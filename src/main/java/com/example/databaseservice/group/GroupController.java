@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,11 +32,6 @@ public class GroupController {
         this.applicationUserService = applicationUserService;
     }
 
-    @GetMapping(path = "/group/all")
-    public List<String> getAllGroupsAsString() {
-        return groupService.findAllGroups().stream().map(val -> val.toString()).collect(Collectors.toList());
-    }
-
     @GetMapping("/groups")
     public ResponseEntity<List<ExpenseGroup>> getAllGroups() {
         List<ExpenseGroup> groups = new ArrayList<>();
@@ -50,12 +46,12 @@ public class GroupController {
     }
 
     @GetMapping("/groups/{id}/users")
-    public ResponseEntity<List<ApplicationUser>> getAllTagsByTutorialId(@PathVariable(value = "userId") Long tutorialId) {
-        Optional<ExpenseGroup> groupOptional = groupService.getGroupById(tutorialId);
+    public ResponseEntity<List<ApplicationUser>> getAllUsersByGroupId(@PathVariable(value = "id") Long groupId) {
+        Optional<ExpenseGroup> groupOptional = groupService.getGroupById(groupId);
         if (groupOptional.isEmpty()) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
         }
-        List<ApplicationUser> users = (List<ApplicationUser>) groupOptional.get().getUsers();
+        List<ApplicationUser> users = groupOptional.get().getUsers().stream().collect(Collectors.toList());
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
@@ -70,12 +66,32 @@ public class GroupController {
         return new ResponseEntity(groupOptional.get(), HttpStatus.OK);
     }
 
+    @PutMapping("/groups/{id}")
+    public ResponseEntity<ExpenseGroup> updateGroup(@PathVariable("id") long id, @RequestBody ExpenseGroup inputGroup) {
+        Optional<ExpenseGroup> groupOptional = groupService.getGroupById(id);
+
+        if (groupOptional.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        ExpenseGroup group = groupOptional.get();
+
+        if(inputGroup.getName() != null){
+            group.setName(inputGroup.getName());
+        }
+        if(inputGroup.getCurrency() != null){
+            group.setCurrency(inputGroup.getCurrency());
+        }
+
+        return new ResponseEntity(groupService.saveGroup(group), HttpStatus.OK);
+    }
+
     @PostMapping("/users/{userId}/groups")
     public ResponseEntity<ExpenseGroup> addGroup(@PathVariable(value = "userId") Long userId, @RequestBody ExpenseGroup inputGroup) {
         ExpenseGroup group = applicationUserService.getUserById(userId).map(user -> {
-            long groupId = inputGroup.getId();
+            Long groupId = inputGroup.getId();
 
-            if (groupId != 0L) {
+            if (groupId != null) {
                 ExpenseGroup newGroup = groupService.getGroupById(groupId)
                         .orElseThrow(() -> new RuntimeException("Not found Group with id = " + groupId));
                 user.addGroup(newGroup);
@@ -89,8 +105,8 @@ public class GroupController {
         return new ResponseEntity<>(group, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/users/{userId}/groups/{groupId}")
-    public ResponseEntity<HttpStatus> deleteTagFromTutorial(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId) {
+    @DeleteMapping("/groups/{groupId}/users/{userId}")
+    public ResponseEntity<HttpStatus> deleteUserFromGroup(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId) {
         ApplicationUser applicationUser = applicationUserService.getUserById(userId)
                 .orElseThrow(() -> new RuntimeException("Not found User with id = " + userId));
 

@@ -3,6 +3,7 @@ package com.example.databaseservice.expense;
 import com.example.databaseservice.applicationuser.ApplicationUser;
 import com.example.databaseservice.group.ExpenseGroup;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,10 +14,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.Table;
+import java.util.Objects;
 
 @Table
 @Entity
 @Data
+@NoArgsConstructor
 public class Expense {
 
     @Id
@@ -27,31 +30,57 @@ public class Expense {
     @Column(name = "amount")
     private Integer amount;
 
-    @Column(name = "currency")
-    private String currency;
-
     @Column(name = "description")
     private String description;
 
+    @Column(name = "global_id")
+    private Long globalId;
+
     @ManyToOne
-    @MapsId("userId")
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private ApplicationUser user;
 
     @ManyToOne
-    @MapsId("groupId")
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "group_id", nullable = false)
     private ExpenseGroup group;
+
+    public Expense(Integer amount, String description, Long globalId) {
+        this.amount = amount;
+        this.description = description;
+        this.globalId = globalId;
+    }
+
+    public Expense(Integer amount, String description, Long globalId, ApplicationUser user, ExpenseGroup group) {
+        this.amount = amount;
+        this.description = description;
+        this.globalId = globalId;
+        this.user = user;
+        this.group = group;
+    }
 
     @Override
     public String toString() {
         return "Expense{" +
                 "id=" + id +
                 ", amount=" + amount +
-                ", currency='" + currency + '\'' +
                 ", description='" + description + '\'' +
+                ", globalTransactionId=" + globalId +
                 ", user=" + user.getUsername() +
                 ", group=" + group.getName() +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Expense expense = (Expense) o;
+        return Objects.equals(id, expense.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
 }

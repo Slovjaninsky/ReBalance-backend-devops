@@ -4,7 +4,6 @@ import com.example.databaseservice.applicationuser.ApplicationUser;
 import com.example.databaseservice.expense.Expense;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -17,6 +16,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Table(name = "expense_group")
@@ -32,24 +32,28 @@ public class ExpenseGroup {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "currency")
+    private String currency;
+
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.PERSIST,
                     CascadeType.MERGE
             },
             mappedBy = "expenseGroups")
-    @JsonIgnore
     private Set<ApplicationUser> users = new HashSet<>();
+
+    @OneToMany(mappedBy = "group")
+    @JsonIgnore
+    Set<Expense> expenses;
 
     public ExpenseGroup() {
     }
 
-    public ExpenseGroup(String name) {
+    public ExpenseGroup(String name, String currency) {
         this.name = name;
+        this.currency = currency;
     }
-
-    @OneToMany(mappedBy = "group")
-    Set<Expense> expenses;
 
     @Override
     public String toString() {
@@ -59,4 +63,16 @@ public class ExpenseGroup {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExpenseGroup that = (ExpenseGroup) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

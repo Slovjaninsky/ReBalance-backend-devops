@@ -37,9 +37,23 @@ public class ExpenseController {
         this.groupService = groupService;
     }
 
-    @GetMapping(path = "expense/all")
-    public List<String> getAllExpensesAsString() {
-        return expenseService.findAllExpenses().stream().map(val -> val.toString()).collect(Collectors.toList());
+    @PostMapping("/expenses/user/{userId}/group/{groupId}")
+    public ResponseEntity<Expense> addExpense(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId, @RequestBody Expense inputexpense) {
+
+        ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new RuntimeException("Not found User with id = " + userId));
+        ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new RuntimeException("Not found Group with id = " + groupId));
+
+        Expense expense = expenseService.saveExpense(
+                new Expense(
+                        inputexpense.getAmount(),
+                        inputexpense.getDescription(),
+                        inputexpense.getGlobalId(),
+                        user,
+                        group
+                )
+        );
+
+        return new ResponseEntity<>(expense, HttpStatus.CREATED);
     }
 
     @GetMapping("/expenses")
@@ -56,15 +70,15 @@ public class ExpenseController {
     }
 
 
-    @GetMapping("/expenses/{id}")
-    public ResponseEntity<Expense> getExpenseById(@PathVariable(value = "id") Long id) {
-        Optional<Expense> expenseOptional = expenseService.getExpenseById(id);
+    @GetMapping("/expenses/{globalId}")
+    public ResponseEntity<List<Expense>> getExpenseById(@PathVariable(value = "globalId") Long id) {
+        List<Expense> expenses = expenseService.getExpensesByGlobalId(id);
 
-        if (expenseOptional.isEmpty()) {
-            return new ResponseEntity(null, HttpStatus.NO_CONTENT);
+        if (expenses.isEmpty()) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
 
-        return new ResponseEntity(expenseOptional.get(), HttpStatus.OK);
+        return new ResponseEntity(expenses, HttpStatus.OK);
     }
 
     @GetMapping("/groups/{groupId}/expenses")
@@ -103,25 +117,24 @@ public class ExpenseController {
     }
 
     @PutMapping("/expenses/{id}")
-    public ResponseEntity<Expense> updateExpense(@PathVariable(value = "id") Long id, @RequestBody Expense inputExpense) {
-        Optional<Expense> expenseOptional = expenseService.getExpenseById(id);
+    public ResponseEntity<List<Expense>> updateExpensesByGlobalId(@PathVariable(value = "id") Long id, @RequestBody Expense inputExpense) {
+        List<Expense> expenses = expenseService.getExpensesByGlobalId(id);
 
-        if (expenseOptional.isEmpty()) {
+        if (expenses.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        Expense expense = expenseOptional.get();
+        expenses.stream().forEach(expense -> expense.setDescription(inputExpense.getDescription()));
 
-        expense.setDescription(inputExpense.getDescription());
+        expenses.stream().forEach(expense -> expenseService.saveExpense(expense));
 
-        return new ResponseEntity(expenseService.saveExpense(expense), HttpStatus.OK);
+        return new ResponseEntity<>(expenses, HttpStatus.OK);
     }
 
-    @DeleteMapping("/expenses/{id}")
-    public ResponseEntity<HttpStatus> deleteExpense(@PathVariable("id") long id) {
-        expenseService.deleteExpenseById(id);
+    @DeleteMapping("/expenses/{globalId}")
+    public ResponseEntity<HttpStatus> deleteExpenseByGlobalId(@PathVariable("globalId") long id) {
+        expenseService.deleteByGlobalId(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
 
 }

@@ -33,4 +33,12 @@ public class ExpenseService {
         expenseRepository.deleteById(id);
     }
 
+    public void deleteByGlobalId(Long globalId){
+        expenseRepository.deleteByGlobalId(globalId);
+    }
+
+    public List<Expense> getExpensesByGlobalId(Long globalId){
+        return expenseRepository.findByGlobalId(globalId);
+    }
+
 }

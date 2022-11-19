@@ -1,5 +1,6 @@
 package com.example.databaseservice.applicationuser;
 
+import com.example.databaseservice.group.ExpenseGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +29,6 @@ public class ApplicationUserController {
         this.applicationUserService = applicationUserService;
     }
 
-    @GetMapping(path = "/user/all")
-    public List<String> getAllUsersAsString() {
-        return applicationUserService.findAllUsers().stream().map(val -> val.toString()).collect(Collectors.toList());
-    }
-
     @GetMapping("/users")
     public ResponseEntity<List<ApplicationUser>> getAllUsers() {
         List<ApplicationUser> users = new ArrayList<ApplicationUser>();
@@ -57,16 +53,24 @@ public class ApplicationUserController {
         return new ResponseEntity(user, HttpStatus.OK);
     }
 
+    @GetMapping("/users/{id}/groups")
+    public ResponseEntity<List<ApplicationUser>> getAllGroupsByUserId(@PathVariable(value = "id") Long userId) {
+        Optional<ApplicationUser> userOptional = applicationUserService.getUserById(userId);
+        if (userOptional.isEmpty()) {
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
+        }
+        List<ExpenseGroup> groups = userOptional.get().getExpenseGroups().stream().collect(Collectors.toList());
+        return new ResponseEntity(groups, HttpStatus.OK);
+    }
+
     @PostMapping("/users")
-    public ResponseEntity<ApplicationUser> createUser(@RequestBody ApplicationUser tutorial) {
+    public ResponseEntity<ApplicationUser> createUser(@RequestBody ApplicationUser inputUser) {
         ApplicationUser user = applicationUserService.saveUser(new ApplicationUser(
-                        tutorial.getUsername(), tutorial.getEmail()
+                        inputUser.getUsername(), inputUser.getEmail()
                 )
         );
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
-
-    //todo add group
 
     @PutMapping("/users/{id}")
     public ResponseEntity<ApplicationUser> updateUser(@PathVariable("id") long id, @RequestBody ApplicationUser userInput) {

@@ -2,6 +2,7 @@ package com.example.databaseservice.applicationuser;
 
 import com.example.databaseservice.expense.Expense;
 import com.example.databaseservice.group.ExpenseGroup;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -27,7 +28,7 @@ import java.util.Set;
 public class ApplicationUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -46,7 +47,12 @@ public class ApplicationUser {
     @JoinTable(name = "user_group",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "group_id")})
+    @JsonIgnore
     private Set<ExpenseGroup> expenseGroups = new HashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private Set<Expense> expenses;
 
     public ApplicationUser() {
     }
@@ -59,9 +65,6 @@ public class ApplicationUser {
     public ApplicationUser(Long id) {
         this.id = id;
     }
-
-    @OneToMany(mappedBy = "user")
-    private Set<Expense> expenses;
 
     public void addGroup(ExpenseGroup expenseGroup) {
         this.expenseGroups.add(expenseGroup);

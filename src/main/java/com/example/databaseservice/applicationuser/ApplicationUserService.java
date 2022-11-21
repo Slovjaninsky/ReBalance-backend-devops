@@ -36,5 +36,8 @@ public class ApplicationUserService {
         return applicationUserRepository.save(user);
     }
 
+    public Optional<ApplicationUser> getUserByEmail(String email){
+        return applicationUserRepository.findByEmail(email);
+    }
 
 }

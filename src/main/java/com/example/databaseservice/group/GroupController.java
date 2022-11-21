@@ -76,10 +76,10 @@ public class GroupController {
 
         ExpenseGroup group = groupOptional.get();
 
-        if(inputGroup.getName() != null){
+        if (inputGroup.getName() != null) {
             group.setName(inputGroup.getName());
         }
-        if(inputGroup.getCurrency() != null){
+        if (inputGroup.getCurrency() != null) {
             group.setCurrency(inputGroup.getCurrency());
         }
 
@@ -101,6 +101,25 @@ public class GroupController {
             user.addGroup(inputGroup);
             return groupService.saveGroup(inputGroup);
         }).orElseThrow(() -> new RuntimeException("Not found User with id = " + userId));
+
+        return new ResponseEntity<>(group, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/users/{email}/groups")
+    public ResponseEntity<ExpenseGroup> addGroup(@PathVariable(value = "email") String email, @RequestBody ExpenseGroup inputGroup) {
+        ExpenseGroup group = applicationUserService.getUserByEmail(email).map(user -> {
+            Long groupId = inputGroup.getId();
+
+            if (groupId != null) {
+                ExpenseGroup newGroup = groupService.getGroupById(groupId)
+                        .orElseThrow(() -> new RuntimeException("Not found Group with id = " + groupId));
+                user.addGroup(newGroup);
+                applicationUserService.saveUser(user);
+                return newGroup;
+            }
+            user.addGroup(inputGroup);
+            return groupService.saveGroup(inputGroup);
+        }).orElseThrow(() -> new RuntimeException("Not found User with email = " + email));
 
         return new ResponseEntity<>(group, HttpStatus.CREATED);
     }

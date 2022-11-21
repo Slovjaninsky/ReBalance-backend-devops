@@ -2,15 +2,21 @@
 | ------------- | ------------- | ------------- |
 | POST | /users  | create a new User without Groups  |
 | POST | /users/:id/groups  | create/add Group for a User  with the given Id|
+| POST | /users/:email/groups  | create/add Group for a User  with the given Email|
 | GET  | /groups/:id/users  | get all Users of a Group  |
 | GET  | /users/:id/groups  | get all Groups of a User  |
+| GET  | /users/:email/groups  | get all Groups of a User by Email|
 | GET  | /users  | get all Users  |
 | GET  | /users/:id  | get User by ID  |
+| GET  | /users/:email  | get User by Email  |
+| PUT  | /users/:email  | update User by Email  |
+| PUT  | /users/:id  | update User by Id  |
 | GET  | /groups  | get all Groups  |
 | GET  | /groups/:id  | get Group by ID  |
 | PUT  | /groups/:id  | update Group by ID  |
 | DELETE  | /groups/:id  | delete Group by ID  |
 | DELETE  | /users/:id  | delete User by ID  |
+| DELETE  | /users/:email  | delete User by Email  |
 | DELETE  | /groups/:id/users/:id  | delete User with the given ID from the given group  |
 | POST  | /expenses/user/:id/group/:id  | create and expense with Group and User by IDs |
 | GET  | /expenses  | get all Expenses  |

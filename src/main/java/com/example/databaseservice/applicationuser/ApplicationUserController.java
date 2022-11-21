@@ -53,6 +53,17 @@ public class ApplicationUserController {
         return new ResponseEntity(user, HttpStatus.OK);
     }
 
+    @GetMapping("/users/{email}")
+    public ResponseEntity<ApplicationUser> getUserByEmail(@PathVariable("email") String email) {
+        Optional<ApplicationUser> user = applicationUserService.getUserByEmail(email);
+
+        if (user.isEmpty()) {
+            return new ResponseEntity(null, HttpStatus.NO_CONTENT);
+        }
+
+        return new ResponseEntity(user, HttpStatus.OK);
+    }
+
     @GetMapping("/users/{id}/groups")
     public ResponseEntity<List<ApplicationUser>> getAllGroupsByUserId(@PathVariable(value = "id") Long userId) {
         Optional<ApplicationUser> userOptional = applicationUserService.getUserById(userId);
@@ -63,12 +74,23 @@ public class ApplicationUserController {
         return new ResponseEntity(groups, HttpStatus.OK);
     }
 
+    @GetMapping("/users/{email}/groups")
+    public ResponseEntity<List<ApplicationUser>> getAllGroupsByUserEmail(@PathVariable(value = "email") String email) {
+        Optional<ApplicationUser> userOptional = applicationUserService.getUserByEmail(email);
+        if (userOptional.isEmpty()) {
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
+        }
+        List<ExpenseGroup> groups = userOptional.get().getExpenseGroups().stream().collect(Collectors.toList());
+        return new ResponseEntity(groups, HttpStatus.OK);
+    }
+
     @PostMapping("/users")
     public ResponseEntity<ApplicationUser> createUser(@RequestBody ApplicationUser inputUser) {
-        ApplicationUser user = applicationUserService.saveUser(new ApplicationUser(
-                        inputUser.getUsername(), inputUser.getEmail()
-                )
-        );
+        ApplicationUser createdUser = new ApplicationUser(inputUser.getUsername(), inputUser.getEmail());
+        if (inputUser.getId() != null) {
+            createdUser.setId(inputUser.getId());
+        }
+        ApplicationUser user = applicationUserService.saveUser(createdUser);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
@@ -88,9 +110,36 @@ public class ApplicationUserController {
         return new ResponseEntity(applicationUserService.saveUser(user), HttpStatus.OK);
     }
 
+    @PutMapping("/users/{email}")
+    public ResponseEntity<ApplicationUser> updateUserByEmail(@PathVariable("email") String email, @RequestBody ApplicationUser userInput) {
+        Optional<ApplicationUser> userOptional = applicationUserService.getUserByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        ApplicationUser user = userOptional.get();
+
+        if (user.getEmail() != null) {
+            user.setEmail(userInput.getEmail());
+        }
+        if (user.getUsername() != null) {
+            user.setUsername(userInput.getUsername());
+        }
+        return new ResponseEntity(applicationUserService.saveUser(user), HttpStatus.OK);
+    }
+
     @DeleteMapping("/users/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") long id) {
         applicationUserService.deleteUserById(id);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/users/{email}")
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable("email") String email) {
+        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new RuntimeException("User with email " + email + " not found!"));
+        applicationUserService.deleteUserById(user.getId());
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

@@ -3,7 +3,6 @@ package com.example.databaseservice.applicationuser;
 import com.example.databaseservice.expense.Expense;
 import com.example.databaseservice.group.ExpenseGroup;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.persistence.CascadeType;

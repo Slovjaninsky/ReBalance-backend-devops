@@ -105,7 +105,7 @@ public class GroupController {
         return new ResponseEntity<>(group, HttpStatus.CREATED);
     }
 
-    @PostMapping("/users/{email}/groups")
+    @PostMapping("/users/email/{email}/groups")
     public ResponseEntity<ExpenseGroup> addGroup(@PathVariable(value = "email") String email, @RequestBody ExpenseGroup inputGroup) {
         ExpenseGroup group = applicationUserService.getUserByEmail(email).map(user -> {
             Long groupId = inputGroup.getId();

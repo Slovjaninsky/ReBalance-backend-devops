@@ -31,7 +31,7 @@ public class ApplicationUserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<ApplicationUser>> getAllUsers() {
-        List<ApplicationUser> users = new ArrayList<ApplicationUser>();
+        List<ApplicationUser> users = new ArrayList<>();
 
         applicationUserService.findAllUsers().forEach(users::add);
 
@@ -53,7 +53,7 @@ public class ApplicationUserController {
         return new ResponseEntity(user, HttpStatus.OK);
     }
 
-    @GetMapping("/users/{email}")
+    @GetMapping("/users/email/{email}")
     public ResponseEntity<ApplicationUser> getUserByEmail(@PathVariable("email") String email) {
         Optional<ApplicationUser> user = applicationUserService.getUserByEmail(email);
 
@@ -74,7 +74,7 @@ public class ApplicationUserController {
         return new ResponseEntity(groups, HttpStatus.OK);
     }
 
-    @GetMapping("/users/{email}/groups")
+    @GetMapping("/users/email/{email}/groups")
     public ResponseEntity<List<ApplicationUser>> getAllGroupsByUserEmail(@PathVariable(value = "email") String email) {
         Optional<ApplicationUser> userOptional = applicationUserService.getUserByEmail(email);
         if (userOptional.isEmpty()) {
@@ -110,7 +110,7 @@ public class ApplicationUserController {
         return new ResponseEntity(applicationUserService.saveUser(user), HttpStatus.OK);
     }
 
-    @PutMapping("/users/{email}")
+    @PutMapping("/users/email/{email}")
     public ResponseEntity<ApplicationUser> updateUserByEmail(@PathVariable("email") String email, @RequestBody ApplicationUser userInput) {
         Optional<ApplicationUser> userOptional = applicationUserService.getUserByEmail(email);
 
@@ -136,7 +136,7 @@ public class ApplicationUserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping("/users/{email}")
+    @DeleteMapping("/users/email/{email}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("email") String email) {
         ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new RuntimeException("User with email " + email + " not found!"));
         applicationUserService.deleteUserById(user.getId());

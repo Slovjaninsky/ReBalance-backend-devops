@@ -1,5 +1,6 @@
 package com.example.databaseservice.controllers;
 
+import com.example.databaseservice.entities.LoginAndPassword;
 import com.example.databaseservice.exceptions.EmailTakenException;
 import com.example.databaseservice.exceptions.InvalidRequestException;
 import com.example.databaseservice.exceptions.UserNotFoundException;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @RestController
@@ -71,7 +72,7 @@ public class ApplicationUserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<ApplicationUser> createUser(@RequestBody ApplicationUser inputUser) {
+    public ResponseEntity<LoginAndPassword> createUser(@RequestBody ApplicationUser inputUser) {
         if (inputUser.getEmail() == null || inputUser.getUsername() == null) {
             throw new InvalidRequestException("Request body should contain email and username fields");
         }
@@ -79,11 +80,10 @@ public class ApplicationUserController {
             throw new EmailTakenException("Email " + inputUser.getEmail() + " is already taken!");
         }
         ApplicationUser createdUser = new ApplicationUser(inputUser.getUsername(), inputUser.getEmail());
-        if (inputUser.getId() != null) {
-            createdUser.setId(inputUser.getId());
-        }
+        Random rand = new Random();
+        createdUser.setPassword(rand.ints(rand.nextInt(25), 33, 122).mapToObj(i -> String.valueOf((char)i)).collect(Collectors.joining()));
         ApplicationUser user = applicationUserService.saveUser(createdUser);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return new ResponseEntity<>(new LoginAndPassword(user.getEmail(), user.getPassword()), HttpStatus.CREATED);
     }
 
     @PutMapping("/users/{id}")
@@ -127,6 +127,18 @@ public class ApplicationUserController {
         ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
         applicationUserService.deleteUserById(user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/users/login")
+    public ResponseEntity<ApplicationUser> loginWithEmailAndPassword(@RequestBody LoginAndPassword inputData) {
+        if (inputData.getEmail() == null || inputData.getPassword() == null) {
+            throw new InvalidRequestException("Request body should contain login and password");
+        }
+        ApplicationUser user = applicationUserService.getUserByEmail(inputData.getEmail()).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + inputData.getEmail()));
+        if (user.getPassword().equals(inputData.getPassword())) {
+            return new ResponseEntity(user, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
 }

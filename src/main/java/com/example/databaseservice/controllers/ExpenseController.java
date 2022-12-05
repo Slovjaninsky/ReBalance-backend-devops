@@ -3,7 +3,6 @@ package com.example.databaseservice.controllers;
 import com.example.databaseservice.entities.ApplicationUser;
 import com.example.databaseservice.entities.Expense;
 import com.example.databaseservice.exceptions.ExpenseNotFoundException;
-import com.example.databaseservice.exceptions.GlobalIdTakenException;
 import com.example.databaseservice.exceptions.GroupNotFoundException;
 import com.example.databaseservice.exceptions.InvalidRequestException;
 import com.example.databaseservice.exceptions.UserNotFoundException;
@@ -48,9 +47,6 @@ public class ExpenseController {
         ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
         if(inputExpense.getDescription() == null || inputExpense.getAmount() == null || inputExpense.getGlobalId() == null){
             throw new InvalidRequestException("Request body should contain amount, description and globalId fields");
-        }
-        if(expenseService.getExpensesByGlobalId(inputExpense.getGlobalId()).size() > 0){
-            throw new GlobalIdTakenException("Expenses exist with globalId = " + inputExpense.getGlobalId());
         }
         Expense expense = expenseService.saveExpense(
                 new Expense(

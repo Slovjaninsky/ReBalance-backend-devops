@@ -35,6 +35,10 @@ public class ApplicationUser {
     @Column(name = "email", unique = true)
     private String email;
 
+    @Column(name = "password")
+    @JsonIgnore
+    private String password;
+
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.PERSIST,

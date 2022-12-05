@@ -2,7 +2,6 @@ package com.example.databaseservice.handler;
 
 import com.example.databaseservice.exceptions.EmailTakenException;
 import com.example.databaseservice.exceptions.ExpenseNotFoundException;
-import com.example.databaseservice.exceptions.GlobalIdTakenException;
 import com.example.databaseservice.exceptions.GroupNotFoundException;
 import com.example.databaseservice.exceptions.InvalidRequestException;
 import com.example.databaseservice.exceptions.UserNotFoundException;
@@ -27,7 +26,6 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             {
                     EmailTakenException.class,
                     ExpenseNotFoundException.class,
-                    GlobalIdTakenException.class,
                     GroupNotFoundException.class,
                     InvalidRequestException.class,
                     UserNotFoundException.class

@@ -1,5 +1,8 @@
 package com.example.databaseservice.controllers;
 
+import com.example.databaseservice.exceptions.EmailTakenException;
+import com.example.databaseservice.exceptions.InvalidRequestException;
+import com.example.databaseservice.exceptions.UserNotFoundException;
 import com.example.databaseservice.servises.ApplicationUserService;
 import com.example.databaseservice.entities.ApplicationUser;
 import com.example.databaseservice.entities.ExpenseGroup;
@@ -34,60 +37,47 @@ public class ApplicationUserController {
     @GetMapping("/users")
     public ResponseEntity<List<ApplicationUser>> getAllUsers() {
         List<ApplicationUser> users = new ArrayList<>();
-
         applicationUserService.findAllUsers().forEach(users::add);
-
         if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/users/{id}")
     public ResponseEntity<ApplicationUser> getUserById(@PathVariable("id") long id) {
-        Optional<ApplicationUser> user = applicationUserService.getUserById(id);
-
-        if (user.isEmpty()) {
-            return new ResponseEntity(null, HttpStatus.NO_CONTENT);
-        }
-
+        ApplicationUser user = applicationUserService.getUserById(id).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + id));
         return new ResponseEntity(user, HttpStatus.OK);
     }
 
     @GetMapping("/users/email/{email}")
     public ResponseEntity<ApplicationUser> getUserByEmail(@PathVariable("email") String email) {
-        Optional<ApplicationUser> user = applicationUserService.getUserByEmail(email);
-
-        if (user.isEmpty()) {
-            return new ResponseEntity(null, HttpStatus.NO_CONTENT);
-        }
-
+        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
         return new ResponseEntity(user, HttpStatus.OK);
     }
 
     @GetMapping("/users/{id}/groups")
     public ResponseEntity<List<ApplicationUser>> getAllGroupsByUserId(@PathVariable(value = "id") Long userId) {
-        Optional<ApplicationUser> userOptional = applicationUserService.getUserById(userId);
-        if (userOptional.isEmpty()) {
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
-        }
-        List<ExpenseGroup> groups = userOptional.get().getExpenseGroups().stream().collect(Collectors.toList());
+        ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
+        List<ExpenseGroup> groups = user.getExpenseGroups().stream().collect(Collectors.toList());
         return new ResponseEntity(groups, HttpStatus.OK);
     }
 
     @GetMapping("/users/email/{email}/groups")
     public ResponseEntity<List<ApplicationUser>> getAllGroupsByUserEmail(@PathVariable(value = "email") String email) {
-        Optional<ApplicationUser> userOptional = applicationUserService.getUserByEmail(email);
-        if (userOptional.isEmpty()) {
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
-        }
-        List<ExpenseGroup> groups = userOptional.get().getExpenseGroups().stream().collect(Collectors.toList());
+        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
+        List<ExpenseGroup> groups = user.getExpenseGroups().stream().collect(Collectors.toList());
         return new ResponseEntity(groups, HttpStatus.OK);
     }
 
     @PostMapping("/users")
     public ResponseEntity<ApplicationUser> createUser(@RequestBody ApplicationUser inputUser) {
+        if (inputUser.getEmail() == null || inputUser.getUsername() == null) {
+            throw new InvalidRequestException("Request body should contain email and username fields");
+        }
+        if (applicationUserService.getUserByEmail(inputUser.getEmail()).isPresent()) {
+            throw new EmailTakenException("Email " + inputUser.getEmail() + " is already taken!");
+        }
         ApplicationUser createdUser = new ApplicationUser(inputUser.getUsername(), inputUser.getEmail());
         if (inputUser.getId() != null) {
             createdUser.setId(inputUser.getId());
@@ -98,32 +88,26 @@ public class ApplicationUserController {
 
     @PutMapping("/users/{id}")
     public ResponseEntity<ApplicationUser> updateUser(@PathVariable("id") long id, @RequestBody ApplicationUser userInput) {
-        Optional<ApplicationUser> userOptional = applicationUserService.getUserById(id);
-
-        if (userOptional.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if (userInput.getEmail() == null || userInput.getUsername() == null) {
+            throw new InvalidRequestException("Request body should contain email and username fields");
         }
-
-        ApplicationUser user = userOptional.get();
-
+        ApplicationUser user = applicationUserService.getUserById(id).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + id));
+        if (applicationUserService.getUserByEmail(userInput.getEmail()).isPresent()) {
+            throw new EmailTakenException("Email " + userInput.getEmail() + " is already taken!");
+        }
         user.setEmail(userInput.getEmail());
         user.setUsername(userInput.getUsername());
-
         return new ResponseEntity(applicationUserService.saveUser(user), HttpStatus.OK);
     }
 
     @PutMapping("/users/email/{email}")
     public ResponseEntity<ApplicationUser> updateUserByEmail(@PathVariable("email") String email, @RequestBody ApplicationUser userInput) {
-        Optional<ApplicationUser> userOptional = applicationUserService.getUserByEmail(email);
-
-        if (userOptional.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        ApplicationUser user = userOptional.get();
-
+        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
         if (user.getEmail() != null) {
             user.setEmail(userInput.getEmail());
+            if (applicationUserService.getUserByEmail(userInput.getEmail()).isPresent()) {
+                throw new EmailTakenException("Email " + userInput.getEmail() + " is already taken!");
+            }
         }
         if (user.getUsername() != null) {
             user.setUsername(userInput.getUsername());
@@ -133,16 +117,15 @@ public class ApplicationUserController {
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") long id) {
+        applicationUserService.getUserById(id).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + id));
         applicationUserService.deleteUserById(id);
-
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/users/email/{email}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("email") String email) {
-        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new RuntimeException("User with email " + email + " not found!"));
+        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
         applicationUserService.deleteUserById(user.getId());
-
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

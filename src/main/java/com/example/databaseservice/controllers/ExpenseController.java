@@ -2,6 +2,11 @@ package com.example.databaseservice.controllers;
 
 import com.example.databaseservice.entities.ApplicationUser;
 import com.example.databaseservice.entities.Expense;
+import com.example.databaseservice.exceptions.ExpenseNotFoundException;
+import com.example.databaseservice.exceptions.GlobalIdTakenException;
+import com.example.databaseservice.exceptions.GroupNotFoundException;
+import com.example.databaseservice.exceptions.InvalidRequestException;
+import com.example.databaseservice.exceptions.UserNotFoundException;
 import com.example.databaseservice.servises.ExpenseService;
 import com.example.databaseservice.servises.ApplicationUserService;
 import com.example.databaseservice.entities.ExpenseGroup;
@@ -20,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -39,16 +43,20 @@ public class ExpenseController {
     }
 
     @PostMapping("/expenses/user/{userId}/group/{groupId}")
-    public ResponseEntity<Expense> addExpense(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId, @RequestBody Expense inputexpense) {
-
-        ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new RuntimeException("Not found User with id = " + userId));
-        ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new RuntimeException("Not found Group with id = " + groupId));
-
+    public ResponseEntity<Expense> addExpense(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId, @RequestBody Expense inputExpense) {
+        ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
+        ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        if(inputExpense.getDescription() == null || inputExpense.getAmount() == null || inputExpense.getGlobalId() == null){
+            throw new InvalidRequestException("Request body should contain amount, description and globalId fields");
+        }
+        if(expenseService.getExpensesByGlobalId(inputExpense.getGlobalId()).size() > 0){
+            throw new GlobalIdTakenException("Expenses exist with globalId = " + inputExpense.getGlobalId());
+        }
         Expense expense = expenseService.saveExpense(
                 new Expense(
-                        inputexpense.getAmount(),
-                        inputexpense.getDescription(),
-                        inputexpense.getGlobalId(),
+                        inputExpense.getAmount(),
+                        inputExpense.getDescription(),
+                        inputExpense.getGlobalId(),
                         user,
                         group
                 )
@@ -60,13 +68,10 @@ public class ExpenseController {
     @GetMapping("/expenses")
     public ResponseEntity<List<Expense>> getAllExpenses() {
         List<Expense> expenses = new ArrayList<>();
-
         expenseService.findAllExpenses().forEach(expenses::add);
-
         if (expenses.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-
         return new ResponseEntity<>(expenses, HttpStatus.OK);
     }
 
@@ -74,66 +79,56 @@ public class ExpenseController {
     @GetMapping("/expenses/{globalId}")
     public ResponseEntity<List<Expense>> getExpenseById(@PathVariable(value = "globalId") Long id) {
         List<Expense> expenses = expenseService.getExpensesByGlobalId(id);
-
         if (expenses.isEmpty()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
-
         return new ResponseEntity(expenses, HttpStatus.OK);
     }
 
     @GetMapping("/groups/{groupId}/expenses")
     public ResponseEntity<List<Expense>> getExpensesFromGroup(@PathVariable(value = "groupId") Long id) {
-        Optional<ExpenseGroup> groupOptional = groupService.getGroupById(id);
-
-        if (groupOptional.isEmpty()) {
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
-        }
-
-        return new ResponseEntity(groupOptional.get().getExpenses(), HttpStatus.OK);
+        ExpenseGroup group = groupService.getGroupById(id).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + id));
+        return new ResponseEntity(group.getExpenses(), HttpStatus.OK);
     }
 
     @GetMapping("/groups/{groupId}/users/{userId}/expenses")
     public ResponseEntity<List<Expense>> getExpensesFromGroup(@PathVariable(value = "groupId") Long groupId, @PathVariable(value = "userId") Long userId) {
-        Optional<ExpenseGroup> groupOptional = groupService.getGroupById(groupId);
-
-        if (groupOptional.isEmpty()) {
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
-        }
-
-        Set<ApplicationUser> groupUsers = groupOptional.get().getUsers();
-
+        ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        Set<ApplicationUser> groupUsers = group.getUsers();
         ApplicationUser sample = new ApplicationUser(userId);
-
         if (groupUsers.contains(sample)) {
             return new ResponseEntity(
-                    applicationUserService.getUserById(userId).get().getExpenses().stream().filter(
-                            expense -> expense.getGroup().getId().equals(groupId)
-                    ),
+                    applicationUserService.getUserById(userId)
+                            .get()
+                            .getExpenses()
+                            .stream()
+                            .filter(expense -> expense.getGroup().getId().equals(groupId)),
                     HttpStatus.OK
             );
         }
-
-        return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
+        throw new UserNotFoundException("Not found User with id = " + userId + " in Group with id = " + groupId);
     }
 
     @PutMapping("/expenses/{id}")
     public ResponseEntity<List<Expense>> updateExpensesByGlobalId(@PathVariable(value = "id") Long id, @RequestBody Expense inputExpense) {
         List<Expense> expenses = expenseService.getExpensesByGlobalId(id);
-
         if (expenses.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            throw new ExpenseNotFoundException(String.format("Expenses with globalId = %d not found", id));
         }
-
+        if(inputExpense.getDescription() == null){
+            throw new InvalidRequestException("Request body should have \"description\" field");
+        }
         expenses.stream().forEach(expense -> expense.setDescription(inputExpense.getDescription()));
-
         expenses.stream().forEach(expense -> expenseService.saveExpense(expense));
-
         return new ResponseEntity<>(expenses, HttpStatus.OK);
     }
 
     @DeleteMapping("/expenses/{globalId}")
     public ResponseEntity<HttpStatus> deleteExpenseByGlobalId(@PathVariable("globalId") long id) {
+        List<Expense> expenses = expenseService.getExpensesByGlobalId(id);
+        if (expenses.isEmpty()) {
+            throw new ExpenseNotFoundException(String.format("Expenses with globalId = %d not found", id));
+        }
         expenseService.deleteByGlobalId(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

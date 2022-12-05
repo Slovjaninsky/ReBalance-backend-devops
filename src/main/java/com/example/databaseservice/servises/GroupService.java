@@ -1,5 +1,7 @@
-package com.example.databaseservice.group;
+package com.example.databaseservice.servises;
 
+import com.example.databaseservice.entities.ExpenseGroup;
+import com.example.databaseservice.repositories.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

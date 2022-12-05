@@ -1,6 +1,7 @@
-package com.example.databaseservice.expense;
+package com.example.databaseservice.servises;
 
-import com.example.databaseservice.applicationuser.ApplicationUser;
+import com.example.databaseservice.entities.Expense;
+import com.example.databaseservice.repositories.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

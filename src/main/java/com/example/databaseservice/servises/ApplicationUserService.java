@@ -1,5 +1,7 @@
-package com.example.databaseservice.applicationuser;
+package com.example.databaseservice.servises;
 
+import com.example.databaseservice.entities.ApplicationUser;
+import com.example.databaseservice.repositories.ApplicationUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

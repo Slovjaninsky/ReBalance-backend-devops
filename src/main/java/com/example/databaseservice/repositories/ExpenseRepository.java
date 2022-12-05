@@ -1,5 +1,6 @@
-package com.example.databaseservice.expense;
+package com.example.databaseservice.repositories;
 
+import com.example.databaseservice.entities.Expense;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

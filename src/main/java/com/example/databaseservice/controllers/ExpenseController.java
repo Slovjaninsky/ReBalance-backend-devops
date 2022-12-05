@@ -1,9 +1,11 @@
-package com.example.databaseservice.expense;
+package com.example.databaseservice.controllers;
 
-import com.example.databaseservice.applicationuser.ApplicationUser;
-import com.example.databaseservice.applicationuser.ApplicationUserService;
-import com.example.databaseservice.group.ExpenseGroup;
-import com.example.databaseservice.group.GroupService;
+import com.example.databaseservice.entities.ApplicationUser;
+import com.example.databaseservice.entities.Expense;
+import com.example.databaseservice.servises.ExpenseService;
+import com.example.databaseservice.servises.ApplicationUserService;
+import com.example.databaseservice.entities.ExpenseGroup;
+import com.example.databaseservice.servises.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping

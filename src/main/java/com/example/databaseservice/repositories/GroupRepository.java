@@ -1,5 +1,6 @@
-package com.example.databaseservice.group;
+package com.example.databaseservice.repositories;
 
+import com.example.databaseservice.entities.ExpenseGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

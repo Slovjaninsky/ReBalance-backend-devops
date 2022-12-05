@@ -1,7 +1,5 @@
-package com.example.databaseservice.expense;
+package com.example.databaseservice.entities;
 
-import com.example.databaseservice.applicationuser.ApplicationUser;
-import com.example.databaseservice.group.ExpenseGroup;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

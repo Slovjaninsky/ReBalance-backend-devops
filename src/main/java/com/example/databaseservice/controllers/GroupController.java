@@ -1,7 +1,9 @@
-package com.example.databaseservice.group;
+package com.example.databaseservice.controllers;
 
-import com.example.databaseservice.applicationuser.ApplicationUser;
-import com.example.databaseservice.applicationuser.ApplicationUserService;
+import com.example.databaseservice.entities.ApplicationUser;
+import com.example.databaseservice.entities.ExpenseGroup;
+import com.example.databaseservice.servises.GroupService;
+import com.example.databaseservice.servises.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

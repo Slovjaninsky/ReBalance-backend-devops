@@ -1,7 +1,5 @@
-package com.example.databaseservice.applicationuser;
+package com.example.databaseservice.entities;
 
-import com.example.databaseservice.expense.Expense;
-import com.example.databaseservice.group.ExpenseGroup;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 

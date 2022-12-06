@@ -81,7 +81,7 @@ public class ApplicationUserController {
         }
         ApplicationUser createdUser = new ApplicationUser(inputUser.getUsername(), inputUser.getEmail());
         Random rand = new Random();
-        createdUser.setPassword(rand.ints(rand.nextInt(25), 33, 122).mapToObj(i -> String.valueOf((char)i)).collect(Collectors.joining()));
+        createdUser.setPassword(rand.ints(rand.nextInt(25), 48, 91).mapToObj(i -> String.valueOf((char)i)).collect(Collectors.joining()));
         ApplicationUser user = applicationUserService.saveUser(createdUser);
         return new ResponseEntity<>(new LoginAndPassword(user.getEmail(), user.getPassword()), HttpStatus.CREATED);
     }
@@ -129,7 +129,7 @@ public class ApplicationUserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/users/login")
+    @PostMapping("/users/login")
     public ResponseEntity<ApplicationUser> loginWithEmailAndPassword(@RequestBody LoginAndPassword inputData) {
         if (inputData.getEmail() == null || inputData.getPassword() == null) {
             throw new InvalidRequestException("Request body should contain login and password");

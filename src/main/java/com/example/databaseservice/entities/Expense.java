@@ -38,6 +38,7 @@ public class Expense {
     private String category;
 
     @Column(name = "global_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long globalId;
 
     @ManyToOne
@@ -48,18 +49,16 @@ public class Expense {
     @JoinColumn(name = "group_id", nullable = false)
     private ExpenseGroup group;
 
-    public Expense(Integer amount, String description, String category, Long globalId) {
+    public Expense(Integer amount, String description, String category) {
         this.amount = amount;
         this.description = description;
         this.category = category;
-        this.globalId = globalId;
     }
 
-    public Expense(Integer amount, String description, String category, Long globalId, ApplicationUser user, ExpenseGroup group) {
+    public Expense(Integer amount, String description, String category, ApplicationUser user, ExpenseGroup group) {
         this.amount = amount;
         this.description = description;
         this.category = category;
-        this.globalId = globalId;
         this.user = user;
         this.group = group;
     }

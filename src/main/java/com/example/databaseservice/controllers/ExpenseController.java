@@ -49,13 +49,14 @@ public class ExpenseController {
     public ResponseEntity<Expense> addExpense(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId, @RequestBody Expense inputExpense) {
         ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
         ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
-        if (inputExpense.getDescription() == null || inputExpense.getAmount() == null || inputExpense.getGlobalId() == null) {
-            throw new InvalidRequestException("Request body should contain amount, description and globalId fields");
+        if (inputExpense.getDescription() == null || inputExpense.getAmount() == null || inputExpense.getGlobalId() == null || inputExpense.getCategory() == null) {
+            throw new InvalidRequestException("Request body should contain amount, description, category and globalId fields");
         }
         Expense expense =
                 new Expense(
                         inputExpense.getAmount(),
                         inputExpense.getDescription(),
+                        inputExpense.getCategory(),
                         inputExpense.getGlobalId(),
                         user,
                         group

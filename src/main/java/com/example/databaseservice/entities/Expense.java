@@ -34,6 +34,9 @@ public class Expense {
     @Column(name = "date_stamp")
     private LocalDate dateStamp;
 
+    @Column(name = "category")
+    private String category;
+
     @Column(name = "global_id")
     private Long globalId;
 
@@ -45,15 +48,17 @@ public class Expense {
     @JoinColumn(name = "group_id", nullable = false)
     private ExpenseGroup group;
 
-    public Expense(Integer amount, String description, Long globalId) {
+    public Expense(Integer amount, String description, String category, Long globalId) {
         this.amount = amount;
         this.description = description;
+        this.category = category;
         this.globalId = globalId;
     }
 
-    public Expense(Integer amount, String description, Long globalId, ApplicationUser user, ExpenseGroup group) {
+    public Expense(Integer amount, String description, String category, Long globalId, ApplicationUser user, ExpenseGroup group) {
         this.amount = amount;
         this.description = description;
+        this.category = category;
         this.globalId = globalId;
         this.user = user;
         this.group = group;
@@ -65,7 +70,9 @@ public class Expense {
                 "id=" + id +
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
-                ", globalTransactionId=" + globalId +
+                ", dateStamp=" + dateStamp +
+                ", category='" + category + '\'' +
+                ", globalId=" + globalId +
                 ", user=" + user.getUsername() +
                 ", group=" + group.getName() +
                 '}';

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -19,5 +20,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     void deleteByGlobalId(@Param("globalId") Long globalId);
 
     List<Expense> findByGlobalId(Long globalId);
+
+    List<Expense> findByGroupIdAndDateStampBetween(Long groupId, LocalDate firstDate, LocalDate secondDate);
 
 }

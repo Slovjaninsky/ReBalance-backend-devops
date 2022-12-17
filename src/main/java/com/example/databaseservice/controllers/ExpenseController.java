@@ -3,7 +3,9 @@ package com.example.databaseservice.controllers;
 import com.example.databaseservice.entities.ApplicationUser;
 import com.example.databaseservice.entities.Expense;
 import com.example.databaseservice.exceptions.ExpenseNotFoundException;
+import com.example.databaseservice.exceptions.FirstDateMustBeBeforeSecondDateException;
 import com.example.databaseservice.exceptions.GroupNotFoundException;
+import com.example.databaseservice.exceptions.IncorrectTimePeriodException;
 import com.example.databaseservice.exceptions.InvalidRequestException;
 import com.example.databaseservice.exceptions.UserNotFoundException;
 import com.example.databaseservice.servises.ExpenseService;
@@ -22,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -45,19 +49,23 @@ public class ExpenseController {
     public ResponseEntity<Expense> addExpense(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId, @RequestBody Expense inputExpense) {
         ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
         ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
-        if(inputExpense.getDescription() == null || inputExpense.getAmount() == null || inputExpense.getGlobalId() == null){
+        if (inputExpense.getDescription() == null || inputExpense.getAmount() == null || inputExpense.getGlobalId() == null) {
             throw new InvalidRequestException("Request body should contain amount, description and globalId fields");
         }
-        Expense expense = expenseService.saveExpense(
+        Expense expense =
                 new Expense(
                         inputExpense.getAmount(),
                         inputExpense.getDescription(),
                         inputExpense.getGlobalId(),
                         user,
                         group
-                )
-        );
-
+                );
+        if (inputExpense.getDateStamp() != null) {
+            expense.setDateStamp(inputExpense.getDateStamp());
+        } else {
+            expense.setDateStamp(LocalDate.now());
+        }
+        expenseService.saveExpense(expense);
         return new ResponseEntity<>(expense, HttpStatus.CREATED);
     }
 
@@ -111,7 +119,7 @@ public class ExpenseController {
         if (expenses.isEmpty()) {
             throw new ExpenseNotFoundException(String.format("Expenses with globalId = %d not found", id));
         }
-        if(inputExpense.getDescription() == null){
+        if (inputExpense.getDescription() == null) {
             throw new InvalidRequestException("Request body should have \"description\" field");
         }
         expenses.stream().forEach(expense -> expense.setDescription(inputExpense.getDescription()));
@@ -127,6 +135,43 @@ public class ExpenseController {
         }
         expenseService.deleteByGlobalId(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/expenses/group/{groupId}/between/{dateFirst}/{dateSecond}")
+    public ResponseEntity<List<Expense>> getExpensesByGroupAndBetweenDates(@PathVariable("groupId") Long groupId, @PathVariable("dateFirst") String firstDateString, @PathVariable("dateSecond") String secondDateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
+        LocalDate secondDate = LocalDate.parse(secondDateString, formatter);
+        if (secondDate.isBefore(firstDate)) {
+            throw new FirstDateMustBeBeforeSecondDateException("First date (" + firstDate + ") must be before or at the second date (" + secondDate + ")");
+        }
+        groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        return new ResponseEntity<>(expenseService.getExpensesByGroupIdAndBetweenDates(groupId, firstDate, secondDate), HttpStatus.OK);
+    }
+
+    @GetMapping("/expenses/group/{groupId}/from/{dateFirst}/{period}")
+    public ResponseEntity<List<Expense>> getExpensesByGroupAndFromDateByTimePeriod(@PathVariable("groupId") Long groupId, @PathVariable("dateFirst") String firstDateString, @PathVariable("period") String period) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
+        groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        LocalDate secondDate;
+        switch (period.toLowerCase()) {
+            case "year":
+                secondDate = firstDate.plusYears(1).minusDays(1);
+                break;
+            case "month":
+                secondDate = firstDate.plusMonths(1).minusDays(1);
+                break;
+            case "week":
+                secondDate = firstDate.plusWeeks(1).minusDays(1);
+                break;
+            case "day":
+                secondDate = firstDate;
+                break;
+            default:
+                throw new IncorrectTimePeriodException();
+        }
+        return new ResponseEntity<>(expenseService.getExpensesByGroupIdAndBetweenDates(groupId, firstDate, secondDate), HttpStatus.OK);
     }
 
 }

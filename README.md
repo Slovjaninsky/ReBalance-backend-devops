@@ -23,6 +23,8 @@
 | GET  | /expenses/:globalId  | get all Expenses by global ID  |
 | GET  | /groups/:id/expenses  | get all Expenses of the Group by ID  |
 | GET  | /groups/:id/users/:id/expenses  | get all Expenses of the User in the Group by ID |
+| GET  | /expenses/group/:groupId/from/:dateFirst/:period  | get all Expenses from Group from date inclusive to some period (day, week, month, year) |
+| GET  | /expenses/group/:groupId/between/:dateFirst/:dateSecond  | get all Expenses from Group between two dates inclusive |
 | PUT  | /expenses/:globalId  | update all Expenses name by global ID  |
 | DELETE  | /expenses/:globalId  | delete all Expenses by global ID  |
 | GET  | /user/login/:email  | login with the given Email and password  |

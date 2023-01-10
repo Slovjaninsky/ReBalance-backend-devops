@@ -1,4 +1,4 @@
-package com.example.databaseservice.entities;
+package com.example.databaseservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +11,7 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class LoginAndPassword {
 
-    String email;
-    String password;
+    private String email;
+    private String password;
 
 }

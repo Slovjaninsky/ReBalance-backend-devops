@@ -77,7 +77,7 @@ public class GroupController {
     public ResponseEntity<ExpenseGroup> addGroup(@PathVariable(value = "userId") Long userId, @RequestBody ExpenseGroup inputGroup) {
         ExpenseGroup group = applicationUserService.getUserById(userId).map(user -> {
                     Long groupId = inputGroup.getId();
-                    if (groupId != null) {
+                    if (groupId != null && groupId != -1) {
                         ExpenseGroup newGroup = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
                         user.addGroup(newGroup);
                         applicationUserService.saveUser(user);

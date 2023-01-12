@@ -179,4 +179,10 @@ public class ExpenseController {
         return new ResponseEntity<>(expenseService.getExpensesByGroupIdAndBetweenDates(groupId, firstDate, secondDate), HttpStatus.OK);
     }
 
+    @GetMapping("/expenses/group/{groupId}/dates")
+    public ResponseEntity<Set<String>> getAllDatesOfExpenses(@PathVariable("groupId") Long groupId) {
+        groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        return new ResponseEntity<>(expenseService.getAllExpenseDatesFromGroup(groupId), HttpStatus.OK);
+    }
+
 }

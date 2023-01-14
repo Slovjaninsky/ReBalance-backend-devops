@@ -1,6 +1,7 @@
 package com.example.databaseservice.controllers;
 
-import com.example.databaseservice.entities.LoginAndPassword;
+import com.example.databaseservice.dto.LoginAndPassword;
+import com.example.databaseservice.dto.UserWithPass;
 import com.example.databaseservice.exceptions.EmailTakenException;
 import com.example.databaseservice.exceptions.InvalidRequestException;
 import com.example.databaseservice.exceptions.UserNotFoundException;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @RestController
@@ -72,16 +72,15 @@ public class ApplicationUserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<LoginAndPassword> createUser(@RequestBody ApplicationUser inputUser) {
-        if (inputUser.getEmail() == null || inputUser.getUsername() == null) {
-            throw new InvalidRequestException("Request body should contain email and username fields");
+    public ResponseEntity<LoginAndPassword> createUser(@RequestBody UserWithPass inputUser) {
+        if (inputUser.getEmail() == null || inputUser.getUsername() == null || inputUser.getPassword() == null) {
+            throw new InvalidRequestException("Request body should contain email, password and username fields");
         }
         if (applicationUserService.getUserByEmail(inputUser.getEmail()).isPresent()) {
             throw new EmailTakenException("Email " + inputUser.getEmail() + " is already taken!");
         }
         ApplicationUser createdUser = new ApplicationUser(inputUser.getUsername(), inputUser.getEmail());
-        Random rand = new Random();
-        createdUser.setPassword(rand.ints(rand.nextInt(25), 48, 91).mapToObj(i -> String.valueOf((char)i)).collect(Collectors.joining()));
+        createdUser.setPassword(inputUser.getPassword());
         ApplicationUser user = applicationUserService.saveUser(createdUser);
         return new ResponseEntity<>(new LoginAndPassword(user.getEmail(), user.getPassword()), HttpStatus.CREATED);
     }

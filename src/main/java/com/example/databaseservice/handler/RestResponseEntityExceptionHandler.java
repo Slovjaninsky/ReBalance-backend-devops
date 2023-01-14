@@ -1,8 +1,11 @@
 package com.example.databaseservice.handler;
 
+import com.example.databaseservice.exceptions.BadDateException;
 import com.example.databaseservice.exceptions.EmailTakenException;
 import com.example.databaseservice.exceptions.ExpenseNotFoundException;
+import com.example.databaseservice.exceptions.FirstDateMustBeBeforeSecondDateException;
 import com.example.databaseservice.exceptions.GroupNotFoundException;
+import com.example.databaseservice.exceptions.IncorrectTimePeriodException;
 import com.example.databaseservice.exceptions.InvalidRequestException;
 import com.example.databaseservice.exceptions.UserNotFoundException;
 import org.springframework.http.HttpHeaders;
@@ -28,7 +31,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                     ExpenseNotFoundException.class,
                     GroupNotFoundException.class,
                     InvalidRequestException.class,
-                    UserNotFoundException.class
+                    UserNotFoundException.class,
+                    BadDateException.class,
+                    FirstDateMustBeBeforeSecondDateException.class,
+                    IncorrectTimePeriodException.class
             }
     )
     protected ResponseEntity<Object> handleConflict(

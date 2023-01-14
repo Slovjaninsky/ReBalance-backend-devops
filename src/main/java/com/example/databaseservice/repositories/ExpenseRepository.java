@@ -23,4 +23,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     List<Expense> findByGroupIdAndDateStampBetween(Long groupId, LocalDate firstDate, LocalDate secondDate);
 
+    @Query("SELECT e.dateStamp FROM Expense e where e.group.id = :groupId")
+    List<LocalDate> findAllDateStampsByGroup(@Param("groupId") Long groupId);
 }

@@ -26,7 +26,7 @@ public class Expense {
     private Long id;
 
     @Column(name = "amount")
-    private Integer amount;
+    private Double amount;
 
     @Column(name = "description")
     private String description;
@@ -49,13 +49,13 @@ public class Expense {
     @JoinColumn(name = "group_id", nullable = false)
     private ExpenseGroup group;
 
-    public Expense(Integer amount, String description, String category) {
+    public Expense(Double amount, String description, String category) {
         this.amount = amount;
         this.description = description;
         this.category = category;
     }
 
-    public Expense(Integer amount, String description, String category, ApplicationUser user, ExpenseGroup group) {
+    public Expense(Double amount, String description, String category, ApplicationUser user, ExpenseGroup group) {
         this.amount = amount;
         this.description = description;
         this.category = category;

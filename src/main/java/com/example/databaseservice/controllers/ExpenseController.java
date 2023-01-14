@@ -144,7 +144,7 @@ public class ExpenseController {
 
     @GetMapping("/expenses/group/{groupId}/between/{dateFirst}/{dateSecond}")
     public ResponseEntity<List<Expense>> getExpensesByGroupAndBetweenDates(@PathVariable("groupId") Long groupId, @PathVariable("dateFirst") String firstDateString, @PathVariable("dateSecond") String secondDateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
         LocalDate secondDate = LocalDate.parse(secondDateString, formatter);
         if (secondDate.isBefore(firstDate)) {
@@ -156,7 +156,7 @@ public class ExpenseController {
 
     @GetMapping("/expenses/group/{groupId}/from/{dateFirst}/{period}")
     public ResponseEntity<List<Expense>> getExpensesByGroupAndFromDateByTimePeriod(@PathVariable("groupId") Long groupId, @PathVariable("dateFirst") String firstDateString, @PathVariable("period") String period) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
         groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
         LocalDate secondDate;

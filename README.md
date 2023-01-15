@@ -29,3 +29,4 @@
 | DELETE  | /expenses/:globalId  | delete all Expenses by global ID  |
 | GET  | /user/login/:email  | login with the given Email and password  |
 | GET  | /expenses/group/:groupId/dates  | get all dates when expenses occurred in the group  |
+| GET  | /connect/test  | connectivity test  |

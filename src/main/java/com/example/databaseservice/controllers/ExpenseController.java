@@ -2,48 +2,34 @@ package com.example.databaseservice.controllers;
 
 import com.example.databaseservice.entities.ApplicationUser;
 import com.example.databaseservice.entities.Expense;
-import com.example.databaseservice.exceptions.ExpenseNotFoundException;
-import com.example.databaseservice.exceptions.FirstDateMustBeBeforeSecondDateException;
-import com.example.databaseservice.exceptions.GroupNotFoundException;
-import com.example.databaseservice.exceptions.IncorrectTimePeriodException;
-import com.example.databaseservice.exceptions.InvalidRequestException;
-import com.example.databaseservice.exceptions.UserNotFoundException;
-import com.example.databaseservice.servises.ExpenseService;
-import com.example.databaseservice.servises.ApplicationUserService;
 import com.example.databaseservice.entities.ExpenseGroup;
+import com.example.databaseservice.entities.Notification;
+import com.example.databaseservice.exceptions.*;
+import com.example.databaseservice.servises.ApplicationUserService;
+import com.example.databaseservice.servises.ExpenseService;
 import com.example.databaseservice.servises.GroupService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.databaseservice.servises.NotificationService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
 @RequestMapping
+@AllArgsConstructor
 public class ExpenseController {
 
     private final ExpenseService expenseService;
     private final ApplicationUserService applicationUserService;
+    private final NotificationService notificationService;
     private final GroupService groupService;
-
-    @Autowired
-    public ExpenseController(ExpenseService expenseService, ApplicationUserService applicationUserService, GroupService groupService) {
-        this.expenseService = expenseService;
-        this.applicationUserService = applicationUserService;
-        this.groupService = groupService;
-    }
 
     @PostMapping("/expenses/user/{userId}/group/{groupId}")
     public ResponseEntity<Expense> addExpense(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId, @RequestBody Expense inputExpense) {
@@ -71,6 +57,11 @@ public class ExpenseController {
             expense.setDateStamp(LocalDate.now());
         }
         expenseService.saveExpense(expense);
+
+        if (expense.getGlobalId() == 0) {
+            notificationService.saveNotification(new Notification(expense.getUser().getId(), expense.getId(), true));
+        }
+
         return new ResponseEntity<>(expense, HttpStatus.CREATED);
     }
 
@@ -84,14 +75,13 @@ public class ExpenseController {
         return new ResponseEntity<>(expenses, HttpStatus.OK);
     }
 
-
-    @GetMapping("/expenses/{globalId}")
-    public ResponseEntity<List<Expense>> getExpenseById(@PathVariable(value = "globalId") Long id) {
-        List<Expense> expenses = expenseService.getExpensesByGlobalId(id);
+    @GetMapping("/expenses/{expenseId}")
+    public ResponseEntity<List<Expense>> getExpenseById(@PathVariable(value = "expenseId") Long id) {
+        Optional<Expense> expenses = expenseService.getExpenseById(id);
         if (expenses.isEmpty()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity(expenses, HttpStatus.OK);
+        return new ResponseEntity(expenses.get(), HttpStatus.OK);
     }
 
     @GetMapping("/groups/{groupId}/expenses")

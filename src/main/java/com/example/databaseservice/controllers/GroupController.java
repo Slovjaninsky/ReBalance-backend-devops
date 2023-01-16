@@ -2,21 +2,16 @@ package com.example.databaseservice.controllers;
 
 import com.example.databaseservice.entities.ApplicationUser;
 import com.example.databaseservice.entities.ExpenseGroup;
+import com.example.databaseservice.entities.Notification;
 import com.example.databaseservice.exceptions.GroupNotFoundException;
 import com.example.databaseservice.exceptions.UserNotFoundException;
-import com.example.databaseservice.servises.GroupService;
 import com.example.databaseservice.servises.ApplicationUserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.databaseservice.servises.GroupService;
+import com.example.databaseservice.servises.NotificationService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,16 +19,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping
+@AllArgsConstructor
 public class GroupController {
 
     private final GroupService groupService;
+    private final NotificationService notificationService;
     private final ApplicationUserService applicationUserService;
-
-    @Autowired
-    public GroupController(GroupService groupService, ApplicationUserService applicationUserService) {
-        this.groupService = groupService;
-        this.applicationUserService = applicationUserService;
-    }
 
     @GetMapping("/groups")
     public ResponseEntity<List<ExpenseGroup>> getAllGroups() {
@@ -87,6 +78,7 @@ public class GroupController {
                     return groupService.saveGroup(inputGroup);
                 }
         ).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
+        notificationService.saveNotification(new Notification(userId, group.getId(), false));
         return new ResponseEntity<>(group, HttpStatus.CREATED);
     }
 

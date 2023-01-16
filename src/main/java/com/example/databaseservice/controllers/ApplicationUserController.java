@@ -2,12 +2,15 @@ package com.example.databaseservice.controllers;
 
 import com.example.databaseservice.dto.LoginAndPassword;
 import com.example.databaseservice.dto.UserWithPass;
+import com.example.databaseservice.entities.Notification;
 import com.example.databaseservice.exceptions.EmailTakenException;
 import com.example.databaseservice.exceptions.InvalidRequestException;
 import com.example.databaseservice.exceptions.UserNotFoundException;
 import com.example.databaseservice.servises.ApplicationUserService;
 import com.example.databaseservice.entities.ApplicationUser;
 import com.example.databaseservice.entities.ExpenseGroup;
+import com.example.databaseservice.servises.NotificationService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +29,11 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping
+@AllArgsConstructor
 public class ApplicationUserController {
 
     private final ApplicationUserService applicationUserService;
-
-    @Autowired
-    public ApplicationUserController(ApplicationUserService applicationUserService) {
-        this.applicationUserService = applicationUserService;
-    }
+    private final NotificationService notificationService;
 
     @GetMapping("/users")
     public ResponseEntity<List<ApplicationUser>> getAllUsers() {
@@ -62,6 +62,12 @@ public class ApplicationUserController {
         ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
         List<ExpenseGroup> groups = user.getExpenseGroups().stream().collect(Collectors.toList());
         return new ResponseEntity(groups, HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{id}/notifications")
+    public ResponseEntity<List<ApplicationUser>> getAllNotificationsByUserId(@PathVariable(value = "id") Long userId) {
+        List<Notification> notifications = notificationService.findAllByUserIdAndDeleteThem(userId);
+        return new ResponseEntity(notifications, HttpStatus.OK);
     }
 
     @GetMapping("/users/email/{email}/groups")

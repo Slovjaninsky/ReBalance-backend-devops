@@ -31,8 +31,12 @@ public class ExpenseController {
     private final NotificationService notificationService;
     private final GroupService groupService;
 
-    @PostMapping("/expenses/user/{userId}/group/{groupId}")
-    public ResponseEntity<Expense> addExpense(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId, @RequestBody Expense inputExpense) {
+    @PostMapping("/expenses/user/{userId}/group/{groupId}/{userFromId}")
+    public ResponseEntity<Expense> addExpense(
+            @PathVariable(value = "userId") Long userId,
+            @PathVariable(value = "userFromId") Long userFromId,
+            @PathVariable(value = "groupId") Long groupId,
+            @RequestBody Expense inputExpense) {
         ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
         ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
         if (inputExpense.getDescription() == null || inputExpense.getAmount() == null || inputExpense.getCategory() == null) {
@@ -59,7 +63,7 @@ public class ExpenseController {
         expenseService.saveExpense(expense);
 
         if (expense.getGlobalId() == 0) {
-            notificationService.saveNotification(new Notification(expense.getUser().getId(), expense.getId(), true));
+            notificationService.saveNotification(new Notification(expense.getUser().getId(), userFromId, expense.getId(), expense.getAmount(), true));
         }
 
         return new ResponseEntity<>(expense, HttpStatus.CREATED);

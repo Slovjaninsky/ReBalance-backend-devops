@@ -78,7 +78,7 @@ public class GroupController {
                     return groupService.saveGroup(inputGroup);
                 }
         ).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
-        notificationService.saveNotification(new Notification(userId, group.getId(), false));
+        notificationService.saveNotification(new Notification(userId, userId, group.getId(), -1D, false));
         return new ResponseEntity<>(group, HttpStatus.CREATED);
     }
 

@@ -52,9 +52,8 @@ public class ExpenseController {
                 );
         if (inputExpense.getGlobalId() != null) {
             expense.setGlobalId(inputExpense.getGlobalId());
-        } else {
-            //todo set globalId
         }
+        // otherwise, it would be set automatically
         if (inputExpense.getDateStamp() != null) {
             expense.setDateStamp(inputExpense.getDateStamp());
         } else {

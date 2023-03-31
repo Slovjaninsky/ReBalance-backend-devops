@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDate;
@@ -40,6 +41,10 @@ public class Expense {
     @Column(name = "global_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long globalId;
+
+    @Lob
+    @Column(name = "image", columnDefinition = "MEDIUMBLOB")
+    private byte[] image;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

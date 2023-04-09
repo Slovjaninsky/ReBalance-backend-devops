@@ -50,10 +50,6 @@ public class ExpenseController {
                         user,
                         group
                 );
-        if (inputExpense.getGlobalId() != null) {
-            expense.setGlobalId(inputExpense.getGlobalId());
-        }
-        // otherwise, it would be set automatically
         if (inputExpense.getDateStamp() != null) {
             expense.setDateStamp(inputExpense.getDateStamp());
         } else {
@@ -61,7 +57,16 @@ public class ExpenseController {
         }
         expenseService.saveExpense(expense);
 
-        if (expense.getGlobalId() == 0) {
+        // todo check if it works
+//        if (expense.getGlobalId() == 0) {
+
+        if (inputExpense.getGlobalId() != null) {
+            expense.setGlobalId(inputExpense.getGlobalId());
+        } else {
+            expense.setGlobalId(expenseService.getMaxGlobalId() + 1);
+        }
+
+        if (expense.getGlobalId() > 0) {
             notificationService.saveNotification(new Notification(expense.getUser().getId(), userFromId, expense.getId(), expense.getAmount(), true));
         }
 

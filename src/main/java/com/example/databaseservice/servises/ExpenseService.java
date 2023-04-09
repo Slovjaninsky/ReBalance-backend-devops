@@ -57,4 +57,8 @@ public class ExpenseService {
                 .collect(Collectors.toSet());
     }
 
+    public Long getMaxGlobalId(){
+        return expenseRepository.getMaxGlobalId();
+    }
+
 }

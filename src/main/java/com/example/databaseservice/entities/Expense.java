@@ -39,7 +39,6 @@ public class Expense {
     private String category;
 
     @Column(name = "global_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long globalId;
 
     @Lob

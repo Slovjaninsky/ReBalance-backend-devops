@@ -25,4 +25,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("SELECT e.dateStamp FROM Expense e where e.group.id = :groupId")
     List<LocalDate> findAllDateStampsByGroup(@Param("groupId") Long groupId);
+
+    @Query("SELECT MAX(e.globalId) FROM Expense e")
+    Long getMaxGlobalId();
 }

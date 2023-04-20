@@ -41,10 +41,6 @@ public class Expense {
     @Column(name = "global_id")
     private Long globalId;
 
-    @Lob
-    @Column(name = "image", columnDefinition = "MEDIUMBLOB")
-    private byte[] image;
-
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private ApplicationUser user;

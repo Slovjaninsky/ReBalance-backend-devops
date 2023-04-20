@@ -29,4 +29,8 @@
 | DELETE  | /expenses/:globalId  | delete all Expenses by global ID  |
 | GET  | /user/login/:email  | login with the given Email and password  |
 | GET  | /expenses/group/:groupId/dates  | get all dates when expenses occurred in the group  |
+| POST  | /expenses/:globalId/image  | save Base64 encoded image for expense |
+| GET  | /expenses/:globalId/image  | get Base64 encoded image for expense |
+| PATCH  | /expenses/:globalId/image  | change Base64 encoded image for expense  |
+| DELETE  | /expenses/:globalId/image  | delete image for expense |
 | GET  | /connect/test  | connectivity test  |

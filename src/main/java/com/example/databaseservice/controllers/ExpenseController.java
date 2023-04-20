@@ -57,9 +57,6 @@ public class ExpenseController {
         }
         expenseService.saveExpense(expense);
 
-        // todo check if it works
-//        if (expense.getGlobalId() == 0) {
-
         if (inputExpense.getGlobalId() != null) {
             expense.setGlobalId(inputExpense.getGlobalId());
         } else {

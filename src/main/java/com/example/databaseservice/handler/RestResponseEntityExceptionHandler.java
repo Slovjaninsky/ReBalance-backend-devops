@@ -5,6 +5,7 @@ import com.example.databaseservice.exceptions.EmailTakenException;
 import com.example.databaseservice.exceptions.ExpenseNotFoundException;
 import com.example.databaseservice.exceptions.FirstDateMustBeBeforeSecondDateException;
 import com.example.databaseservice.exceptions.GroupNotFoundException;
+import com.example.databaseservice.exceptions.ImageNotFoundException;
 import com.example.databaseservice.exceptions.IncorrectTimePeriodException;
 import com.example.databaseservice.exceptions.InvalidRequestException;
 import com.example.databaseservice.exceptions.UserNotFoundException;
@@ -28,10 +29,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(value =
             {
                     EmailTakenException.class,
-                    ExpenseNotFoundException.class,
-                    GroupNotFoundException.class,
                     InvalidRequestException.class,
-                    UserNotFoundException.class,
                     BadDateException.class,
                     FirstDateMustBeBeforeSecondDateException.class,
                     IncorrectTimePeriodException.class
@@ -42,6 +40,22 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     ) {
         return handleExceptionInternal(
                 ex, ex.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT, request
+        );
+    }
+
+    @ExceptionHandler(value =
+            {
+                    ExpenseNotFoundException.class,
+                    GroupNotFoundException.class,
+                    ImageNotFoundException.class,
+                    UserNotFoundException.class
+            }
+    )
+    protected ResponseEntity<Object> handleNotFound(
+            RuntimeException ex, WebRequest request
+    ) {
+        return handleExceptionInternal(
+                ex, ex.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request
         );
     }
 
@@ -69,4 +83,20 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 request
         );
     }
+
+    @ExceptionHandler(value = RuntimeException.class)
+    protected ResponseEntity<Object> handleRuntimeExceptions(
+            ConstraintViolationException ex, WebRequest request
+    ) {
+        return handleExceptionInternal(
+                ex,
+                ex.getConstraintViolations().stream()
+                        .map(ConstraintViolation::getMessage)
+                        .collect(Collectors.joining("\n")),
+                new HttpHeaders(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request
+        );
+    }
+
 }

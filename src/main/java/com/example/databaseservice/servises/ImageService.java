@@ -1,6 +1,7 @@
 package com.example.databaseservice.servises;
 
 import com.example.databaseservice.entities.Image;
+import com.example.databaseservice.exceptions.ImageNotFoundException;
 import com.example.databaseservice.repositories.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,7 @@ public class ImageService {
     }
 
     public String getImageByGlobalId(Long id) {
-        Image image = imageRepository.findById(id).orElseThrow(() -> new RuntimeException("Image not found with id: " + id));
+        Image image = imageRepository.findById(id).orElseThrow(() -> new ImageNotFoundException("Image not found with id: " + id));
         byte[] imageBytes = loadImageBytes(image.getImagePath());
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
         return base64Image;

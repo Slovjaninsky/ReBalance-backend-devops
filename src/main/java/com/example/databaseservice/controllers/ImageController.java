@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +42,7 @@ public class ImageController {
     }
 
     @PostMapping("/expenses/{globalId}/image")
-    public ResponseEntity<HttpStatus> addImageToExpense(@PathVariable("globalId") long globalId, @RequestBody Map<String, String> requestBody) throws UnsupportedEncodingException {
+    public ResponseEntity<HttpStatus> addImageToExpense(@PathVariable("globalId") long globalId, @RequestBody Map<String, String> requestBody) {
         if (!requestBody.containsKey("image")) {
             throw new InvalidRequestException("Request body should have \"image\" field");
         }
@@ -63,7 +61,7 @@ public class ImageController {
     }
 
     @PatchMapping("/expenses/{globalId}/image")
-    public ResponseEntity<Image> updateImageByGlobalId(@PathVariable("globalId") long globalId, @RequestBody Map<String, String> requestBody) throws UnsupportedEncodingException {
+    public ResponseEntity<Image> updateImageByGlobalId(@PathVariable("globalId") long globalId, @RequestBody Map<String, String> requestBody) {
         imageService.throwExceptionIfNotExistsById(globalId);
         if (!requestBody.containsKey("image")) {
             throw new InvalidRequestException("Request body should have \"image\" field");
@@ -72,7 +70,5 @@ public class ImageController {
         imageService.updateImage(globalId, base64Image);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-
 
 }

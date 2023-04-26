@@ -5,3 +5,4 @@ DROP TABLE expense_group;
 DROP TABLE hibernate_sequence;
 DROP TABLE notification;
 DROP TABLE flyway_schema_history;
+DROP TABLE image;

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -47,19 +48,19 @@ public class ApplicationUserController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<ApplicationUser> getUserById(@PathVariable("id") long id) {
-        ApplicationUser user = applicationUserService.getUserById(id).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + id));
+        ApplicationUser user = applicationUserService.getUserById(id);
         return new ResponseEntity(user, HttpStatus.OK);
     }
 
     @GetMapping("/users/email/{email}")
     public ResponseEntity<ApplicationUser> getUserByEmail(@PathVariable("email") String email) {
-        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
+        ApplicationUser user = applicationUserService.getUserByEmail(email);
         return new ResponseEntity(user, HttpStatus.OK);
     }
 
     @GetMapping("/users/{id}/groups")
     public ResponseEntity<List<ApplicationUser>> getAllGroupsByUserId(@PathVariable(value = "id") Long userId) {
-        ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
+        ApplicationUser user = applicationUserService.getUserById(userId);
         List<ExpenseGroup> groups = user.getExpenseGroups().stream().collect(Collectors.toList());
         return new ResponseEntity(groups, HttpStatus.OK);
     }
@@ -72,7 +73,7 @@ public class ApplicationUserController {
 
     @GetMapping("/users/email/{email}/groups")
     public ResponseEntity<List<ApplicationUser>> getAllGroupsByUserEmail(@PathVariable(value = "email") String email) {
-        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
+        ApplicationUser user = applicationUserService.getUserByEmail(email);
         List<ExpenseGroup> groups = user.getExpenseGroups().stream().collect(Collectors.toList());
         return new ResponseEntity(groups, HttpStatus.OK);
     }
@@ -82,13 +83,7 @@ public class ApplicationUserController {
         if (inputUser.getEmail() == null || inputUser.getUsername() == null || inputUser.getPassword() == null) {
             throw new InvalidRequestException("Request body should contain email, password and username fields");
         }
-        if (applicationUserService.getUserByEmail(inputUser.getEmail()).isPresent()) {
-            throw new EmailTakenException("Email " + inputUser.getEmail() + " is already taken!");
-        }
-        ApplicationUser createdUser = new ApplicationUser(inputUser.getUsername(), inputUser.getEmail());
-        createdUser.setPassword(inputUser.getPassword());
-        ApplicationUser user = applicationUserService.saveUser(createdUser);
-        return new ResponseEntity<>(new LoginAndPassword(user.getEmail(), user.getPassword()), HttpStatus.CREATED);
+        return new ResponseEntity<>(applicationUserService.createUser(inputUser), HttpStatus.CREATED);
     }
 
     @PutMapping("/users/{id}")
@@ -96,41 +91,23 @@ public class ApplicationUserController {
         if (userInput.getEmail() == null || userInput.getUsername() == null) {
             throw new InvalidRequestException("Request body should contain email and username fields");
         }
-        ApplicationUser user = applicationUserService.getUserById(id).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + id));
-        if (applicationUserService.getUserByEmail(userInput.getEmail()).isPresent()) {
-            throw new EmailTakenException("Email " + userInput.getEmail() + " is already taken!");
-        }
-        user.setEmail(userInput.getEmail());
-        user.setUsername(userInput.getUsername());
-        return new ResponseEntity(applicationUserService.saveUser(user), HttpStatus.OK);
+        return new ResponseEntity(applicationUserService.updateUser(id, userInput), HttpStatus.OK);
     }
 
     @PutMapping("/users/email/{email}")
     public ResponseEntity<ApplicationUser> updateUserByEmail(@PathVariable("email") String email, @RequestBody ApplicationUser userInput) {
-        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
-        if (user.getEmail() != null) {
-            user.setEmail(userInput.getEmail());
-            if (applicationUserService.getUserByEmail(userInput.getEmail()).isPresent()) {
-                throw new EmailTakenException("Email " + userInput.getEmail() + " is already taken!");
-            }
-        }
-        if (user.getUsername() != null) {
-            user.setUsername(userInput.getUsername());
-        }
-        return new ResponseEntity(applicationUserService.saveUser(user), HttpStatus.OK);
+        return new ResponseEntity(applicationUserService.updateUserByEmail(email, userInput), HttpStatus.OK);
     }
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") long id) {
-        applicationUserService.getUserById(id).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + id));
         applicationUserService.deleteUserById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/users/email/{email}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("email") String email) {
-        ApplicationUser user = applicationUserService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
-        applicationUserService.deleteUserById(user.getId());
+        applicationUserService.deleteUserByEmail(email);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -139,9 +116,9 @@ public class ApplicationUserController {
         if (inputData.getEmail() == null || inputData.getPassword() == null) {
             throw new InvalidRequestException("Request body should contain login and password");
         }
-        ApplicationUser user = applicationUserService.getUserByEmail(inputData.getEmail()).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + inputData.getEmail()));
-        if (user.getPassword().equals(inputData.getPassword())) {
-            return new ResponseEntity(user, HttpStatus.OK);
+        Optional<ApplicationUser> userOptional = applicationUserService.authorizeUser(inputData);
+        if (userOptional.isPresent()) {
+            return new ResponseEntity(userOptional.get(), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }

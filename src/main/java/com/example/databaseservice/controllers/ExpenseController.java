@@ -37,8 +37,8 @@ public class ExpenseController {
             @PathVariable(value = "userFromId") Long userFromId,
             @PathVariable(value = "groupId") Long groupId,
             @RequestBody Expense inputExpense) {
-        ApplicationUser user = applicationUserService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
-        ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        ApplicationUser user = applicationUserService.getUserById(userId);
+        ExpenseGroup group = groupService.getGroupById(groupId);
         if (inputExpense.getDescription() == null || inputExpense.getAmount() == null || inputExpense.getCategory() == null) {
             throw new InvalidRequestException("Request body should contain amount, description and category fields");
         }
@@ -91,19 +91,18 @@ public class ExpenseController {
 
     @GetMapping("/groups/{groupId}/expenses")
     public ResponseEntity<List<Expense>> getExpensesFromGroup(@PathVariable(value = "groupId") Long id) {
-        ExpenseGroup group = groupService.getGroupById(id).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + id));
+        ExpenseGroup group = groupService.getGroupById(id);
         return new ResponseEntity(group.getExpenses(), HttpStatus.OK);
     }
 
     @GetMapping("/groups/{groupId}/users/{userId}/expenses")
     public ResponseEntity<List<Expense>> getExpensesFromGroup(@PathVariable(value = "groupId") Long groupId, @PathVariable(value = "userId") Long userId) {
-        ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        ExpenseGroup group = groupService.getGroupById(groupId);
         Set<ApplicationUser> groupUsers = group.getUsers();
         ApplicationUser sample = new ApplicationUser(userId);
         if (groupUsers.contains(sample)) {
             return new ResponseEntity(
                     applicationUserService.getUserById(userId)
-                            .get()
                             .getExpenses()
                             .stream()
                             .filter(expense -> expense.getGroup().getId().equals(groupId)),
@@ -145,7 +144,7 @@ public class ExpenseController {
         if (secondDate.isBefore(firstDate)) {
             throw new FirstDateMustBeBeforeSecondDateException("First date (" + firstDate + ") must be before or at the second date (" + secondDate + ")");
         }
-        groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        groupService.getGroupById(groupId);
         return new ResponseEntity<>(expenseService.getExpensesByGroupIdAndBetweenDates(groupId, firstDate, secondDate), HttpStatus.OK);
     }
 
@@ -153,7 +152,7 @@ public class ExpenseController {
     public ResponseEntity<List<Expense>> getExpensesByGroupAndFromDateByTimePeriod(@PathVariable("groupId") Long groupId, @PathVariable("dateFirst") String firstDateString, @PathVariable("period") String period) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
-        groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        groupService.getGroupById(groupId);
         LocalDate secondDate;
         switch (period.toLowerCase()) {
             case "year":
@@ -176,7 +175,7 @@ public class ExpenseController {
 
     @GetMapping("/expenses/group/{groupId}/dates")
     public ResponseEntity<Set<String>> getAllDatesOfExpenses(@PathVariable("groupId") Long groupId) {
-        groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        groupService.getGroupById(groupId);
         return new ResponseEntity<>(expenseService.getAllExpenseDatesFromGroup(groupId), HttpStatus.OK);
     }
 

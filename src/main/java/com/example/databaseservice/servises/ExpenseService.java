@@ -1,6 +1,7 @@
 package com.example.databaseservice.servises;
 
 import com.example.databaseservice.entities.Expense;
+import com.example.databaseservice.exceptions.ExpenseNotFoundException;
 import com.example.databaseservice.repositories.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,12 @@ public class ExpenseService {
 
     public List<Expense> getExpensesByGlobalId(Long globalId) {
         return expenseRepository.findByGlobalId(globalId);
+    }
+
+    public void throwExceptionIfExpensesWithGlobalIdNotFound(Long globalId){
+        if(expenseRepository.findByGlobalId(globalId).isEmpty()){
+            throw new ExpenseNotFoundException(String.format("Expenses with globalId = %d not found", globalId));
+        }
     }
 
     public List<Expense> getExpensesByGroupIdAndBetweenDates(Long groupId, LocalDate firstDate, LocalDate secondDate) {

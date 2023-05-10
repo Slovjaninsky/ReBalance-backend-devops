@@ -46,9 +46,7 @@ public class ImageController {
         if (!requestBody.containsKey("image")) {
             throw new InvalidRequestException("Request body should have \"image\" field");
         }
-        if(expenseService.getExpensesByGlobalId(globalId).isEmpty()){
-            throw new ExpenseNotFoundException(String.format("Expenses with globalId = %d not found", globalId));
-        }
+        expenseService.throwExceptionIfExpensesWithGlobalIdNotFound(globalId);
         String base64Image = requestBody.get("image");
         imageService.saveImage(base64Image, globalId);
         return new ResponseEntity<>(HttpStatus.CREATED);

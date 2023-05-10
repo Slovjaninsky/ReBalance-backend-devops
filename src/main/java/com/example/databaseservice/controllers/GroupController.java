@@ -28,48 +28,34 @@ public class GroupController {
 
     @GetMapping("/groups")
     public ResponseEntity<List<ExpenseGroup>> getAllGroups() {
-        List<ExpenseGroup> groups = new ArrayList<>();
-
-        groupService.findAllGroups().forEach(groups::add);
-
-        if (groups.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
+        List<ExpenseGroup> groups = groupService.findAllGroups();
         return new ResponseEntity<>(groups, HttpStatus.OK);
     }
 
     @GetMapping("/groups/{id}/users")
     public ResponseEntity<List<ApplicationUser>> getAllUsersByGroupId(@PathVariable(value = "id") Long groupId) {
-        ExpenseGroup group = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+        ExpenseGroup group = groupService.getGroupById(groupId);
         List<ApplicationUser> users = group.getUsers().stream().collect(Collectors.toList());
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/groups/{id}")
     public ResponseEntity<ExpenseGroup> getGroupById(@PathVariable(value = "id") Long id) {
-        ExpenseGroup group = groupService.getGroupById(id).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + id));
+        ExpenseGroup group = groupService.getGroupById(id);
         return new ResponseEntity(group, HttpStatus.OK);
     }
 
     @PutMapping("/groups/{id}")
-    public ResponseEntity<ExpenseGroup> updateGroup(@PathVariable("id") long id, @RequestBody ExpenseGroup inputGroup) {
-        ExpenseGroup group = groupService.getGroupById(id).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + id));
-        if (inputGroup.getName() != null) {
-            group.setName(inputGroup.getName());
-        }
-        if (inputGroup.getCurrency() != null) {
-            group.setCurrency(inputGroup.getCurrency());
-        }
-        return new ResponseEntity(groupService.saveGroup(group), HttpStatus.OK);
+    public ResponseEntity<ExpenseGroup> updateGroup(@PathVariable("id") Long id, @RequestBody ExpenseGroup inputGroup) {
+        return new ResponseEntity(groupService.updateGroup(id, inputGroup), HttpStatus.OK);
     }
 
     @PostMapping("/users/{userId}/groups")
     public ResponseEntity<ExpenseGroup> addGroup(@PathVariable(value = "userId") Long userId, @RequestBody ExpenseGroup inputGroup) {
-        ExpenseGroup group = applicationUserService.getUserById(userId).map(user -> {
+        ExpenseGroup group = applicationUserService.getUserOptionalById(userId).map(user -> {
                     Long groupId = inputGroup.getId();
                     if (groupId != null && groupId != -1) {
-                        ExpenseGroup newGroup = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+                        ExpenseGroup newGroup = groupService.getGroupById(groupId);
                         user.addGroup(newGroup);
                         applicationUserService.saveUser(user);
                         return newGroup;
@@ -84,10 +70,10 @@ public class GroupController {
 
     @PostMapping("/users/email/{email}/groups")
     public ResponseEntity<ExpenseGroup> addGroup(@PathVariable(value = "email") String email, @RequestBody ExpenseGroup inputGroup) {
-        ExpenseGroup group = applicationUserService.getUserByEmail(email).map(user -> {
+        ExpenseGroup group = applicationUserService.getUserOptionalByEmail(email).map(user -> {
                     Long groupId = inputGroup.getId();
                     if (groupId != null) {
-                        ExpenseGroup newGroup = groupService.getGroupById(groupId).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + groupId));
+                        ExpenseGroup newGroup = groupService.getGroupById(groupId);
                         user.addGroup(newGroup);
                         applicationUserService.saveUser(user);
                         return newGroup;
@@ -101,7 +87,7 @@ public class GroupController {
 
     @DeleteMapping("/groups/{groupId}/users/{userId}")
     public ResponseEntity<HttpStatus> deleteUserFromGroup(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId) {
-        ApplicationUser applicationUser = applicationUserService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
+        ApplicationUser applicationUser = applicationUserService.getUserById(userId);
         applicationUser.removeGroup(groupId);
         applicationUserService.saveUser(applicationUser);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -109,7 +95,6 @@ public class GroupController {
 
     @DeleteMapping("/groups/{id}")
     public ResponseEntity<HttpStatus> deleteGroup(@PathVariable("id") long id) {
-        groupService.getGroupById(id).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + id));
         groupService.deleteGroupById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

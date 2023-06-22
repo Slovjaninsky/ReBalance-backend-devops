@@ -6,6 +6,9 @@ import com.example.databaseservice.repositories.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +35,20 @@ public class ImageService {
             Files.write(imagePath, decodedImage);
             Image toRepository = new Image(globalId, imagePath.toString());
             imageRepository.save(toRepository);
+
+            ImageIcon imageIcon = new ImageIcon(decodedImage);
+            java.awt.Image originalImage = imageIcon.getImage();
+
+            java.awt.Image scaledImage = originalImage.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+
+            BufferedImage bufferedImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+            bufferedImage.getGraphics().drawImage(scaledImage, 0, 0, null);
+
+            Path iconPath = Paths.get(IMAGES_PATH, (globalId + "_icon.jpg"));
+            ImageIO.write(bufferedImage, "jpg", iconPath.toFile());
+
+            Image iconToRepository = new Image(globalId, iconPath.toString());
+            imageRepository.save(iconToRepository);
         } catch (IOException e) {
             throw new RuntimeException("Error saving image", e);
         }
@@ -48,6 +65,13 @@ public class ImageService {
     public String getImageByGlobalId(Long id) {
         Image image = imageRepository.findById(id).orElseThrow(() -> new ImageNotFoundException("Image not found with id: " + id));
         byte[] imageBytes = loadImageBytes(image.getImagePath());
+        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+        return base64Image;
+    }
+
+    public String getImageIconByGlobalId(Long id) {
+        Image image = imageRepository.findById(id).orElseThrow(() -> new ImageNotFoundException("Image not found with id: " + id));
+        byte[] imageBytes = loadImageBytes(image.getImagePath().replace(".jpg", "_icon.jpg"));
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
         return base64Image;
     }

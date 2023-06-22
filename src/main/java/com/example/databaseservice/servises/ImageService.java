@@ -4,6 +4,7 @@ import com.example.databaseservice.entities.Image;
 import com.example.databaseservice.exceptions.ImageNotFoundException;
 import com.example.databaseservice.repositories.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -19,7 +20,8 @@ import java.util.Base64;
 @Service
 public class ImageService {
 
-    private static final String IMAGES_PATH = "D:\\rebalance_images";
+    @Value("${IMAGES_PATH}")
+    private String IMAGES_PATH;
 
     private final ImageRepository imageRepository;
 

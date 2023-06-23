@@ -1,7 +1,6 @@
 package com.example.databaseservice.controllers;
 
 import com.example.databaseservice.entities.Image;
-import com.example.databaseservice.exceptions.ExpenseNotFoundException;
 import com.example.databaseservice.exceptions.InvalidRequestException;
 import com.example.databaseservice.servises.ExpenseService;
 import com.example.databaseservice.servises.ImageService;

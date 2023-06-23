@@ -3,6 +3,7 @@ package com.example.databaseservice.controllers;
 import com.example.databaseservice.entities.Expense;
 import com.example.databaseservice.exceptions.*;
 import com.example.databaseservice.servises.ExpenseService;
+import com.example.databaseservice.servises.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,12 @@ import java.util.Set;
 public class ExpenseController {
 
     private final ExpenseService expenseService;
+    private final ImageService imageService;
 
     @Autowired
-    public ExpenseController(ExpenseService expenseService) {
+    public ExpenseController(ExpenseService expenseService, ImageService imageService) {
         this.expenseService = expenseService;
+        this.imageService = imageService;
     }
 
     @PostMapping("/expenses/user/{userId}/group/{groupId}/{userFromId}")
@@ -69,6 +72,9 @@ public class ExpenseController {
     @DeleteMapping("/expenses/{globalId}")
     public ResponseEntity<HttpStatus> deleteExpenseByGlobalId(@PathVariable("globalId") long id) {
         expenseService.deleteByGlobalId(id);
+        try {
+            imageService.deleteImageByGlobalId(id);
+        } catch (RuntimeException ignored) {}
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

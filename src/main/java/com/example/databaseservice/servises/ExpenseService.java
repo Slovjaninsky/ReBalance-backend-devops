@@ -60,7 +60,8 @@ public class ExpenseService {
         if (inputExpense.getGlobalId() != null) {
             expense.setGlobalId(inputExpense.getGlobalId());
         } else {
-            expense.setGlobalId(expenseRepository.getMaxGlobalId() + 1);
+            Long maxGlobalId = expenseRepository.getMaxGlobalId() == null ? 1 : expenseRepository.getMaxGlobalId();
+            expense.setGlobalId(maxGlobalId + 1);
         }
 
         if (expense.getGlobalId() > 0) {

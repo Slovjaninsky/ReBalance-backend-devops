@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/user")
 @AllArgsConstructor
-public class ApplicationUserController {
+public class UserController {
     private final ApplicationUserService applicationUserService;
     private final GroupService groupService;
     private final NotificationService notificationService;

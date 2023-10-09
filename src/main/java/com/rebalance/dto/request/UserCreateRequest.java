@@ -1,4 +1,4 @@
-package com.rebalance.dto;
+package com.rebalance.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.extern.jackson.Jacksonized;
 @NoArgsConstructor
 @Data
 @Jacksonized
-public class UserWithPass {
+public class UserCreateRequest {
 
     private String email;
     private String password;

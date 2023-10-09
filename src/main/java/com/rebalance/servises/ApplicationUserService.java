@@ -1,7 +1,7 @@
 package com.rebalance.servises;
 
 import com.rebalance.dto.LoginAndPassword;
-import com.rebalance.dto.UserWithPass;
+import com.rebalance.dto.request.UserCreateRequest;
 import com.rebalance.entities.ApplicationUser;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
@@ -62,12 +62,11 @@ public class ApplicationUserService {
         }
     }
 
-    public LoginAndPassword createUser(UserWithPass inputUser) {
+    public ApplicationUser createUser(UserCreateRequest inputUser) {
         throwExceptionIfUserExistsByEmail(inputUser.getEmail());
         ApplicationUser createdUser = new ApplicationUser(inputUser.getUsername(), inputUser.getEmail());
         createdUser.setPassword(inputUser.getPassword());
-        ApplicationUser user = applicationUserRepository.save(createdUser);
-        return new LoginAndPassword(user.getEmail(), user.getPassword());
+        return applicationUserRepository.save(createdUser);
     }
 
     public ApplicationUser updateUser(Long id, ApplicationUser userInput) {

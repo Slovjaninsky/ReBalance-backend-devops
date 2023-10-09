@@ -24,6 +24,10 @@ public class GroupService {
         return groupRepository.findAll();
     }
 
+    public List<ExpenseGroup> findAllGroupsByUserId(Long userId) {
+        return groupRepository.findAllByUsersId(userId);
+    }
+
     public ExpenseGroup saveGroup(ExpenseGroup expenseGroup) {
         return groupRepository.save(expenseGroup);
     }

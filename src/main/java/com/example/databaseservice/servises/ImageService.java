@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Service
@@ -48,15 +49,13 @@ public class ImageService {
     public String getImageByGlobalId(Long id) {
         throwExceptionIfNotExistsById(id);
         byte[] imageBytes = loadImageBytes(id, false);
-        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-        return base64Image;
+        return Base64.getEncoder().encodeToString(imageBytes);
     }
 
     public String getImageIconByGlobalId(Long id) {
         throwExceptionIfNotExistsById(id);
         byte[] imageBytes = loadImageBytes(id, true);
-        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-        return base64Image;
+        return Base64.getEncoder().encodeToString(imageBytes);
     }
 
     public void deleteImageByGlobalId(Long id) {
@@ -91,21 +90,20 @@ public class ImageService {
     }
 
     private BlobServiceClient connectToCloudStorage() {
-        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+        return new BlobServiceClientBuilder()
                 .endpoint(String.format("https://%s.blob.core.windows.net/", storageAccountName))
                 .connectionString(storageConnectionString)
                 .buildClient();
-        return blobServiceClient;
     }
 
     private String saveImageAndIconToCloud(String base64Image, Long globalId) {
         try {
             BlobServiceClient connection = connectToCloudStorage();
 
-            byte[] decodedImage = Base64.getDecoder().decode(base64Image.getBytes("UTF-8"));
+            byte[] decodedImage = Base64.getDecoder().decode(base64Image.getBytes(StandardCharsets.UTF_8));
 
             String blobName = globalId + ".png";
-            connection.getBlobContainerClient(storageContainerImages).getBlobClient(blobName).upload(BinaryData.fromBytes(Base64.getDecoder().decode(base64Image.getBytes("UTF-8"))));
+            connection.getBlobContainerClient(storageContainerImages).getBlobClient(blobName).upload(BinaryData.fromBytes(Base64.getDecoder().decode(base64Image.getBytes(StandardCharsets.UTF_8))));
 
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(decodedImage));
             java.awt.Image scaledImage = img.getScaledInstance(100, 100, java.awt.Image.SCALE_REPLICATE);

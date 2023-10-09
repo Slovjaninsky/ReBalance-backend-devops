@@ -8,7 +8,7 @@ import java.io.UnsupportedEncodingException;
 @SpringBootApplication
 public class DatabaseServiceApplication {
 
-    public static void main(String[] args) throws UnsupportedEncodingException {
+    public static void main(String[] args) {
         SpringApplication.run(DatabaseServiceApplication.class, args);
     }
 

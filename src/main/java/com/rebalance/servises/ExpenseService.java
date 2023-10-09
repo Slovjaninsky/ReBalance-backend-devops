@@ -4,10 +4,8 @@ import com.rebalance.entities.ApplicationUser;
 import com.rebalance.entities.Expense;
 import com.rebalance.entities.ExpenseGroup;
 import com.rebalance.entities.Notification;
-import com.rebalance.exceptions.ExpenseNotFoundException;
-import com.rebalance.exceptions.FirstDateMustBeBeforeSecondDateException;
-import com.rebalance.exceptions.IncorrectTimePeriodException;
-import com.rebalance.exceptions.UserNotFoundException;
+import com.rebalance.exception.RebalanceErrorType;
+import com.rebalance.exception.RebalanceException;
 import com.rebalance.repositories.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,13 +70,13 @@ public class ExpenseService {
     }
 
     public Expense getExpenseById(Long id) {
-        return expenseRepository.findById(id).orElseThrow(() -> new ExpenseNotFoundException(String.format("Expenses with globalId = %d not found", id)));
+        return expenseRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_101));
     }
 
     public void deleteByGlobalId(Long globalId) {
         List<Expense> expenses = expenseRepository.findByGlobalId(globalId);
         if (expenses.isEmpty()) {
-            throw new ExpenseNotFoundException(String.format("Expenses with globalId = %d not found", globalId));
+            throw new RebalanceException(RebalanceErrorType.RB_101);
         }
         expenseRepository.deleteByGlobalId(globalId);
     }
@@ -89,7 +87,7 @@ public class ExpenseService {
 
     public void throwExceptionIfExpensesWithGlobalIdNotFound(Long globalId) {
         if (expenseRepository.findByGlobalId(globalId).isEmpty()) {
-            throw new ExpenseNotFoundException(String.format("Expenses with globalId = %d not found", globalId));
+            throw new RebalanceException(RebalanceErrorType.RB_101);
         }
     }
 
@@ -98,13 +96,13 @@ public class ExpenseService {
         LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
         LocalDate secondDate = LocalDate.parse(secondDateString, formatter);
         if (secondDate.isBefore(firstDate)) {
-            throw new FirstDateMustBeBeforeSecondDateException("First date (" + firstDate + ") must be before or at the second date (" + secondDate + ")");
+            throw new RebalanceException(RebalanceErrorType.RB_102);
         }
         groupService.throwExceptionIfGroupNotFoundById(groupId);
         return expenseRepository.findByGroupIdAndDateStampBetween(groupId, firstDate, secondDate);
     }
 
-    public List<Expense> getExpensesByGroupAndFromDateByTimePeriod(Long groupId, String firstDateString, String period){
+    public List<Expense> getExpensesByGroupAndFromDateByTimePeriod(Long groupId, String firstDateString, String period) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
         groupService.getGroupById(groupId);
@@ -123,7 +121,7 @@ public class ExpenseService {
                 secondDate = firstDate;
                 break;
             default:
-                throw new IncorrectTimePeriodException();
+                throw new RebalanceException(RebalanceErrorType.RB_103);
         }
         groupService.throwExceptionIfGroupNotFoundById(groupId);
         return expenseRepository.findByGroupIdAndDateStampBetween(groupId, firstDate, secondDate);
@@ -152,7 +150,7 @@ public class ExpenseService {
                     .filter(expense -> expense.getGroup().getId().equals(groupId))
                     .toList();
         }
-        throw new UserNotFoundException("Not found User with id = " + userId + " in Group with id = " + groupId);
+        throw new RebalanceException(RebalanceErrorType.RB_101);
     }
 
     public Set<Expense> getExpensesFromGroup(Long groupId) {
@@ -160,10 +158,10 @@ public class ExpenseService {
         return group.getExpenses();
     }
 
-    public List<Expense> updateExpensesByGlobalId(Long globalId, Expense inputExpense){
+    public List<Expense> updateExpensesByGlobalId(Long globalId, Expense inputExpense) {
         List<Expense> expenses = expenseRepository.findByGlobalId(globalId);
         if (expenses.isEmpty()) {
-            throw new ExpenseNotFoundException(String.format("Expenses with globalId = %d not found", globalId));
+            throw new RebalanceException(RebalanceErrorType.RB_101);
         }
         expenses.stream().forEach(expense -> expense.setDescription(inputExpense.getDescription()));
         expenses.stream().forEach(expense -> expenseRepository.save(expense));

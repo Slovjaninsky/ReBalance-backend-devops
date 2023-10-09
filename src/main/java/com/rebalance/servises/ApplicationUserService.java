@@ -3,8 +3,8 @@ package com.rebalance.servises;
 import com.rebalance.dto.LoginAndPassword;
 import com.rebalance.dto.UserWithPass;
 import com.rebalance.entities.ApplicationUser;
-import com.rebalance.exceptions.EmailTakenException;
-import com.rebalance.exceptions.UserNotFoundException;
+import com.rebalance.exception.RebalanceErrorType;
+import com.rebalance.exception.RebalanceException;
 import com.rebalance.repositories.ApplicationUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class ApplicationUserService {
     }
 
     public ApplicationUser getUserById(Long id) {
-        return applicationUserRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + id));
+        return applicationUserRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
     }
 
     public Optional<ApplicationUser> getUserOptionalById(Long id) {
@@ -40,29 +40,29 @@ public class ApplicationUserService {
     }
 
     public void deleteUserByEmail(String email) {
-        ApplicationUser user = getUserOptionalByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
+        ApplicationUser user = getUserOptionalByEmail(email).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
         applicationUserRepository.deleteById(user.getId());
     }
 
-    public ApplicationUser saveUser(ApplicationUser user){
+    public ApplicationUser saveUser(ApplicationUser user) {
         return applicationUserRepository.save(user);
     }
 
-    public ApplicationUser getUserByEmail(String email){
-        return applicationUserRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
+    public ApplicationUser getUserByEmail(String email) {
+        return applicationUserRepository.findByEmail(email).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
     }
 
-    public Optional<ApplicationUser> getUserOptionalByEmail(String email){
+    public Optional<ApplicationUser> getUserOptionalByEmail(String email) {
         return applicationUserRepository.findByEmail(email);
     }
 
-    public void throwExceptionIfUserExistsByEmail(String email){
+    public void throwExceptionIfUserExistsByEmail(String email) {
         if (getUserOptionalByEmail(email).isPresent()) {
-            throw new EmailTakenException("Email " + email + " is already taken!");
+            throw new RebalanceException(RebalanceErrorType.RB_001);
         }
     }
 
-    public LoginAndPassword createUser(UserWithPass inputUser){
+    public LoginAndPassword createUser(UserWithPass inputUser) {
         throwExceptionIfUserExistsByEmail(inputUser.getEmail());
         ApplicationUser createdUser = new ApplicationUser(inputUser.getUsername(), inputUser.getEmail());
         createdUser.setPassword(inputUser.getPassword());
@@ -70,7 +70,7 @@ public class ApplicationUserService {
         return new LoginAndPassword(user.getEmail(), user.getPassword());
     }
 
-    public ApplicationUser updateUser(Long id, ApplicationUser userInput){
+    public ApplicationUser updateUser(Long id, ApplicationUser userInput) {
         ApplicationUser user = getUserById(id);
         throwExceptionIfUserExistsByEmail(userInput.getEmail());
         user.setEmail(userInput.getEmail());
@@ -78,7 +78,7 @@ public class ApplicationUserService {
         return applicationUserRepository.save(user);
     }
 
-    public ApplicationUser updateUserByEmail(String email, ApplicationUser userInput){
+    public ApplicationUser updateUserByEmail(String email, ApplicationUser userInput) {
         ApplicationUser user = getUserByEmail(email);
         if (user.getEmail() != null) {
             user.setEmail(userInput.getEmail());
@@ -90,11 +90,11 @@ public class ApplicationUserService {
         return applicationUserRepository.save(user);
     }
 
-    public void throwExceptionIfUserDoesNotExistById(Long id){
+    public void throwExceptionIfUserDoesNotExistById(Long id) {
         getUserById(id);
     }
 
-    public Optional<ApplicationUser> authorizeUser(LoginAndPassword inputData){
+    public Optional<ApplicationUser> authorizeUser(LoginAndPassword inputData) {
         ApplicationUser user = getUserByEmail(inputData.getEmail());
         if (user.getPassword().equals(inputData.getPassword())) {
             return Optional.of(user);

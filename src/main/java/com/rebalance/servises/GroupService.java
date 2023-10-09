@@ -1,7 +1,8 @@
 package com.rebalance.servises;
 
 import com.rebalance.entities.ExpenseGroup;
-import com.rebalance.exceptions.GroupNotFoundException;
+import com.rebalance.exception.RebalanceErrorType;
+import com.rebalance.exception.RebalanceException;
 import com.rebalance.repositories.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class GroupService {
     }
 
     public ExpenseGroup getGroupById(Long id) {
-        return groupRepository.findById(id).orElseThrow(() -> new GroupNotFoundException("Not found Group with id = " + id));
+        return groupRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_201));
     }
 
     public ExpenseGroup updateGroup(Long id, @RequestBody ExpenseGroup inputGroup) {

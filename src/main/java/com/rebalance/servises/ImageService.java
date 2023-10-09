@@ -1,7 +1,8 @@
 package com.rebalance.servises;
 
 import com.rebalance.entities.Image;
-import com.rebalance.exceptions.ImageNotFoundException;
+import com.rebalance.exception.RebalanceErrorType;
+import com.rebalance.exception.RebalanceException;
 import com.rebalance.repositories.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,20 +60,20 @@ public class ImageService {
     }
 
     public String getImageByGlobalId(Long id) {
-        Image image = imageRepository.findById(id).orElseThrow(() -> new ImageNotFoundException("Image not found with id: " + id));
+        Image image = imageRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_301));
         byte[] imageBytes = loadImageBytes(image.getImagePath());
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
         return base64Image;
     }
 
     public String getImageIconByGlobalId(Long id) {
-        Image image = imageRepository.findById(id).orElseThrow(() -> new ImageNotFoundException("Icon not found with id: " + id));
+        Image image = imageRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_302));
         byte[] imageBytes = loadImageBytes(image.getImagePath().replace(".jpg", "_icon.jpg"));
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
         return base64Image;
     }
 
-    public void deleteImageByGlobalId(Long id){
+    public void deleteImageByGlobalId(Long id) {
         throwExceptionIfNotExistsById(id);
         Path imagePath = Paths.get(IMAGES_PATH, (id + ".jpg"));
         Path iconPath = Paths.get(IMAGES_PATH, (id + "_icon.jpg"));
@@ -85,7 +86,7 @@ public class ImageService {
         imageRepository.deleteById(id);
     }
 
-    public void throwExceptionIfNotExistsById(Long id){
+    public void throwExceptionIfNotExistsById(Long id) {
         getImageByGlobalId(id);
     }
 

@@ -3,7 +3,8 @@ package com.rebalance.controllers;
 import com.rebalance.entities.ApplicationUser;
 import com.rebalance.entities.ExpenseGroup;
 import com.rebalance.entities.Notification;
-import com.rebalance.exceptions.UserNotFoundException;
+import com.rebalance.exception.RebalanceErrorType;
+import com.rebalance.exception.RebalanceException;
 import com.rebalance.servises.ApplicationUserService;
 import com.rebalance.servises.GroupService;
 import com.rebalance.servises.NotificationService;
@@ -61,7 +62,7 @@ public class GroupController {
                     user.addGroup(inputGroup);
                     return groupService.saveGroup(inputGroup);
                 }
-        ).orElseThrow(() -> new UserNotFoundException("Not found User with id = " + userId));
+        ).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
         notificationService.saveNotification(new Notification(userId, userId, group.getId(), -1D, false));
         return new ResponseEntity<>(group, HttpStatus.CREATED);
     }
@@ -79,7 +80,7 @@ public class GroupController {
                     user.addGroup(inputGroup);
                     return groupService.saveGroup(inputGroup);
                 }
-        ).orElseThrow(() -> new UserNotFoundException("Not found User with email = " + email));
+        ).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
         return new ResponseEntity<>(group, HttpStatus.CREATED);
     }
 

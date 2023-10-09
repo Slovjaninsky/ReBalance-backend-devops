@@ -1,7 +1,6 @@
 package com.rebalance.controllers;
 
 import com.rebalance.entities.Expense;
-import com.rebalance.exceptions.InvalidRequestException;
 import com.rebalance.servises.ExpenseService;
 import com.rebalance.servises.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +30,6 @@ public class ExpenseController {
             @PathVariable(value = "userFromId") Long userFromId,
             @PathVariable(value = "groupId") Long groupId,
             @RequestBody Expense inputExpense) {
-
-        if (inputExpense.getDescription() == null || inputExpense.getAmount() == null || inputExpense.getCategory() == null) {
-            throw new InvalidRequestException("Request body should contain amount, description and category fields");
-        }
         return new ResponseEntity<>(expenseService.saveExpense(userId, userFromId, groupId, inputExpense), HttpStatus.CREATED);
     }
 
@@ -63,9 +58,6 @@ public class ExpenseController {
 
     @PutMapping("/expenses/{id}")
     public ResponseEntity<List<Expense>> updateExpensesByGlobalId(@PathVariable(value = "id") Long id, @RequestBody Expense inputExpense) {
-        if (inputExpense.getDescription() == null) {
-            throw new InvalidRequestException("Request body should have \"description\" field");
-        }
         return new ResponseEntity<>(expenseService.updateExpensesByGlobalId(id, inputExpense), HttpStatus.OK);
     }
 

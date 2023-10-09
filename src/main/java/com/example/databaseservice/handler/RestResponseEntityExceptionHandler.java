@@ -44,45 +44,4 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 ex, ex.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request
         );
     }
-
-//    @Override
-//    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-//            MethodArgumentNotValidException ex, HttpHeaders headers,
-//            HttpStatus status, WebRequest request
-//    ) {
-//        return handleExceptionInternal(
-//                ex, Objects.requireNonNull(ex.getFieldError()).getDefaultMessage(), headers, status, request
-//        );
-//    }
-
-//    @ExceptionHandler(value = ConstraintViolationException.class)
-//    protected ResponseEntity<Object> handleConstraintViolationException(
-//            ConstraintViolationException ex, WebRequest request
-//    ) {
-//        return handleExceptionInternal(
-//                ex,
-//                ex.getConstraintViolations().stream()
-//                        .map(ConstraintViolation::getMessage)
-//                        .collect(Collectors.joining("\n")),
-//                new HttpHeaders(),
-//                HttpStatus.BAD_REQUEST,
-//                request
-//        );
-//    }
-//
-//    @ExceptionHandler(value = RuntimeException.class)
-//    protected ResponseEntity<Object> handleRuntimeExceptions(
-//            ConstraintViolationException ex, WebRequest request
-//    ) {
-//        return handleExceptionInternal(
-//                ex,
-//                ex.getConstraintViolations().stream()
-//                        .map(ConstraintViolation::getMessage)
-//                        .collect(Collectors.joining("\n")),
-//                new HttpHeaders(),
-//                HttpStatus.INTERNAL_SERVER_ERROR,
-//                request
-//        );
-//    }
-
 }

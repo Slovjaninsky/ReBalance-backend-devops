@@ -1,11 +1,11 @@
-package com.example.databaseservice.servises;
+package com.rebalance.servises;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
-import com.example.databaseservice.entities.Image;
-import com.example.databaseservice.exceptions.ImageNotFoundException;
-import com.example.databaseservice.repositories.ImageRepository;
+import com.rebalance.entities.Image;
+import com.rebalance.exceptions.ImageNotFoundException;
+import com.rebalance.repositories.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

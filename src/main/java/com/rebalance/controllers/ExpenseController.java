@@ -14,7 +14,6 @@ import java.util.Set;
 @RestController
 @RequestMapping
 public class ExpenseController {
-
     private final ExpenseService expenseService;
     private final ImageService imageService;
 
@@ -33,18 +32,6 @@ public class ExpenseController {
         return new ResponseEntity<>(expenseService.saveExpense(userId, userFromId, groupId, inputExpense), HttpStatus.CREATED);
     }
 
-    @GetMapping("/expenses")
-    public ResponseEntity<List<Expense>> getAllExpenses() {
-        List<Expense> expenses = expenseService.findAllExpenses();
-        return new ResponseEntity<>(expenses, HttpStatus.OK);
-    }
-
-    @GetMapping("/expenses/{expenseId}")
-    public ResponseEntity<Expense> getExpenseById(@PathVariable(value = "expenseId") Long id) {
-        Expense expenses = expenseService.getExpenseById(id);
-        return new ResponseEntity(expenses, HttpStatus.OK);
-    }
-
     @GetMapping("/groups/{groupId}/expenses")
     public ResponseEntity<Set<Expense>> getExpensesFromGroup(@PathVariable(value = "groupId") Long id) {
         return new ResponseEntity(expenseService.getExpensesFromGroup(id), HttpStatus.OK);
@@ -56,11 +43,6 @@ public class ExpenseController {
         return new ResponseEntity<>(expenses, HttpStatus.OK);
     }
 
-    @PutMapping("/expenses/{id}")
-    public ResponseEntity<List<Expense>> updateExpensesByGlobalId(@PathVariable(value = "id") Long id, @RequestBody Expense inputExpense) {
-        return new ResponseEntity<>(expenseService.updateExpensesByGlobalId(id, inputExpense), HttpStatus.OK);
-    }
-
     @DeleteMapping("/expenses/{globalId}")
     public ResponseEntity<HttpStatus> deleteExpenseByGlobalId(@PathVariable("globalId") long id) {
         expenseService.deleteByGlobalId(id);
@@ -70,20 +52,4 @@ public class ExpenseController {
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-    @GetMapping("/expenses/group/{groupId}/between/{dateFirst}/{dateSecond}")
-    public ResponseEntity<List<Expense>> getExpensesByGroupAndBetweenDates(@PathVariable("groupId") Long groupId, @PathVariable("dateFirst") String firstDateString, @PathVariable("dateSecond") String secondDateString) {
-        return new ResponseEntity<>(expenseService.getExpensesByGroupIdAndBetweenDates(groupId, firstDateString, secondDateString), HttpStatus.OK);
-    }
-
-    @GetMapping("/expenses/group/{groupId}/from/{dateFirst}/{period}")
-    public ResponseEntity<List<Expense>> getExpensesByGroupAndFromDateByTimePeriod(@PathVariable("groupId") Long groupId, @PathVariable("dateFirst") String firstDateString, @PathVariable("period") String period) {
-        return new ResponseEntity<>(expenseService.getExpensesByGroupAndFromDateByTimePeriod(groupId, firstDateString, period), HttpStatus.OK);
-    }
-
-    @GetMapping("/expenses/group/{groupId}/dates")
-    public ResponseEntity<Set<String>> getAllDatesOfExpenses(@PathVariable("groupId") Long groupId) {
-        return new ResponseEntity<>(expenseService.getAllExpenseDatesFromGroup(groupId), HttpStatus.OK);
-    }
-
 }

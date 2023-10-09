@@ -20,16 +20,9 @@ import java.util.stream.Collectors;
 @RequestMapping
 @AllArgsConstructor
 public class GroupController {
-
     private final GroupService groupService;
     private final NotificationService notificationService;
     private final ApplicationUserService applicationUserService;
-
-    @GetMapping("/groups")
-    public ResponseEntity<List<ExpenseGroup>> getAllGroups() {
-        List<ExpenseGroup> groups = groupService.findAllGroups();
-        return new ResponseEntity<>(groups, HttpStatus.OK);
-    }
 
     @GetMapping("/groups/{id}/users")
     public ResponseEntity<List<ApplicationUser>> getAllUsersByGroupId(@PathVariable(value = "id") Long groupId) {
@@ -42,11 +35,6 @@ public class GroupController {
     public ResponseEntity<ExpenseGroup> getGroupById(@PathVariable(value = "id") Long id) {
         ExpenseGroup group = groupService.getGroupById(id);
         return new ResponseEntity(group, HttpStatus.OK);
-    }
-
-    @PutMapping("/groups/{id}")
-    public ResponseEntity<ExpenseGroup> updateGroup(@PathVariable("id") Long id, @RequestBody ExpenseGroup inputGroup) {
-        return new ResponseEntity(groupService.updateGroup(id, inputGroup), HttpStatus.OK);
     }
 
     @PostMapping("/users/{userId}/groups")
@@ -66,36 +54,4 @@ public class GroupController {
         notificationService.saveNotification(new Notification(userId, userId, group.getId(), -1D, false));
         return new ResponseEntity<>(group, HttpStatus.CREATED);
     }
-
-    @PostMapping("/users/email/{email}/groups")
-    public ResponseEntity<ExpenseGroup> addGroup(@PathVariable(value = "email") String email, @RequestBody ExpenseGroup inputGroup) {
-        ExpenseGroup group = applicationUserService.getUserOptionalByEmail(email).map(user -> {
-                    Long groupId = inputGroup.getId();
-                    if (groupId != null) {
-                        ExpenseGroup newGroup = groupService.getGroupById(groupId);
-                        user.addGroup(newGroup);
-                        applicationUserService.saveUser(user);
-                        return newGroup;
-                    }
-                    user.addGroup(inputGroup);
-                    return groupService.saveGroup(inputGroup);
-                }
-        ).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
-        return new ResponseEntity<>(group, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/groups/{groupId}/users/{userId}")
-    public ResponseEntity<HttpStatus> deleteUserFromGroup(@PathVariable(value = "userId") Long userId, @PathVariable(value = "groupId") Long groupId) {
-        ApplicationUser applicationUser = applicationUserService.getUserById(userId);
-        applicationUser.removeGroup(groupId);
-        applicationUserService.saveUser(applicationUser);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @DeleteMapping("/groups/{id}")
-    public ResponseEntity<HttpStatus> deleteGroup(@PathVariable("id") long id) {
-        groupService.deleteGroupById(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
 }

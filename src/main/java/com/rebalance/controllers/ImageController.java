@@ -1,6 +1,5 @@
 package com.rebalance.controllers;
 
-import com.rebalance.entities.Image;
 import com.rebalance.servises.ExpenseService;
 import com.rebalance.servises.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import java.util.Map;
 @RestController
 @RequestMapping
 public class ImageController {
-
     private final ImageService imageService;
     private final ExpenseService expenseService;
 
@@ -47,19 +45,4 @@ public class ImageController {
         imageService.saveImage(base64Image, globalId);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
-    @DeleteMapping("/expenses/{globalId}/image")
-    public ResponseEntity<HttpStatus> deleteImageByGlobalId(@PathVariable("globalId") long globalId) {
-        imageService.deleteImageByGlobalId(globalId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @PatchMapping("/expenses/{globalId}/image")
-    public ResponseEntity<Image> updateImageByGlobalId(@PathVariable("globalId") long globalId, @RequestBody Map<String, String> requestBody) {
-        imageService.throwExceptionIfNotExistsById(globalId);
-        String base64Image = requestBody.get("image");
-        imageService.updateImage(globalId, base64Image);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
 }

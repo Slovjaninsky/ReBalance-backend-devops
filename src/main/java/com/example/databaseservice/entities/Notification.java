@@ -1,9 +1,8 @@
 package com.example.databaseservice.entities;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
 
 @Table
 @Entity

@@ -47,6 +47,7 @@ public class UserController {
                         .map(groupMapper::groupToResponse).collect(Collectors.toList()));
     }
 
+    //TODO: move to notification controller
     @GetMapping("/{id}/notifications")
     public ResponseEntity<List<NotificationResponse>> getAllNotificationsByUserId(@PathVariable(value = "id") Long userId) {
         return ResponseEntity.ok(
@@ -54,6 +55,7 @@ public class UserController {
                         .map(notificationMapper::notificationToResponse).collect(Collectors.toList()));
     }
 
+    //TODO: move to auth controller
     @PostMapping()
     public ResponseEntity<UserResponse> register(@RequestBody UserCreateRequest user) {
         return new ResponseEntity<>(
@@ -61,6 +63,7 @@ public class UserController {
                 HttpStatus.CREATED);
     }
 
+    //TODO: move to auth controller
     @PostMapping("/login")
     public ResponseEntity<UserResponse> loginWithEmailAndPassword(@RequestBody @Validated LoginAndPassword inputData) {
         Optional<ApplicationUser> user = applicationUserService.authorizeUser(inputData);

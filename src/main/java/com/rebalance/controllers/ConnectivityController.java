@@ -8,11 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping
-public class ConnectivityTestController {
-
+public class ConnectivityController {
     @GetMapping("/connect/test")
     public ResponseEntity<String> testConnection() {
-        return new ResponseEntity<>("{\"connection\": \"connected\"}", HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

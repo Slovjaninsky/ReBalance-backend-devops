@@ -32,6 +32,8 @@ public class ImageService {
 
     @Value("${cloud.storage.container.thumbnail}")
     private String storageContainerThumbnails;
+    @Value("${cloud.storage.profile.image.name.prefix}")
+    private String imageNamePrefix;
 
     private final ImageRepository imageRepository;
 
@@ -63,8 +65,8 @@ public class ImageService {
 
         BlobServiceClient connection = connectToCloudStorage();
 
-        connection.getBlobContainerClient(storageContainerImages).getBlobClient(id + ".png").delete();
-        connection.getBlobContainerClient(storageContainerThumbnails).getBlobClient(id + "_icon.jpg").delete();
+        connection.getBlobContainerClient(storageContainerImages).getBlobClient(id + imageNamePrefix + ".png").delete();
+        connection.getBlobContainerClient(storageContainerThumbnails).getBlobClient(id + imageNamePrefix + "_icon.jpg").delete();
 
         imageRepository.deleteById(id);
     }
@@ -76,8 +78,8 @@ public class ImageService {
     public void updateImage(Long id, String base64Image) {
         BlobServiceClient connection = connectToCloudStorage();
 
-        connection.getBlobContainerClient(storageContainerImages).getBlobClient(id + ".png").delete();
-        connection.getBlobContainerClient(storageContainerThumbnails).getBlobClient(id + "_icon.jpg").delete();
+        connection.getBlobContainerClient(storageContainerImages).getBlobClient(id + imageNamePrefix + ".png").delete();
+        connection.getBlobContainerClient(storageContainerThumbnails).getBlobClient(id + imageNamePrefix + "_icon.jpg").delete();
 
         saveImageAndIconToCloud(base64Image, id);
     }
@@ -85,7 +87,7 @@ public class ImageService {
     private byte[] loadImageBytes(Long globalId, boolean getIcon) {
         BlobServiceClient connection = connectToCloudStorage();
         String container = getIcon ? storageContainerThumbnails : storageContainerImages;
-        String blobName = getIcon ? globalId + "_icon.jpg" : globalId + ".png";
+        String blobName = getIcon ? globalId + imageNamePrefix + "_icon.jpg" : globalId + imageNamePrefix + ".png";
         return connection.getBlobContainerClient(container).getBlobClient(blobName).downloadContent().toBytes();
     }
 
@@ -102,7 +104,7 @@ public class ImageService {
 
             byte[] decodedImage = Base64.getDecoder().decode(base64Image.getBytes(StandardCharsets.UTF_8));
 
-            String blobName = globalId + ".png";
+            String blobName = globalId + imageNamePrefix + ".png";
             connection.getBlobContainerClient(storageContainerImages).getBlobClient(blobName).upload(BinaryData.fromBytes(Base64.getDecoder().decode(base64Image.getBytes(StandardCharsets.UTF_8))));
 
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(decodedImage));
@@ -111,7 +113,7 @@ public class ImageService {
             BufferedImage bufferedImage = new BufferedImage(scaledImage.getWidth(null), scaledImage.getHeight(null), BufferedImage.TYPE_INT_RGB);
             bufferedImage.getGraphics().drawImage(scaledImage, 0, 0, null);
 
-            String iconBlobName = globalId + "_icon.jpg";
+            String iconBlobName = globalId + imageNamePrefix + "_icon.jpg";
 
             ByteArrayOutputStream b = new ByteArrayOutputStream();
             ImageIO.write(bufferedImage, "jpg", b);

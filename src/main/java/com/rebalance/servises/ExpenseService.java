@@ -1,5 +1,6 @@
 package com.rebalance.servises;
 
+import com.rebalance.dto.request.GroupExpenseAddRequest;
 import com.rebalance.entities.ApplicationUser;
 import com.rebalance.entities.Expense;
 import com.rebalance.entities.ExpenseGroup;
@@ -36,6 +37,10 @@ public class ExpenseService {
         return expenseRepository.findAll();
     }
 
+    public Expense saveExpense(GroupExpenseAddRequest request) {
+        //TODO: reimplement
+        return null;
+    }
     public Expense saveExpense(Long userId, Long userFromId, Long groupId, Expense inputExpense) {
 
         ApplicationUser user = applicationUserService.getUserById(userId);
@@ -167,5 +172,4 @@ public class ExpenseService {
         expenses.stream().forEach(expense -> expenseRepository.save(expense));
         return expenses;
     }
-
 }

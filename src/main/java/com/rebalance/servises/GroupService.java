@@ -1,5 +1,6 @@
 package com.rebalance.servises;
 
+import com.rebalance.entities.ApplicationUser;
 import com.rebalance.entities.ExpenseGroup;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class GroupService {
@@ -28,8 +30,12 @@ public class GroupService {
         return groupRepository.findAllByUsersId(userId);
     }
 
-    public ExpenseGroup saveGroup(ExpenseGroup expenseGroup) {
-        return groupRepository.save(expenseGroup);
+    public Set<ApplicationUser> findAllUsersOfGroup(Long groupId) {
+        return getGroupById(groupId).getUsers();
+    }
+
+    public void saveGroup(ExpenseGroup expenseGroup) {
+        groupRepository.save(expenseGroup);
     }
 
     public ExpenseGroup getGroupById(Long id) {
@@ -58,5 +64,9 @@ public class GroupService {
 
     public void throwExceptionIfGroupNotFoundById(Long id) {
         getGroupById(id);
+    }
+
+    public void addUserToGroup(Long groupId, String email) {
+        //TODO: implement
     }
 }

@@ -27,13 +27,9 @@ public class Group {
     @Column(name = "currency")
     private String currency;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
-            mappedBy = "expenseGroups")
-    private Set<ApplicationUser> users = new HashSet<>();
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "group")
+    private Set<UserGroup> users = new HashSet<>();
 
     @OneToMany(mappedBy = "group")
     @JsonIgnore

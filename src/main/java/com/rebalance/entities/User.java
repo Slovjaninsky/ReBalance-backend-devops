@@ -30,20 +30,12 @@ public class User {
     @JsonIgnore
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            }
-    )
-    @JoinTable(name = "user_group",
-            joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "group_id")})
-    @JsonIgnore
-    private Set<ExpenseGroup> expenseGroups = new HashSet<>();
-
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "user")
-    @JsonIgnore
+    private Set<UserGroup> groups = new HashSet<>();
+
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "user")
     private Set<Expense> expenses;
 
     public ApplicationUser() {

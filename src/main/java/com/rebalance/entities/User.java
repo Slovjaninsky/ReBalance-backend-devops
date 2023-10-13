@@ -3,16 +3,18 @@ package com.rebalance.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+@Data
+@NoArgsConstructor
 @Table
 @Entity
-@Data
-public class ApplicationUser {
-
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")

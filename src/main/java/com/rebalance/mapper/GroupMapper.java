@@ -2,12 +2,12 @@ package com.rebalance.mapper;
 
 import com.rebalance.dto.request.GroupCreateRequest;
 import com.rebalance.dto.response.GroupResponse;
-import com.rebalance.entities.ExpenseGroup;
+import com.rebalance.entities.Group;
 import org.mapstruct.Mapper;
 
 @Mapper
 public interface GroupMapper {
-    GroupResponse groupToResponse(ExpenseGroup group);
+    GroupResponse groupToResponse(Group group);
 
-    ExpenseGroup createRequestToGroup(GroupCreateRequest request);
+    Group createRequestToGroup(GroupCreateRequest request);
 }

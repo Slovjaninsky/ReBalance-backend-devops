@@ -5,11 +5,11 @@ import com.rebalance.dto.request.UserCreateRequest;
 import com.rebalance.dto.response.GroupResponse;
 import com.rebalance.dto.response.NotificationResponse;
 import com.rebalance.dto.response.UserResponse;
-import com.rebalance.entities.ApplicationUser;
+import com.rebalance.entities.User;
 import com.rebalance.mapper.GroupMapper;
 import com.rebalance.mapper.NotificationMapper;
 import com.rebalance.mapper.UserMapper;
-import com.rebalance.servises.ApplicationUserService;
+import com.rebalance.servises.UserService;
 import com.rebalance.servises.GroupService;
 import com.rebalance.servises.NotificationService;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/user")
 @AllArgsConstructor
 public class UserController {
-    private final ApplicationUserService applicationUserService;
+    private final UserService userService;
     private final GroupService groupService;
     private final NotificationService notificationService;
     private final UserMapper userMapper;
@@ -37,7 +37,7 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserByEmail(@PathVariable("email") String email) {
         return ResponseEntity.ok(
                 userMapper.userToResponse(
-                        applicationUserService.getUserByEmail(email)));
+                        userService.getUserByEmail(email)));
     }
 
     @GetMapping("/{id}/groups")
@@ -59,14 +59,14 @@ public class UserController {
     @PostMapping()
     public ResponseEntity<UserResponse> register(@RequestBody UserCreateRequest user) {
         return new ResponseEntity<>(
-                userMapper.userToResponse(applicationUserService.createUser(user)),
+                userMapper.userToResponse(userService.createUser(user)),
                 HttpStatus.CREATED);
     }
 
     //TODO: move to auth controller
     @PostMapping("/login")
     public ResponseEntity<UserResponse> loginWithEmailAndPassword(@RequestBody @Validated LoginAndPassword inputData) {
-        Optional<ApplicationUser> user = applicationUserService.authorizeUser(inputData);
+        Optional<User> user = userService.authorizeUser(inputData);
 
         return user.map(u -> ResponseEntity.ok(userMapper.userToResponse(u)))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.UNAUTHORIZED));

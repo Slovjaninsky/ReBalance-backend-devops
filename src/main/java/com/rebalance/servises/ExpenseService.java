@@ -1,10 +1,10 @@
 package com.rebalance.servises;
 
 import com.rebalance.dto.request.GroupExpenseAddRequest;
-import com.rebalance.entities.ApplicationUser;
 import com.rebalance.entities.Expense;
-import com.rebalance.entities.ExpenseGroup;
+import com.rebalance.entities.Group;
 import com.rebalance.entities.Notification;
+import com.rebalance.entities.User;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
 import com.rebalance.repositories.ExpenseRepository;
@@ -15,21 +15,20 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final GroupService groupService;
-    private final ApplicationUserService applicationUserService;
+    private final UserService userService;
     private final NotificationService notificationService;
 
     @Autowired
-    public ExpenseService(ExpenseRepository expenseRepository, GroupService groupService, ApplicationUserService applicationUserService, NotificationService notificationService) {
+    public ExpenseService(ExpenseRepository expenseRepository, GroupService groupService, UserService userService, NotificationService notificationService) {
         this.expenseRepository = expenseRepository;
         this.groupService = groupService;
-        this.applicationUserService = applicationUserService;
+        this.userService = userService;
         this.notificationService = notificationService;
     }
 
@@ -41,22 +40,21 @@ public class ExpenseService {
         //TODO: reimplement
         return null;
     }
+
     public Expense saveExpense(Long userId, Long userFromId, Long groupId, Expense inputExpense) {
 
-        ApplicationUser user = applicationUserService.getUserById(userId);
-        ExpenseGroup group = groupService.getGroupById(groupId);
-        Expense expense =
-                new Expense(
-                        inputExpense.getAmount(),
-                        inputExpense.getDescription(),
-                        inputExpense.getCategory(),
-                        user,
-                        group
-                );
-        if (inputExpense.getDateStamp() != null) {
-            expense.setDateStamp(inputExpense.getDateStamp());
+        User user = userService.getUserById(userId);
+        Group group = groupService.getGroupById(groupId);
+        Expense expense = new Expense();
+        expense.setAmount(inputExpense.getAmount());
+        expense.setDescription(inputExpense.getDescription());
+        expense.setCategory(inputExpense.getCategory());
+        expense.setUser(user);
+        expense.setGroup(group);
+        if (inputExpense.getDate() != null) {
+            expense.setDate(inputExpense.getDate());
         } else {
-            expense.setDateStamp(LocalDate.now());
+            expense.setDate(LocalDate.now());
         }
         expenseRepository.save(expense);
 
@@ -159,7 +157,7 @@ public class ExpenseService {
     }
 
     public Set<Expense> getExpensesFromGroup(Long groupId) {
-        ExpenseGroup group = groupService.getGroupById(groupId);
+        Group group = groupService.getGroupById(groupId);
         return group.getExpenses();
     }
 

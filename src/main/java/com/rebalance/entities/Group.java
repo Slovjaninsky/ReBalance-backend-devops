@@ -3,15 +3,18 @@ package com.rebalance.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Table(name = "expense_group")
-@Entity
 @Data
-public class ExpenseGroup {
+@NoArgsConstructor
+@Table
+@Entity
+public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

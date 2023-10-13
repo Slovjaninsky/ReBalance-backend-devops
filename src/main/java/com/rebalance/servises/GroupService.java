@@ -1,7 +1,8 @@
 package com.rebalance.servises;
 
-import com.rebalance.entities.ApplicationUser;
-import com.rebalance.entities.ExpenseGroup;
+import com.rebalance.entities.Group;
+import com.rebalance.entities.User;
+import com.rebalance.entities.UserGroup;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
 import com.rebalance.repositories.GroupRepository;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
@@ -22,28 +24,28 @@ public class GroupService {
         this.groupRepository = groupRepository;
     }
 
-    public List<ExpenseGroup> findAllGroups() {
+    public List<Group> findAllGroups() {
         return groupRepository.findAll();
     }
 
-    public List<ExpenseGroup> findAllGroupsByUserId(Long userId) {
+    public List<Group> findAllGroupsByUserId(Long userId) {
         return groupRepository.findAllByUsersId(userId);
     }
 
-    public Set<ApplicationUser> findAllUsersOfGroup(Long groupId) {
-        return getGroupById(groupId).getUsers();
+    public Set<User> findAllUsersOfGroup(Long groupId) {
+        return getGroupById(groupId).getUsers().stream().map(UserGroup::getUser).collect(Collectors.toSet());
     }
 
-    public void saveGroup(ExpenseGroup expenseGroup) {
-        groupRepository.save(expenseGroup);
+    public void saveGroup(Group group) {
+        groupRepository.save(group);
     }
 
-    public ExpenseGroup getGroupById(Long id) {
+    public Group getGroupById(Long id) {
         return groupRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_201));
     }
 
-    public ExpenseGroup updateGroup(Long id, @RequestBody ExpenseGroup inputGroup) {
-        ExpenseGroup group = getGroupById(id);
+    public Group updateGroup(Long id, @RequestBody Group inputGroup) {
+        Group group = getGroupById(id);
         if (inputGroup.getName() != null) {
             group.setName(inputGroup.getName());
         }

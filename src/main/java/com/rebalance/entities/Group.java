@@ -1,13 +1,11 @@
 package com.rebalance.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -18,21 +16,21 @@ public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "group_id")
+    @Column
     private Long id;
 
-    @Column(name = "name")
+    @Column
     private String name;
 
-    @Column(name = "currency")
+    @Column
     private String currency;
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "group")
     private Set<UserGroup> users = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "group")
-    @JsonIgnore
     Set<Expense> expenses;
 
     @EqualsAndHashCode.Exclude

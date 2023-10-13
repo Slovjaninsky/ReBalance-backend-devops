@@ -6,47 +6,42 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Objects;
+import java.util.Set;
 
-@Table
-@Entity
 @Data
 @NoArgsConstructor
+@Table
+@Entity
 public class Expense {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "expense_id")
+    @Column
     private Long id;
 
-    @Column(name = "amount")
+    @Column
     private Double amount;
 
-    @Column(name = "description")
+    @Column
     private String description;
 
-    @Column(name = "date_stamp")
-    private LocalDate dateStamp;
+    @Column
+    private LocalDate date;
 
-    @Column(name = "category")
+    @Column
     private String category;
 
-    @Column(name = "global_id")
+    @Column
     private Long globalId;
 
+    @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private ApplicationUser user;
+    private User user;
 
+    @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
-    private ExpenseGroup group;
-
-    public Expense(Double amount, String description, String category) {
-        this.amount = amount;
-        this.description = description;
-        this.category = category;
-    }
+    private Group group;
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "expense")

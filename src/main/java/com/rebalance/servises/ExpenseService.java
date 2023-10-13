@@ -130,44 +130,8 @@ public class ExpenseService {
         return expenseRepository.findByGroupIdAndDateStampBetween(groupId, firstDate, secondDate);
     }
 
-    public Set<String> getAllExpenseDatesFromGroup(Long groupId) {
-        groupService.throwExceptionIfGroupNotFoundById(groupId);
-        return expenseRepository.findAllDateStampsByGroup(groupId)
-                .stream()
-                .map(date -> date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
-                .collect(Collectors.toSet());
-    }
-
-    public Long getMaxGlobalId() {
-        return expenseRepository.getMaxGlobalId();
-    }
-
-    public List<Expense> getExpensesOfUserFromGroup(Long groupId, Long userId) {
-        ExpenseGroup group = groupService.getGroupById(groupId);
-        Set<ApplicationUser> groupUsers = group.getUsers();
-        ApplicationUser sample = new ApplicationUser(userId);
-        if (groupUsers.contains(sample)) {
-            return applicationUserService.getUserById(userId)
-                    .getExpenses()
-                    .stream()
-                    .filter(expense -> expense.getGroup().getId().equals(groupId))
-                    .toList();
-        }
-        throw new RebalanceException(RebalanceErrorType.RB_101);
-    }
-
     public Set<Expense> getExpensesFromGroup(Long groupId) {
         Group group = groupService.getGroupById(groupId);
         return group.getExpenses();
-    }
-
-    public List<Expense> updateExpensesByGlobalId(Long globalId, Expense inputExpense) {
-        List<Expense> expenses = expenseRepository.findByGlobalId(globalId);
-        if (expenses.isEmpty()) {
-            throw new RebalanceException(RebalanceErrorType.RB_101);
-        }
-        expenses.stream().forEach(expense -> expense.setDescription(inputExpense.getDescription()));
-        expenses.stream().forEach(expense -> expenseRepository.save(expense));
-        return expenses;
     }
 }

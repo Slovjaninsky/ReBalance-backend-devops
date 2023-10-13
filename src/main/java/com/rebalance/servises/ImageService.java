@@ -35,7 +35,9 @@ public class ImageService {
             byte[] decodedImage = Base64.getDecoder().decode(base64Image.getBytes("UTF-8"));
             Path imagePath = Paths.get(IMAGES_PATH, (globalId + ".jpg"));
             Files.write(imagePath, decodedImage);
-            Image toRepository = new Image(globalId, imagePath.toString());
+            Image toRepository = new Image();
+            toRepository.setId(globalId);
+            toRepository.setImagePath(imagePath.toString());
             imageRepository.save(toRepository);
 
             BufferedImage img = ImageIO.read(imagePath.toFile());

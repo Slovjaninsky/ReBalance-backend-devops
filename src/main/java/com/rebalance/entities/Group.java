@@ -35,32 +35,7 @@ public class Group {
     @JsonIgnore
     Set<Expense> expenses;
 
-    public ExpenseGroup() {
-    }
-
-    public ExpenseGroup(String name, String currency) {
-        this.name = name;
-        this.currency = currency;
-    }
-
-    @Override
-    public String toString() {
-        return "ExpenseGroup{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ExpenseGroup that = (ExpenseGroup) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "group")
+    Set<Category> categories;
 }

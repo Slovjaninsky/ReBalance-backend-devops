@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class ExpenseUsers {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
 

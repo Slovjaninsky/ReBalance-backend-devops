@@ -12,7 +12,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Entity
 public class UserGroup {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
 

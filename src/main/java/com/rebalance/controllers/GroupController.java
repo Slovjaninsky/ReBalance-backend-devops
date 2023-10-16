@@ -7,7 +7,6 @@ import com.rebalance.dto.response.UserResponse;
 import com.rebalance.mapper.GroupMapper;
 import com.rebalance.mapper.UserMapper;
 import com.rebalance.servises.GroupService;
-import com.rebalance.servises.NotificationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +20,13 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class GroupController {
     private final GroupService groupService;
-    private final NotificationService notificationService;
     private final UserMapper userMapper;
     private final GroupMapper groupMapper;
 
     @GetMapping("/{id}/users")
     public ResponseEntity<List<UserResponse>> getAllUsersByGroupId(@PathVariable(value = "id") Long groupId) {
         return ResponseEntity.ok(
-                groupService.findAllUsersOfGroup(groupId).stream()
+                groupService.getAllUsersOfGroup(groupId).stream()
                         .map(userMapper::userToResponse).collect(Collectors.toList()));
     }
 
@@ -41,7 +39,7 @@ public class GroupController {
 
     @PostMapping()
     public ResponseEntity<String> createGroup(@RequestBody GroupCreateRequest request) {
-        groupService.saveGroup(groupMapper.createRequestToGroup(request));
+        groupService.createGroup(groupMapper.createRequestToGroup(request));
 
         //TODO: add notifications
         return new ResponseEntity<>(HttpStatus.CREATED);

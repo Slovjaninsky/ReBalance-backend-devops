@@ -18,13 +18,13 @@ public class Expense {
     @Column
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private Double amount;
 
     @Column
     private String description;
 
-    @Column
+    @Column(nullable = false)
     private LocalDate date;
 
     @Column

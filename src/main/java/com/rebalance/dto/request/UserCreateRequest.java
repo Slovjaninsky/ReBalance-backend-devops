@@ -10,10 +10,7 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Jacksonized
 public class UserCreateRequest {
-
     private String email;
     private String password;
     private String username;
-
-
 }

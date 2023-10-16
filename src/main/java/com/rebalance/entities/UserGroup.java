@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Data
 @NoArgsConstructor
@@ -15,7 +16,8 @@ public class UserGroup {
     @Column
     private Long id;
 
-    @Column
+    @Column(nullable = false)
+    @ColumnDefault("0")
     private Boolean favorite;
 
     @EqualsAndHashCode.Exclude

@@ -17,7 +17,7 @@ CREATE TABLE `expense` (
   `description` VARCHAR(255) NOT NULL,
   `date_stamp` DATE NOT NULL,
   `category` VARCHAR(255) NOT NULL,
-  `global_id` BIGINT UNSIGNED AUTO_INCREMENT UNIQUE,
+  `global_id` BIGINT,
   `user_id` BIGINT UNSIGNED NOT NULL,
   `group_id` BIGINT UNSIGNED NOT NULL,
   FOREIGN KEY (user_id) REFERENCES application_user(user_id),

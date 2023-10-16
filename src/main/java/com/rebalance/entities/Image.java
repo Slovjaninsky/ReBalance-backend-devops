@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@Table
+@Table(name = "images")
 @Entity
 public class Image {
     @Id

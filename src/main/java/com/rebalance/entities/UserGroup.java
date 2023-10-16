@@ -8,7 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Data
 @NoArgsConstructor
-@Table
+@Table(name = "user_group")
 @Entity
 public class UserGroup {
     @Id

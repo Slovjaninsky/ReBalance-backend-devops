@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@Table
+@Table(name = "expense_user")
 @Entity
 public class ExpenseUsers {
     @Id

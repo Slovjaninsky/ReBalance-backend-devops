@@ -10,7 +10,7 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@Table
+@Table(name = "app_group")
 @Entity
 public class Group {
 

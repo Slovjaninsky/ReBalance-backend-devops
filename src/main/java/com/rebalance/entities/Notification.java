@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@Table
+@Table(name = "notifications")
 @Entity
 public class Notification {
     @Id

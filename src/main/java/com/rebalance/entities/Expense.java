@@ -30,9 +30,6 @@ public class Expense {
     @Column
     private String category;
 
-    @Column
-    private Long globalId;
-
     @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

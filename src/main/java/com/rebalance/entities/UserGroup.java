@@ -18,7 +18,7 @@ public class UserGroup {
 
     @Column(nullable = false)
     @ColumnDefault("0")
-    private Boolean favorite;
+    private Boolean favorite = false;
 
     @EqualsAndHashCode.Exclude
     @ManyToOne

@@ -1,6 +1,7 @@
 package com.rebalance.controllers;
 
 import com.rebalance.dto.request.GroupExpenseAddRequest;
+import com.rebalance.dto.request.GroupExpenseEditRequest;
 import com.rebalance.dto.response.GroupExpenseResponse;
 import com.rebalance.mapper.ExpenseMapper;
 import com.rebalance.servises.ExpenseService;
@@ -34,8 +35,18 @@ public class GroupExpenseController {
         return new ResponseEntity<>(
                 expenseMapper.expenseToGroupResponse(
                         expenseService.saveGroupExpense(
-                                expenseMapper.groupExpenseRequestToExpense(request),
-                                expenseMapper.groupExpenseUserRequestToExpenseUserList(request.getUsers()))),
+                                expenseMapper.groupExpenseAddRequestToExpense(request),
+                                expenseMapper.groupExpenseUserRequestListToExpenseUserList(request.getUsers()))),
+                HttpStatus.OK);
+    }
+
+    @PutMapping("/expenses")
+    public ResponseEntity<GroupExpenseResponse> editExpense(@RequestBody GroupExpenseEditRequest request) {
+        return new ResponseEntity<>(
+                expenseMapper.expenseToGroupResponse(
+                        expenseService.saveGroupExpense(
+                                expenseMapper.groupExpenseEditRequestToExpense(request),
+                                expenseMapper.groupExpenseUserRequestListToExpenseUserList(request.getUsers()))),
                 HttpStatus.OK);
     }
 

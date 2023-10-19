@@ -26,9 +26,7 @@ public class ExpenseService {
     private final ExpenseUsersRepository expenseUsersRepository;
 
     public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers) {
-        if (expenseUsers.stream().mapToDouble(ExpenseUsers::getAmount).sum() != expense.getAmount()) {
-            throw new RebalanceException(RebalanceErrorType.RB_104);
-        }
+        validateUsersAmount(expense.getAmount(), expenseUsers);
 
         User initiator = userService.getUserById(expense.getUser().getId());
         Group group = groupService.getGroupById(expense.getGroup().getId());
@@ -100,5 +98,11 @@ public class ExpenseService {
     public List<Expense> getExpensesOfGroup(Long groupId) {
         Group group = groupService.getGroupByIdWithExpenses(groupId);
         return group.getExpenses().stream().toList();
+    }
+
+    private void validateUsersAmount(Double amount, List<ExpenseUsers> expenseUsers) {
+        if (expenseUsers.stream().mapToDouble(ExpenseUsers::getAmount).sum() != amount) {
+            throw new RebalanceException(RebalanceErrorType.RB_104);
+        }
     }
 }

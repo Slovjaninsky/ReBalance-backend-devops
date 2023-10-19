@@ -50,6 +50,10 @@ public class GroupService {
         Group group = getGroupById(groupId);
         User user = userService.getUserByEmail(email);
 
+        if (group.getUsers().stream().anyMatch(gu -> gu.getUser().getId().equals(user.getId()))) {
+            throw new RebalanceException(RebalanceErrorType.RB_203);
+        }
+
         UserGroup userGroup = new UserGroup();
         userGroup.setGroup(group);
         userGroup.setUser(user);

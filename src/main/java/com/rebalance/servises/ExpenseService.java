@@ -49,7 +49,10 @@ public class ExpenseService {
     }
 
     public void deleteById(Long expenseId) {
-        getExpenseById(expenseId);
+        if (!expenseRepository.existsById(expenseId)) {
+            throw new RebalanceException(RebalanceErrorType.RB_101);
+        }
+
         expenseRepository.deleteById(expenseId);
     }
 

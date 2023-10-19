@@ -1,7 +1,7 @@
 package com.rebalance.controllers;
 
 import com.rebalance.dto.request.GroupExpenseAddRequest;
-import com.rebalance.dto.response.ExpenseResponse;
+import com.rebalance.dto.response.GroupExpenseResponse;
 import com.rebalance.mapper.ExpenseMapper;
 import com.rebalance.servises.ExpenseService;
 import com.rebalance.servises.ImageService;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/expense/group")
+@RequestMapping("/group")
 @RequiredArgsConstructor
 public class GroupExpenseController {
     private final ExpenseService expenseService;
@@ -21,28 +21,33 @@ public class GroupExpenseController {
     private final ExpenseMapper expenseMapper;
 
     //TODO: add pagination
-    @GetMapping("/{groupId}")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesOfGroup(@PathVariable(value = "groupId") Long groupId) {
+    @GetMapping("/{groupId}/expenses")
+    public ResponseEntity<List<GroupExpenseResponse>> getExpensesOfGroup(@PathVariable(value = "groupId") Long groupId) {
         return new ResponseEntity<>(
                 expenseService.getExpensesOfGroup(groupId).stream()
-                        .map(expenseMapper::expenseToResponse).toList(), HttpStatus.OK);
+                        .map(expenseMapper::expenseToGroupResponse).toList(),
+                HttpStatus.OK);
     }
 
-    @PostMapping()
-    public ResponseEntity<String> addExpense(@RequestBody GroupExpenseAddRequest request) {
-        expenseService.saveGroupExpense(expenseMapper.groupExpenseRequestToExpense(request),
-                expenseMapper.groupExpenseUserRequestToExpenseUserList(request.getUsers()));
-
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping("/expenses")
+    public ResponseEntity<GroupExpenseResponse> addExpense(@RequestBody GroupExpenseAddRequest request) {
+        return new ResponseEntity<>(
+                expenseMapper.expenseToGroupResponse(
+                        expenseService.saveGroupExpense(
+                                expenseMapper.groupExpenseRequestToExpense(request),
+                                expenseMapper.groupExpenseUserRequestToExpenseUserList(request.getUsers()))),
+                HttpStatus.OK);
     }
 
-    @DeleteMapping("/{expenseId}")
-    public ResponseEntity<HttpStatus> deleteExpenseByGlobalId(@PathVariable("expenseId") Long expenseId) {
-        expenseService.deleteByGlobalId(expenseId);
+    @DeleteMapping("/expenses/{expenseId}")
+    public ResponseEntity<HttpStatus> deleteExpenseById(@PathVariable("expenseId") Long expenseId) {
+        expenseService.deleteById(expenseId);
+
         try {
             imageService.deleteImageByGlobalId(expenseId);
         } catch (RuntimeException ignored) {
         }
+
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

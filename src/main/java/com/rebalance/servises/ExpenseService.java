@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -40,6 +41,7 @@ public class ExpenseService {
 
         expenseUsers.forEach(u -> u.setExpense(expense));
         expenseUsersRepository.saveAll(expenseUsers);
+        expense.setExpenseUsers(new HashSet<>(expenseUsers));
 
         return expense;
     }
@@ -48,12 +50,9 @@ public class ExpenseService {
         return expenseRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_101));
     }
 
-    public void deleteByGlobalId(Long globalId) {
-        List<Expense> expenses = expenseRepository.findAllById(globalId);
-        if (expenses.isEmpty()) {
-            throw new RebalanceException(RebalanceErrorType.RB_101);
-        }
-        expenseRepository.deleteById(globalId);
+    public void deleteById(Long expenseId) {
+        getExpenseById(expenseId);
+        expenseRepository.deleteById(expenseId);
     }
 
     public void throwExceptionIfExpensesWithGlobalIdNotFound(Long globalId) {

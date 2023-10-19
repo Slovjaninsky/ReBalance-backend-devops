@@ -42,11 +42,11 @@ public class GroupService {
         return getGroupById(groupId).getUsers().stream().map(UserGroup::getUser).collect(Collectors.toList());
     }
 
-    public void createGroup(Group group) {
-        groupRepository.save(group);
+    public Group createGroup(Group group) {
+        return groupRepository.save(group);
     }
 
-    public void addUserToGroup(Long groupId, String email) {
+    public UserGroup addUserToGroup(Long groupId, String email) {
         Group group = getGroupById(groupId);
         User user = userService.getUserByEmail(email);
 
@@ -54,10 +54,9 @@ public class GroupService {
         userGroup.setGroup(group);
         userGroup.setUser(user);
 
-        userGroupRepository.save(userGroup);
+        return userGroupRepository.save(userGroup);
     }
 
-    //TODO: check
     public void validateUsersInGroup(List<Long> users, Long groupId) {
         if (userGroupRepository.countByGroupIdAndUserIdIn(groupId, users) != users.size()) {
             throw new RebalanceException(RebalanceErrorType.RB_202);

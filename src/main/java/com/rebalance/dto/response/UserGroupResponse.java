@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
+public class UserGroupResponse {
     private Long id;
-    private String username;
-    private String email;
+    private Long userId;
+    private Long groupId;
+    private Boolean favorite;
 }

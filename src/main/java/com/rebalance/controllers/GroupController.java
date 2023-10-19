@@ -3,7 +3,8 @@ package com.rebalance.controllers;
 import com.rebalance.dto.request.GroupAddUserRequest;
 import com.rebalance.dto.request.GroupCreateRequest;
 import com.rebalance.dto.response.GroupResponse;
-import com.rebalance.dto.response.UserResponse;
+import com.rebalance.dto.response.GroupUserResponse;
+import com.rebalance.dto.response.UserGroupResponse;
 import com.rebalance.mapper.GroupMapper;
 import com.rebalance.mapper.UserMapper;
 import com.rebalance.servises.GroupService;
@@ -24,10 +25,10 @@ public class GroupController {
     private final GroupMapper groupMapper;
 
     @GetMapping("/{id}/users")
-    public ResponseEntity<List<UserResponse>> getAllUsersByGroupId(@PathVariable(value = "id") Long groupId) {
+    public ResponseEntity<List<GroupUserResponse>> getAllUsersByGroupId(@PathVariable(value = "id") Long groupId) {
         return ResponseEntity.ok(
                 groupService.getAllUsersOfGroup(groupId).stream()
-                        .map(userMapper::userToResponse).collect(Collectors.toList()));
+                        .map(userMapper::userToGroupResponse).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
@@ -38,18 +39,20 @@ public class GroupController {
     }
 
     @PostMapping()
-    public ResponseEntity<String> createGroup(@RequestBody GroupCreateRequest request) {
-        groupService.createGroup(groupMapper.createRequestToGroup(request));
-
-        //TODO: add notifications
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<GroupResponse> createGroup(@RequestBody GroupCreateRequest request) {
+        return new ResponseEntity<>(
+                groupMapper.groupToResponse(
+                        groupService.createGroup(
+                                groupMapper.createRequestToGroup(request))),
+                HttpStatus.CREATED);
     }
 
     @PostMapping("/users")
-    public ResponseEntity<String> addUserToGroup(@RequestBody GroupAddUserRequest request) {
-        groupService.addUserToGroup(request.getGroupId(), request.getEmail());
-
-        //TODO: add notifications
-        return ResponseEntity.ok().build();
+    public ResponseEntity<UserGroupResponse> addUserToGroup(@RequestBody GroupAddUserRequest request) {
+        return new ResponseEntity<>(
+                userMapper.userGroupToResponse(
+                        groupService.addUserToGroup(request.getGroupId(), request.getEmail())),
+                HttpStatus.OK
+        );
     }
 }

@@ -68,7 +68,6 @@ CREATE TABLE expense_user
 (
     id         BIGINT AUTO_INCREMENT NOT NULL,
     amount     DOUBLE                NULL,
-    multiplier INT                   NULL,
     user_id    BIGINT                NOT NULL,
     expense_id BIGINT                NOT NULL,
     CONSTRAINT pk_expense_user PRIMARY KEY (id)

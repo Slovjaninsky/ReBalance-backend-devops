@@ -18,9 +18,6 @@ public class ExpenseUsers {
     @Column
     private Double amount;
 
-    @Column
-    private Integer multiplier;
-
     @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

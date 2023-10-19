@@ -6,5 +6,6 @@ import org.mapstruct.Mapper;
 
 @Mapper
 public interface UserMapper {
+    @Mapping(target = "expenseGroups", source = "groups")
     UserResponse userToResponse(User user);
 }

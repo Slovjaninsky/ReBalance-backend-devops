@@ -1,75 +1,47 @@
 package com.rebalance.servises;
 
-import com.rebalance.dto.request.GroupExpenseAddRequest;
 import com.rebalance.entities.Expense;
+import com.rebalance.entities.ExpenseUsers;
 import com.rebalance.entities.Group;
-import com.rebalance.entities.Notification;
 import com.rebalance.entities.User;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
 import com.rebalance.repositories.ExpenseRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.rebalance.repositories.ExpenseUsersRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Set;
 
+@RequiredArgsConstructor
 @Service
 public class ExpenseService {
-
     private final ExpenseRepository expenseRepository;
     private final GroupService groupService;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final ExpenseUsersRepository expenseUsersRepository;
 
-    @Autowired
-    public ExpenseService(ExpenseRepository expenseRepository, GroupService groupService, UserService userService, NotificationService notificationService) {
-        this.expenseRepository = expenseRepository;
-        this.groupService = groupService;
-        this.userService = userService;
-        this.notificationService = notificationService;
-    }
-
-    public List<Expense> findAllExpenses() {
-        return expenseRepository.findAll();
-    }
-
-    public Expense saveExpense(GroupExpenseAddRequest request) {
-        //TODO: reimplement
-        return null;
-    }
-
-    public Expense saveExpense(Long userId, Long userFromId, Long groupId, Expense inputExpense) {
-
-        User user = userService.getUserById(userId);
-        Group group = groupService.getGroupById(groupId);
-        Expense expense = new Expense();
-        expense.setAmount(inputExpense.getAmount());
-        expense.setDescription(inputExpense.getDescription());
-        expense.setCategory(inputExpense.getCategory());
-        expense.setUser(user);
-        expense.setGroup(group);
-        if (inputExpense.getDate() != null) {
-            expense.setDate(inputExpense.getDate());
-        } else {
-            expense.setDate(LocalDate.now());
+    public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers) {
+        if (expenseUsers.stream().mapToDouble(ExpenseUsers::getAmount).sum() != expense.getAmount()) {
+            throw new RebalanceException(RebalanceErrorType.RB_104);
         }
+
+        User initiator = userService.getUserById(expense.getUser().getId());
+        Group group = groupService.getGroupById(expense.getGroup().getId());
+
+        groupService.validateUsersInGroup(expenseUsers.stream().map(expenseUser ->
+                expenseUser.getUser().getId()).toList(), group.getId());
+
+        expense.setDate(LocalDate.now());
         expenseRepository.save(expense);
 
-        if (inputExpense.getGlobalId() != null) {
-            expense.setGlobalId(inputExpense.getGlobalId());
-        } else {
-            Long maxGlobalId = expenseRepository.getMaxGlobalId() == null ? 1 : expenseRepository.getMaxGlobalId();
-            expense.setGlobalId(maxGlobalId + 1);
-        }
+        expenseUsers.forEach(u -> u.setExpense(expense));
+        expenseUsersRepository.saveAll(expenseUsers);
 
-        if (expense.getGlobalId() > 0) {
-            notificationService.saveNotification(new Notification(expense.getUser().getId(), userFromId, expense.getId(), expense.getAmount(), true));
-        }
-
-        return expenseRepository.save(expense);
+        return expense;
     }
 
     public Expense getExpenseById(Long id) {
@@ -77,19 +49,15 @@ public class ExpenseService {
     }
 
     public void deleteByGlobalId(Long globalId) {
-        List<Expense> expenses = expenseRepository.findByGlobalId(globalId);
+        List<Expense> expenses = expenseRepository.findAllById(globalId);
         if (expenses.isEmpty()) {
             throw new RebalanceException(RebalanceErrorType.RB_101);
         }
-        expenseRepository.deleteByGlobalId(globalId);
-    }
-
-    public List<Expense> getExpensesByGlobalId(Long globalId) {
-        return expenseRepository.findByGlobalId(globalId);
+        expenseRepository.deleteById(globalId);
     }
 
     public void throwExceptionIfExpensesWithGlobalIdNotFound(Long globalId) {
-        if (expenseRepository.findByGlobalId(globalId).isEmpty()) {
+        if (expenseRepository.findById(globalId).isEmpty()) {
             throw new RebalanceException(RebalanceErrorType.RB_101);
         }
     }
@@ -101,8 +69,8 @@ public class ExpenseService {
         if (secondDate.isBefore(firstDate)) {
             throw new RebalanceException(RebalanceErrorType.RB_102);
         }
-        groupService.throwExceptionIfGroupNotFoundById(groupId);
-        return expenseRepository.findByGroupIdAndDateStampBetween(groupId, firstDate, secondDate);
+//        groupService.throwExceptionIfGroupNotFoundById(groupId);
+        return expenseRepository.findByGroupIdAndDateBetween(groupId, firstDate, secondDate);
     }
 
     public List<Expense> getExpensesByGroupAndFromDateByTimePeriod(Long groupId, String firstDateString, String period) {
@@ -126,12 +94,12 @@ public class ExpenseService {
             default:
                 throw new RebalanceException(RebalanceErrorType.RB_103);
         }
-        groupService.throwExceptionIfGroupNotFoundById(groupId);
-        return expenseRepository.findByGroupIdAndDateStampBetween(groupId, firstDate, secondDate);
+//        groupService.throwExceptionIfGroupNotFoundById(groupId);
+        return expenseRepository.findByGroupIdAndDateBetween(groupId, firstDate, secondDate);
     }
 
-    public Set<Expense> getExpensesFromGroup(Long groupId) {
-        Group group = groupService.getGroupById(groupId);
-        return group.getExpenses();
+    public List<Expense> getExpensesOfGroup(Long groupId) {
+        Group group = groupService.getGroupByIdWithExpenses(groupId);
+        return group.getExpenses().stream().toList();
     }
 }

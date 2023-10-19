@@ -18,9 +18,11 @@ public enum RebalanceErrorType {
     RB_101("Expense not found", HttpStatus.NOT_FOUND),
     RB_102("First date should be before or at the second date", HttpStatus.CONFLICT),
     RB_103("Incorrect time period. Allowed types: 'day', 'week', 'month', 'year'", HttpStatus.CONFLICT),
+    RB_104("Amount of expense and user expenses is not the same", HttpStatus.CONFLICT),
 
     // groups
     RB_201("Group not found", HttpStatus.NOT_FOUND),
+    RB_202("User not in group", HttpStatus.CONFLICT),
 
     // images
     RB_301("Image not found", HttpStatus.NOT_FOUND),

@@ -8,9 +8,11 @@ import com.rebalance.exception.RebalanceException;
 import com.rebalance.repositories.GroupRepository;
 import com.rebalance.repositories.UserGroupRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -22,6 +24,18 @@ public class GroupService {
 
     public Group getGroupById(Long id) {
         return groupRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_201));
+    }
+
+    public Group getGroupByIdWithExpenses(Long id) {
+        Optional<Group> group = groupRepository.findById(id);
+
+        if (group.isPresent()) {
+            Hibernate.initialize(group.get().getExpenses());
+        } else {
+            throw new RebalanceException(RebalanceErrorType.RB_201);
+        }
+
+        return group.get();
     }
 
     public List<User> getAllUsersOfGroup(Long groupId) {
@@ -41,5 +55,12 @@ public class GroupService {
         userGroup.setUser(user);
 
         userGroupRepository.save(userGroup);
+    }
+
+    //TODO: check
+    public void validateUsersInGroup(List<Long> users, Long groupId) {
+        if (!userGroupRepository.existsByGroupIdAndUserIdIn(groupId, users)) {
+            throw new RebalanceException(RebalanceErrorType.RB_202);
+        }
     }
 }

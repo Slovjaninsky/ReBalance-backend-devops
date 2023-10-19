@@ -59,7 +59,7 @@ public class GroupService {
 
     //TODO: check
     public void validateUsersInGroup(List<Long> users, Long groupId) {
-        if (!userGroupRepository.existsByGroupIdAndUserIdIn(groupId, users)) {
+        if (userGroupRepository.countByGroupIdAndUserIdIn(groupId, users) != users.size()) {
             throw new RebalanceException(RebalanceErrorType.RB_202);
         }
     }

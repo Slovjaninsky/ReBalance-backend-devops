@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface UserGroupRepository extends JpaRepository<UserGroup, Long> {
 
-    Boolean existsByGroupIdAndUserIdIn(Long groupId, List<Long> users);
+    Long countByGroupIdAndUserIdIn(Long groupId, List<Long> users);
 }

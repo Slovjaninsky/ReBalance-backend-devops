@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,6 +25,15 @@ public class Group {
 
     @Column(nullable = false)
     private String currency;
+
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
+
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Boolean personal = false;
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "group")

@@ -28,6 +28,10 @@ public class User {
     private String password;
 
     @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "creator")
+    private Set<Group> createdGroups;
+
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "user")
     private Set<UserGroup> groups = new HashSet<>();
 

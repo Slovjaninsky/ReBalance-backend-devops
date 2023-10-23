@@ -1,21 +1,18 @@
 package com.rebalance.controllers;
 
-import com.rebalance.dto.LoginAndPassword;
-import com.rebalance.dto.request.UserCreateRequest;
 import com.rebalance.dto.response.GroupResponse;
 import com.rebalance.dto.response.UserResponse;
-import com.rebalance.entities.User;
 import com.rebalance.mapper.GroupMapper;
 import com.rebalance.mapper.UserMapper;
 import com.rebalance.servises.UserService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @AllArgsConstructor
 @RestController
@@ -37,22 +34,5 @@ public class UserController {
         return ResponseEntity.ok(
                 userService.getAllGroupsOfUser(userId).stream()
                         .map(groupMapper::groupToResponse).toList());
-    }
-
-    @PostMapping()
-    public ResponseEntity<UserResponse> register(@RequestBody UserCreateRequest user) {
-        return new ResponseEntity<>(
-                userMapper.userToResponse(
-                        userService.createUser(
-                                userMapper.createRequestToUser(user))),
-                HttpStatus.CREATED);
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<UserResponse> loginWithEmailAndPassword(@RequestBody @Validated LoginAndPassword request) {
-        Optional<User> user = userService.authorizeUser(request.getEmail(), request.getPassword());
-
-        return user.map(u -> ResponseEntity.ok(userMapper.userToResponse(u)))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
     }
 }

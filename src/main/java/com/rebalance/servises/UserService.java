@@ -30,19 +30,6 @@ public class UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
     }
 
-    public User createUser(User user) {
-        validateUserNotExists(user.getEmail());
-        return userRepository.save(user);
-    }
-
-    public Optional<User> authorizeUser(String email, String password) {
-        User user = getUserByEmail(email);
-        if (user.getPassword().equals(password)) {
-            return Optional.of(user);
-        }
-        return Optional.empty();
-    }
-
     private void validateUserNotExists(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {

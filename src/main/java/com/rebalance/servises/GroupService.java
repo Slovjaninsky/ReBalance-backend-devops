@@ -64,8 +64,8 @@ public class GroupService {
         return userGroupRepository.save(userGroup);
     }
 
-    public void validateGroupExists(Long groupId) {
-        if (!groupRepository.existsById(groupId)) {
+    public void validateGroupExistsAndNotPersonal(Long groupId) {
+        if (!groupRepository.existsByIdAndPersonal(groupId, false)) {
             throw new RebalanceException(RebalanceErrorType.RB_201);
         }
     }
@@ -82,9 +82,9 @@ public class GroupService {
         }
     }
 
-    private void validateGroupIsNotPersonal(Group group) {
+    public void validateGroupIsNotPersonal(Group group) {
         if (group.getPersonal()) {
-            throw new RebalanceException(RebalanceErrorType.RB_204);
+            throw new RebalanceException(RebalanceErrorType.RB_205);
         }
     }
 

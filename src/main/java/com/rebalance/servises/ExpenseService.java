@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class ExpenseService {
         validateUsersAmount(expense.getAmount(), expenseUsers);
 
         User initiator = userService.getUserById(expense.getUser().getId());
-        groupService.validateGroupExists(expense.getGroup().getId());
+        groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
 
         groupService.validateUsersInGroup(expenseUsers.stream().map(expenseUser ->
                 expenseUser.getUser().getId()).toList(), expense.getGroup().getId());
@@ -59,11 +58,15 @@ public class ExpenseService {
         return expenseRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_101));
     }
 
-    public void deleteById(Long expenseId) {
-        if (!expenseRepository.existsById(expenseId)) {
-            throw new RebalanceException(RebalanceErrorType.RB_101);
-        }
+    public void deleteGroupExpenseById(Long expenseId) {
+        Expense expense = getExpenseById(expenseId);
+        groupService.validateGroupIsNotPersonal(expense.getGroup());
 
+        expenseRepository.deleteById(expenseId);
+    }
+
+    public void deleteById(Long expenseId) {
+        validateExpenseExists(expenseId);
         expenseRepository.deleteById(expenseId);
     }
 
@@ -73,44 +76,8 @@ public class ExpenseService {
         }
     }
 
-    public List<Expense> getExpensesByGroupIdAndBetweenDates(Long groupId, String firstDateString, String secondDateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
-        LocalDate secondDate = LocalDate.parse(secondDateString, formatter);
-        if (secondDate.isBefore(firstDate)) {
-            throw new RebalanceException(RebalanceErrorType.RB_102);
-        }
-        groupService.validateGroupExists(groupId);
-        return expenseRepository.findByGroupIdAndDateBetween(groupId, firstDate, secondDate);
-    }
-
-    public List<Expense> getExpensesByGroupAndFromDateByTimePeriod(Long groupId, String firstDateString, String period) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
-        groupService.validateGroupExists(groupId);
-        LocalDate secondDate;
-        switch (period.toLowerCase()) {
-            case "year":
-                secondDate = firstDate.plusYears(1).minusDays(1);
-                break;
-            case "month":
-                secondDate = firstDate.plusMonths(1).minusDays(1);
-                break;
-            case "week":
-                secondDate = firstDate.plusWeeks(1).minusDays(1);
-                break;
-            case "day":
-                secondDate = firstDate;
-                break;
-            default:
-                throw new RebalanceException(RebalanceErrorType.RB_103);
-        }
-        groupService.validateGroupExists(groupId);
-        return expenseRepository.findByGroupIdAndDateBetween(groupId, firstDate, secondDate);
-    }
-
     public List<Expense> getExpensesOfGroup(Long groupId) {
-        groupService.validateGroupExists(groupId);
+        groupService.validateGroupExistsAndNotPersonal(groupId);
         return expenseRepository.findAllByGroupId(groupId);
     }
 
@@ -122,6 +89,12 @@ public class ExpenseService {
     private void validateUsersAmount(Double amount, List<ExpenseUsers> expenseUsers) {
         if (expenseUsers.stream().mapToDouble(ExpenseUsers::getAmount).sum() != amount) {
             throw new RebalanceException(RebalanceErrorType.RB_104);
+        }
+    }
+
+    private void validateExpenseExists(Long expenseId) {
+        if (!expenseRepository.existsById(expenseId)) {
+            throw new RebalanceException(RebalanceErrorType.RB_101);
         }
     }
 }

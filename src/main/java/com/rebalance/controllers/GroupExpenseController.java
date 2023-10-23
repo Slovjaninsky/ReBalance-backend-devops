@@ -24,7 +24,7 @@ public class GroupExpenseController {
     //TODO: add pagination
     @GetMapping("/{groupId}/expenses")
     public ResponseEntity<List<GroupExpenseResponse>> getExpensesOfGroup(@PathVariable(value = "groupId") Long groupId) {
-        return new ResponseEntity<>( //TODO: check that group is not personal
+        return new ResponseEntity<>(
                 expenseService.getExpensesOfGroup(groupId).stream()
                         .map(expenseMapper::expenseToGroupResponse).toList(),
                 HttpStatus.OK);
@@ -32,7 +32,7 @@ public class GroupExpenseController {
 
     @PostMapping("/expenses")
     public ResponseEntity<GroupExpenseResponse> addExpense(@RequestBody GroupExpenseAddRequest request) {
-        return new ResponseEntity<>( //TODO: check that group is not personal
+        return new ResponseEntity<>(
                 expenseMapper.expenseToGroupResponse(
                         expenseService.saveGroupExpense(
                                 expenseMapper.groupExpenseAddRequestToExpense(request),
@@ -53,7 +53,7 @@ public class GroupExpenseController {
 
     @DeleteMapping("/expenses/{expenseId}")
     public ResponseEntity<HttpStatus> deleteExpenseById(@PathVariable("expenseId") Long expenseId) {
-        expenseService.deleteById(expenseId); //TODO: check that group is not personal
+        expenseService.deleteGroupExpenseById(expenseId);
 
         try {
             imageService.deleteImageByGlobalId(expenseId);

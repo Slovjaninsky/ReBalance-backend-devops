@@ -25,6 +25,7 @@ public enum RebalanceErrorType {
     RB_202("User not in group", HttpStatus.CONFLICT),
     RB_203("User already in group", HttpStatus.CONFLICT),
     RB_204("Group is not a personal group of user", HttpStatus.CONFLICT),
+    RB_205("Group is personal", HttpStatus.CONFLICT),
 
     // images
     RB_301("Image not found", HttpStatus.NOT_FOUND),

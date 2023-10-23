@@ -35,7 +35,7 @@ public class GroupController {
     public ResponseEntity<GroupResponse> getGroupById(@PathVariable(value = "id") Long id) {
         return ResponseEntity.ok(
                 groupMapper.groupToResponse(
-                        groupService.getGroupById(id)));
+                        groupService.getNotPersonalGroupById(id)));
     }
 
     @PostMapping()

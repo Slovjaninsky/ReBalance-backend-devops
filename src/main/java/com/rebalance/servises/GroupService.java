@@ -20,8 +20,10 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final UserGroupRepository userGroupRepository;
 
-    public Group getGroupById(Long id) {
-        return groupRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_201));
+    public Group getNotPersonalGroupById(Long id) {
+        Group group = groupRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_201));
+        validateGroupIsNotPersonal(group);
+        return group;
     }
 
     public Group getPersonalGroupByUserId(Long userId) {
@@ -30,7 +32,7 @@ public class GroupService {
     }
 
     public List<User> getAllUsersOfGroup(Long groupId) {
-        return getGroupById(groupId).getUsers().stream().map(UserGroup::getUser).collect(Collectors.toList());
+        return getNotPersonalGroupById(groupId).getUsers().stream().map(UserGroup::getUser).collect(Collectors.toList());
     }
 
     public Group createGroupAndAddUser(Group groupRequest) {
@@ -51,11 +53,10 @@ public class GroupService {
     }
 
     public UserGroup addUserToGroup(Long groupId, String email) {
-        Group group = getGroupById(groupId);
+        Group group = getNotPersonalGroupById(groupId);
         User user = userService.getUserByEmail(email);
 
         validateUserNotInGroup(user.getId(), group.getId());
-        //TODO: check if group not personal
 
         UserGroup userGroup = new UserGroup();
         userGroup.setGroup(group);
@@ -77,6 +78,12 @@ public class GroupService {
 
     public void validateGroupIsPersonal(Long groupId, Long userId) {
         if (!groupRepository.existsByIdAndCreatorIdAndPersonal(groupId, userId, true)) {
+            throw new RebalanceException(RebalanceErrorType.RB_204);
+        }
+    }
+
+    private void validateGroupIsNotPersonal(Group group) {
+        if (group.getPersonal()) {
             throw new RebalanceException(RebalanceErrorType.RB_204);
         }
     }

@@ -9,9 +9,11 @@ import lombok.extern.jackson.Jacksonized;
 @NoArgsConstructor
 @Data
 @Jacksonized
-public class UserCreateRequest {
-    private String email;
-    private String password;
-    private String username;
-    private String currency;
+public class PersonalExpenseEditRequest {
+    private Long expenseId;
+    private Long initiatorUserId;
+    private Long groupId;
+    private Double amount;
+    private String description;
+    private String category;
 }

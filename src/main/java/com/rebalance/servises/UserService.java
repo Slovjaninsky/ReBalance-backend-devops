@@ -23,7 +23,10 @@ public class UserService {
     }
 
     public List<Group> getAllGroupsOfUser(Long userId) {
-        return getUserById(userId).getGroups().stream().map(UserGroup::getGroup).collect(Collectors.toList());
+        return getUserById(userId).getGroups().stream()
+                .map(UserGroup::getGroup)
+                .filter(group -> !group.getPersonal()) // do not include personal group
+                .collect(Collectors.toList());
     }
 
     public User getUserByEmail(String email) {

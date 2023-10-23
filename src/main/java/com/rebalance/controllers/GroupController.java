@@ -39,10 +39,10 @@ public class GroupController {
     }
 
     @PostMapping()
-    public ResponseEntity<GroupResponse> createGroup(@RequestBody GroupCreateRequest request) {
+    public ResponseEntity<GroupResponse> createGroupAndAddUser(@RequestBody GroupCreateRequest request) {
         return new ResponseEntity<>(
                 groupMapper.groupToResponse(
-                        groupService.createGroup(
+                        groupService.createGroupAndAddUser(
                                 groupMapper.createRequestToGroup(request))),
                 HttpStatus.CREATED);
     }

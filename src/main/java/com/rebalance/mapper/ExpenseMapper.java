@@ -1,10 +1,9 @@
 package com.rebalance.mapper;
 
-import com.rebalance.dto.request.GroupExpenseAddRequest;
-import com.rebalance.dto.request.GroupExpenseEditRequest;
-import com.rebalance.dto.request.GroupExpenseUserRequest;
+import com.rebalance.dto.request.*;
 import com.rebalance.dto.response.GroupExpenseResponse;
 import com.rebalance.dto.response.GroupExpenseUserResponse;
+import com.rebalance.dto.response.PersonalExpenseResponse;
 import com.rebalance.entities.Expense;
 import com.rebalance.entities.ExpenseUsers;
 import org.mapstruct.Mapper;
@@ -21,6 +20,9 @@ public interface ExpenseMapper {
     GroupExpenseResponse expenseToGroupResponse(Expense expense);
 
 
+    PersonalExpenseResponse expenseToPersonalResponse(Expense expense);
+
+
     @Mapping(target = "user.id", source = "userId")
     ExpenseUsers groupExpenseUserRequestToExpenseUser(GroupExpenseUserRequest request);
 
@@ -31,8 +33,17 @@ public interface ExpenseMapper {
     @Mapping(target = "group.id", source = "groupId")
     Expense groupExpenseAddRequestToExpense(GroupExpenseAddRequest request);
 
+    @Mapping(target = "user.id", source = "initiatorUserId")
+    @Mapping(target = "group.id", source = "groupId")
+    Expense perosnalExpenseAddRequestToExpense(PersonalExpenseAddRequest request);
+
     @Mapping(target = "id", source = "expenseId")
     @Mapping(target = "user.id", source = "initiatorUserId")
     @Mapping(target = "group.id", source = "groupId")
     Expense groupExpenseEditRequestToExpense(GroupExpenseEditRequest request);
+
+    @Mapping(target = "id", source = "expenseId")
+    @Mapping(target = "user.id", source = "initiatorUserId")
+    @Mapping(target = "group.id", source = "groupId")
+    Expense personalExpenseEditRequestToExpense(PersonalExpenseEditRequest request);
 }

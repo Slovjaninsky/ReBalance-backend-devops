@@ -29,10 +29,10 @@ public class ExpenseService {
         validateUsersAmount(expense.getAmount(), expenseUsers);
 
         User initiator = userService.getUserById(expense.getUser().getId());
-        Group group = groupService.getGroupById(expense.getGroup().getId());
+        groupService.validateGroupExists(expense.getGroup().getId());
 
         groupService.validateUsersInGroup(expenseUsers.stream().map(expenseUser ->
-                expenseUser.getUser().getId()).toList(), group.getId());
+                expenseUser.getUser().getId()).toList(), expense.getGroup().getId());
 
         expense.setDate(LocalDate.now());
         expenseRepository.save(expense);
@@ -40,6 +40,17 @@ public class ExpenseService {
         expenseUsers.forEach(u -> u.setExpense(expense));
         expenseUsersRepository.saveAll(expenseUsers);
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
+
+        return expense;
+    }
+
+    public Expense savePersonalExpense(Expense expense) {
+        User initiator = userService.getUserById(expense.getUser().getId());
+        Long groupId = expense.getGroup().getId();
+        groupService.validateGroupIsPersonal(groupId, initiator.getId());
+
+        expense.setDate(LocalDate.now());
+        expenseRepository.save(expense);
 
         return expense;
     }
@@ -69,14 +80,14 @@ public class ExpenseService {
         if (secondDate.isBefore(firstDate)) {
             throw new RebalanceException(RebalanceErrorType.RB_102);
         }
-//        groupService.throwExceptionIfGroupNotFoundById(groupId);
+        groupService.validateGroupExists(groupId);
         return expenseRepository.findByGroupIdAndDateBetween(groupId, firstDate, secondDate);
     }
 
     public List<Expense> getExpensesByGroupAndFromDateByTimePeriod(Long groupId, String firstDateString, String period) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate firstDate = LocalDate.parse(firstDateString, formatter);
-        groupService.getGroupById(groupId);
+        groupService.validateGroupExists(groupId);
         LocalDate secondDate;
         switch (period.toLowerCase()) {
             case "year":
@@ -94,13 +105,18 @@ public class ExpenseService {
             default:
                 throw new RebalanceException(RebalanceErrorType.RB_103);
         }
-//        groupService.throwExceptionIfGroupNotFoundById(groupId);
+        groupService.validateGroupExists(groupId);
         return expenseRepository.findByGroupIdAndDateBetween(groupId, firstDate, secondDate);
     }
 
     public List<Expense> getExpensesOfGroup(Long groupId) {
-        Group group = groupService.getGroupByIdWithExpenses(groupId);
-        return group.getExpenses().stream().toList();
+        groupService.validateGroupExists(groupId);
+        return expenseRepository.findAllByGroupId(groupId);
+    }
+
+    public List<Expense> getExpensesOfUser(Long userId) {
+        Group personalGroup = groupService.getPersonalGroupByUserId(userId);
+        return expenseRepository.findAllByGroupId(personalGroup.getId());
     }
 
     private void validateUsersAmount(Double amount, List<ExpenseUsers> expenseUsers) {

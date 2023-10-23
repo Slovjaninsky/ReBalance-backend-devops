@@ -12,4 +12,5 @@ import lombok.extern.jackson.Jacksonized;
 public class GroupCreateRequest {
     private String name;
     private String currency;
+    private Long creatorId;
 }

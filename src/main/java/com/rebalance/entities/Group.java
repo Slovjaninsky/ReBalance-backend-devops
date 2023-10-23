@@ -19,10 +19,10 @@ public class Group {
     @Column
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
-    @Column
+    @Column(nullable = false)
     private String currency;
 
     @EqualsAndHashCode.Exclude

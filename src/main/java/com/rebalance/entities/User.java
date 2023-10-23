@@ -18,13 +18,13 @@ public class User {
     @Column
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String username;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column
+    @Column(nullable = false)
     private String password;
 
     @EqualsAndHashCode.Exclude

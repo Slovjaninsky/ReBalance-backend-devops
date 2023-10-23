@@ -21,13 +21,13 @@ public class Expense {
     @Column(nullable = false)
     private Double amount;
 
-    @Column
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)
     private LocalDate date;
 
-    @Column
+    @Column(nullable = false)
     private String category;
 
     @EqualsAndHashCode.Exclude

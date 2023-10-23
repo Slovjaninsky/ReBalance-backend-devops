@@ -15,7 +15,7 @@ public class Category {
     @Column
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
     @EqualsAndHashCode.Exclude

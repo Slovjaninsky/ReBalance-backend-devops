@@ -41,7 +41,6 @@ public interface ExpenseMapper {
     Expense groupExpenseEditRequestToExpense(GroupExpenseEditRequest request);
 
     @Mapping(target = "id", source = "expenseId")
-    @Mapping(target = "user.id", source = "initiatorUserId")
-    @Mapping(target = "group.id", source = "groupId")
+    @Mapping(target = "user.id", source = "userId")
     Expense personalExpenseEditRequestToExpense(PersonalExpenseEditRequest request);
 }

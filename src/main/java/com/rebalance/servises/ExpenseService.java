@@ -86,6 +86,24 @@ public class ExpenseService {
         return expense;
     }
 
+    public Expense editPersonalExpense(Expense expenseRequest) {
+        // get existing expense
+        Expense expense = getExpenseById(expenseRequest.getId());
+
+        // validate expense is user's personal
+        if (!expense.getGroup().isPersonalOf(expense.getUser())) {
+            throw new RebalanceException(RebalanceErrorType.RB_204);
+        }
+
+        // update fields
+        expense.setAmount(expenseRequest.getAmount());
+        expense.setDescription(expenseRequest.getDescription());
+        expense.setCategory(expenseRequest.getCategory());
+        expenseRepository.save(expense);
+
+        return expense;
+    }
+
     public Expense getExpenseById(Long id) {
         return expenseRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_101));
     }
@@ -97,8 +115,10 @@ public class ExpenseService {
         expenseRepository.deleteById(expenseId);
     }
 
-    public void deleteById(Long expenseId) {
-        validateExpenseExists(expenseId);
+    public void deletePersonalExpenseById(Long userId, Long expenseId) {
+        Expense expense = getExpenseById(expenseId);
+        groupService.validateGroupIsPersonal(expense.getGroup().getId(), userId);
+
         expenseRepository.deleteById(expenseId);
     }
 
@@ -121,12 +141,6 @@ public class ExpenseService {
     private void validateUsersAmount(Double amount, List<ExpenseUsers> expenseUsers) {
         if (expenseUsers.stream().mapToDouble(ExpenseUsers::getAmount).sum() != amount) {
             throw new RebalanceException(RebalanceErrorType.RB_104);
-        }
-    }
-
-    private void validateExpenseExists(Long expenseId) {
-        if (!expenseRepository.existsById(expenseId)) {
-            throw new RebalanceException(RebalanceErrorType.RB_101);
         }
     }
 

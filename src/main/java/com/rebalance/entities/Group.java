@@ -46,4 +46,8 @@ public class Group {
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "group")
     Set<Category> categories;
+
+    public Boolean isPersonalOf(User user) {
+        return personal && creator.getId().equals(user.getId());
+    }
 }

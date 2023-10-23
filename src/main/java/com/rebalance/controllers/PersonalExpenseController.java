@@ -41,17 +41,16 @@ public class PersonalExpenseController {
 
     @PutMapping("/expenses")
     public ResponseEntity<PersonalExpenseResponse> editExpense(@RequestBody PersonalExpenseEditRequest request) {
-        return new ResponseEntity<>( //TODO: check that expense exists
-                //TODO: remove initiator
+        return new ResponseEntity<>(
                 expenseMapper.expenseToPersonalResponse(
-                        expenseService.savePersonalExpense(
+                        expenseService.editPersonalExpense(
                                 expenseMapper.personalExpenseEditRequestToExpense(request))),
                 HttpStatus.OK);
     }
 
-    @DeleteMapping("/expenses/{expenseId}")
-    public ResponseEntity<HttpStatus> deleteExpenseById(@PathVariable("expenseId") Long expenseId) {
-        expenseService.deleteById(expenseId);
+    @DeleteMapping("/{userId}/expenses/{expenseId}")
+    public ResponseEntity<HttpStatus> deleteExpenseById(@PathVariable("userId") Long userId, @PathVariable("expenseId") Long expenseId) {
+        expenseService.deletePersonalExpenseById(userId, expenseId);
 
         try {
             imageService.deleteImageByGlobalId(expenseId);

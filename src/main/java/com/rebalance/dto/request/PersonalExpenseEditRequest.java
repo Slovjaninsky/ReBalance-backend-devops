@@ -11,8 +11,7 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class PersonalExpenseEditRequest {
     private Long expenseId;
-    private Long initiatorUserId;
-    private Long groupId;
+    private Long userId;
     private Double amount;
     private String description;
     private String category;

@@ -13,8 +13,6 @@ import java.util.List;
 @Jacksonized
 public class GroupExpenseEditRequest {
     private Long expenseId;
-    private Long initiatorUserId;
-    private Long groupId;
     private Double amount;
     private String description;
     private String category;

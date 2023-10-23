@@ -8,10 +8,12 @@ import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
 import com.rebalance.repositories.ExpenseRepository;
 import com.rebalance.repositories.ExpenseUsersRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -30,12 +32,42 @@ public class ExpenseService {
         User initiator = userService.getUserById(expense.getUser().getId());
         groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
 
-        groupService.validateUsersInGroup(expenseUsers.stream().map(expenseUser ->
-                expenseUser.getUser().getId()).toList(), expense.getGroup().getId());
+        validateUsersInGroup(expenseUsers, expense.getGroup().getId());
 
         expense.setDate(LocalDate.now());
         expenseRepository.save(expense);
 
+        expenseUsers.forEach(u -> u.setExpense(expense));
+        expenseUsersRepository.saveAll(expenseUsers);
+        expense.setExpenseUsers(new HashSet<>(expenseUsers));
+
+        return expense;
+    }
+
+    @Transactional
+    public Expense editGroupExpense(Expense expenseRequest, List<ExpenseUsers> expenseUsers) {
+        // get existing expense
+        Expense expense = getExpenseById(expenseRequest.getId());
+
+        // validate input data
+        validateUsersAmount(expenseRequest.getAmount(), expenseUsers);
+        groupService.validateGroupIsNotPersonal(expense.getGroup());
+
+        // add initiator to list to validate he is also in group
+        List<ExpenseUsers> usersToValidate = new ArrayList<>(expenseUsers);
+        ExpenseUsers userToValidate = new ExpenseUsers();
+        userToValidate.setUser(expense.getUser());
+        usersToValidate.add(userToValidate);
+        validateUsersInGroup(usersToValidate, expense.getGroup().getId());
+
+        // update fields
+        expense.setAmount(expenseRequest.getAmount());
+        expense.setDescription(expenseRequest.getDescription());
+        expense.setCategory(expenseRequest.getCategory());
+        expenseRepository.save(expense);
+
+        // update users
+        expenseUsersRepository.deleteAllByExpenseId(expense.getId());
         expenseUsers.forEach(u -> u.setExpense(expense));
         expenseUsersRepository.saveAll(expenseUsers);
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
@@ -96,5 +128,10 @@ public class ExpenseService {
         if (!expenseRepository.existsById(expenseId)) {
             throw new RebalanceException(RebalanceErrorType.RB_101);
         }
+    }
+
+    private void validateUsersInGroup(List<ExpenseUsers> users, Long groupId) {
+        groupService.validateUsersInGroup(users.stream().map(expenseUser ->
+                expenseUser.getUser().getId()).toList(), groupId);
     }
 }

@@ -42,10 +42,9 @@ public class GroupExpenseController {
 
     @PutMapping("/expenses")
     public ResponseEntity<GroupExpenseResponse> editExpense(@RequestBody GroupExpenseEditRequest request) {
-        return new ResponseEntity<>( //TODO: check that expense exists
-                //TODO: remove initiator
+        return new ResponseEntity<>(
                 expenseMapper.expenseToGroupResponse(
-                        expenseService.saveGroupExpense(
+                        expenseService.editGroupExpense(
                                 expenseMapper.groupExpenseEditRequestToExpense(request),
                                 expenseMapper.groupExpenseUserRequestListToExpenseUserList(request.getUsers()))),
                 HttpStatus.OK);

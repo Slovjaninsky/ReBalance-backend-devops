@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -42,5 +44,6 @@ public class Expense {
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "expense")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ExpenseUsers> expenseUsers;
 }

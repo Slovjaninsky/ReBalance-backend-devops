@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -37,14 +39,17 @@ public class Group {
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "group")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<UserGroup> users = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "group")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     Set<Expense> expenses;
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "group")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     Set<Category> categories;
 
     public Boolean isPersonalOf(User user) {

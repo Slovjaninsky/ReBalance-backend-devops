@@ -38,7 +38,7 @@ public class GroupService {
     public Group createGroupAndAddUser(Group groupRequest) {
         User user = userService.getUserById(groupRequest.getCreator().getId());
 
-        Group group = createGroup(groupRequest);
+        Group group = groupRepository.save(groupRequest);
 
         UserGroup userGroup = new UserGroup();
         userGroup.setGroup(group);
@@ -46,10 +46,6 @@ public class GroupService {
         userGroupRepository.save(userGroup);
 
         return group;
-    }
-
-    public Group createGroup(Group group) {
-        return groupRepository.save(group);
     }
 
     public UserGroup addUserToGroup(Long groupId, String email) {

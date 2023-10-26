@@ -146,6 +146,6 @@ public class ExpenseService {
 
     private void validateUsersInGroup(List<ExpenseUsers> users, Long groupId) {
         groupService.validateUsersInGroup(users.stream().map(expenseUser ->
-                expenseUser.getUser().getId()).toList(), groupId);
+                expenseUser.getUser().getId()).distinct().toList(), groupId);
     }
 }

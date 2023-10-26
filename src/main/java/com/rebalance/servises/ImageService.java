@@ -50,19 +50,19 @@ public class ImageService {
     }
 
     public String getImageByGlobalId(Long id) {
-        throwExceptionIfNotExistsById(id);
+        throwExceptionIfImageNotExists(id);
         byte[] imageBytes = loadImageBytes(id, false);
         return Base64.getEncoder().encodeToString(imageBytes);
     }
 
     public String getImageIconByGlobalId(Long id) {
-        throwExceptionIfNotExistsById(id);
+        throwExceptionIfIconNotExists(id);
         byte[] imageBytes = loadImageBytes(id, true);
         return Base64.getEncoder().encodeToString(imageBytes);
     }
 
     public void deleteImageByGlobalId(Long id) {
-        throwExceptionIfNotExistsById(id);
+        throwExceptionIfImageNotExists(id);
 
         BlobServiceClient connection = connectToCloudStorage();
 
@@ -72,8 +72,12 @@ public class ImageService {
         imageRepository.deleteById(id);
     }
 
-    public void throwExceptionIfNotExistsById(Long id) {
-        imageRepository.findById(id).orElseThrow(() -> new ImageNotFoundException("Image not found with id: " + id));
+    public void throwExceptionIfImageNotExists(Long id) {
+        imageRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_301));
+    }
+
+    public void throwExceptionIfIconNotExists(Long id) {
+        imageRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_302));
     }
 
     public void updateImage(Long id, String base64Image) {

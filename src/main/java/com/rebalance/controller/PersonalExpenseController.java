@@ -9,6 +9,7 @@ import com.rebalance.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class PersonalExpenseController {
     }
 
     @PostMapping("/expenses")
-    public ResponseEntity<PersonalExpenseResponse> addExpense(@RequestBody PersonalExpenseAddRequest request) {
+    public ResponseEntity<PersonalExpenseResponse> addExpense(@RequestBody @Validated PersonalExpenseAddRequest request) {
         return new ResponseEntity<>(
                 expenseMapper.expenseToPersonalResponse(
                         expenseService.savePersonalExpense(
@@ -39,7 +40,7 @@ public class PersonalExpenseController {
     }
 
     @PutMapping("/expenses")
-    public ResponseEntity<PersonalExpenseResponse> editExpense(@RequestBody PersonalExpenseEditRequest request) {
+    public ResponseEntity<PersonalExpenseResponse> editExpense(@RequestBody @Validated PersonalExpenseEditRequest request) {
         return new ResponseEntity<>(
                 expenseMapper.expenseToPersonalResponse(
                         expenseService.editPersonalExpense(

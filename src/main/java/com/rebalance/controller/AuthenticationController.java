@@ -1,6 +1,6 @@
 package com.rebalance.controller;
 
-import com.rebalance.dto.LoginAndPassword;
+import com.rebalance.dto.request.LoginRequest;
 import com.rebalance.dto.request.UserCreateRequest;
 import com.rebalance.dto.response.UserResponse;
 import com.rebalance.entity.User;
@@ -25,7 +25,7 @@ public class AuthenticationController {
     private final UserMapper userMapper;
 
     @PostMapping()
-    public ResponseEntity<UserResponse> register(@RequestBody UserCreateRequest user) {
+    public ResponseEntity<UserResponse> register(@RequestBody @Validated UserCreateRequest user) {
         return new ResponseEntity<>(
                 userMapper.userToResponse(
                         authenticationService.createUser(
@@ -34,7 +34,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> loginWithEmailAndPassword(@RequestBody @Validated LoginAndPassword request) {
+    public ResponseEntity<UserResponse> loginWithEmailAndPassword(@RequestBody @Validated LoginRequest request) {
         Optional<User> user = authenticationService.authorizeUser(request.getEmail(), request.getPassword());
 
         return user.map(u -> ResponseEntity.ok(userMapper.userToResponse(u)))

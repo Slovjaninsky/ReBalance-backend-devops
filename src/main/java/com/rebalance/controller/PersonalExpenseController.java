@@ -21,7 +21,6 @@ public class PersonalExpenseController {
     private final ImageService imageService;
     private final ExpenseMapper expenseMapper;
 
-    //TODO: add pagination
     @GetMapping("/{userId}/expenses")
     public ResponseEntity<List<PersonalExpenseResponse>> getPersonalExpenses(@PathVariable(value = "userId") Long userId) {
         return new ResponseEntity<>(

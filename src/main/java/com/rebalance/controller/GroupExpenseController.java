@@ -21,7 +21,6 @@ public class GroupExpenseController {
     private final ImageService imageService;
     private final ExpenseMapper expenseMapper;
 
-    //TODO: add pagination
     @GetMapping("/{groupId}/expenses")
     public ResponseEntity<List<GroupExpenseResponse>> getExpensesOfGroup(@PathVariable(value = "groupId") Long groupId) {
         return new ResponseEntity<>(

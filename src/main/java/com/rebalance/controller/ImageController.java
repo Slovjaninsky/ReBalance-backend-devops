@@ -17,7 +17,6 @@ public class ImageController {
     private final ImageService imageService;
     private final ExpenseService expenseService;
 
-    //TODO: use PartFile instead of Map
     @GetMapping("/{expenseId}/image")
     public ResponseEntity<Map<String, String>> getImage(@PathVariable("expenseId") Long expenseId) {
         String base64Image = imageService.getImageByGlobalId(expenseId);
@@ -28,7 +27,6 @@ public class ImageController {
         return ResponseEntity.ok(response);
     }
 
-    //TODO: use PartFile instead of Map
     @GetMapping("/{expenseId}/preview")
     public ResponseEntity<Map<String, String>> getImagePreview(@PathVariable("expenseId") Long expenseId) {
         String base64Image = imageService.getImageIconByGlobalId(expenseId);
@@ -39,7 +37,6 @@ public class ImageController {
         return ResponseEntity.ok(response);
     }
 
-    //TODO: use PartFile instead of Map
     @PostMapping("/{expenseId}/image")
     public ResponseEntity<String> addImageToExpense(@PathVariable("expenseId") Long expenseId, @RequestBody Map<String, String> requestBody) {
         expenseService.throwExceptionIfExpensesWithGlobalIdNotFound(expenseId);

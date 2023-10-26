@@ -4,8 +4,8 @@ import com.rebalance.dto.request.UserCreateRequest;
 import com.rebalance.dto.response.GroupUserResponse;
 import com.rebalance.dto.response.UserGroupResponse;
 import com.rebalance.dto.response.UserResponse;
-import com.rebalance.entities.User;
-import com.rebalance.entities.UserGroup;
+import com.rebalance.entity.User;
+import com.rebalance.entity.UserGroup;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

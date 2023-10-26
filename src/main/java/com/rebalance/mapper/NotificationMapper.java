@@ -1,7 +1,7 @@
 package com.rebalance.mapper;
 
 import com.rebalance.dto.response.NotificationResponse;
-import com.rebalance.entities.Notification;
+import com.rebalance.entity.Notification;
 import org.mapstruct.Mapper;
 
 @Mapper

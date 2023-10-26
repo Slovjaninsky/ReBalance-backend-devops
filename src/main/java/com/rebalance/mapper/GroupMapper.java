@@ -2,7 +2,7 @@ package com.rebalance.mapper;
 
 import com.rebalance.dto.request.GroupCreateRequest;
 import com.rebalance.dto.response.GroupResponse;
-import com.rebalance.entities.Group;
+import com.rebalance.entity.Group;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

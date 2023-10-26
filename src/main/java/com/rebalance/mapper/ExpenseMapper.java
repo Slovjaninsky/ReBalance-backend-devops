@@ -4,8 +4,8 @@ import com.rebalance.dto.request.*;
 import com.rebalance.dto.response.GroupExpenseResponse;
 import com.rebalance.dto.response.GroupExpenseUserResponse;
 import com.rebalance.dto.response.PersonalExpenseResponse;
-import com.rebalance.entities.Expense;
-import com.rebalance.entities.ExpenseUsers;
+import com.rebalance.entity.Expense;
+import com.rebalance.entity.ExpenseUsers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

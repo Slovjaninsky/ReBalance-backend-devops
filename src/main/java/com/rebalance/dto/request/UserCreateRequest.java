@@ -1,6 +1,5 @@
-package com.rebalance.dto;
+package com.rebalance.dto.request;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,9 +9,9 @@ import lombok.extern.jackson.Jacksonized;
 @NoArgsConstructor
 @Data
 @Jacksonized
-public class LoginAndPassword {
-    @NotNull(message = "Email is required")
+public class UserCreateRequest {
     private String email;
-    @NotNull(message = "Password is required")
     private String password;
+    private String username;
+    private String currency;
 }

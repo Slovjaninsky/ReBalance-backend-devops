@@ -1,3 +1,4 @@
+DROP TABLE NOTIFICATION;
 DROP TABLE expense;
 DROP TABLE user_group;
 DROP TABLE application_user;

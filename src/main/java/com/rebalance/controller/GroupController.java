@@ -11,6 +11,7 @@ import com.rebalance.service.GroupService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class GroupController {
     }
 
     @PostMapping()
-    public ResponseEntity<GroupResponse> createGroupAndAddUser(@RequestBody GroupCreateRequest request) {
+    public ResponseEntity<GroupResponse> createGroupAndAddUser(@RequestBody @Validated GroupCreateRequest request) {
         return new ResponseEntity<>(
                 groupMapper.groupToResponse(
                         groupService.createGroupAndAddUser(
@@ -48,7 +49,7 @@ public class GroupController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<UserGroupResponse> addUserToGroup(@RequestBody GroupAddUserRequest request) {
+    public ResponseEntity<UserGroupResponse> addUserToGroup(@RequestBody @Validated GroupAddUserRequest request) {
         return new ResponseEntity<>(
                 userMapper.userGroupToResponse(
                         groupService.addUserToGroup(request.getGroupId(), request.getEmail())),

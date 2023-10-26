@@ -9,6 +9,7 @@ import com.rebalance.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class GroupExpenseController {
     }
 
     @PostMapping("/expenses")
-    public ResponseEntity<GroupExpenseResponse> addExpense(@RequestBody GroupExpenseAddRequest request) {
+    public ResponseEntity<GroupExpenseResponse> addExpense(@RequestBody @Validated GroupExpenseAddRequest request) {
         return new ResponseEntity<>(
                 expenseMapper.expenseToGroupResponse(
                         expenseService.saveGroupExpense(
@@ -40,7 +41,7 @@ public class GroupExpenseController {
     }
 
     @PutMapping("/expenses")
-    public ResponseEntity<GroupExpenseResponse> editExpense(@RequestBody GroupExpenseEditRequest request) {
+    public ResponseEntity<GroupExpenseResponse> editExpense(@RequestBody @Validated GroupExpenseEditRequest request) {
         return new ResponseEntity<>(
                 expenseMapper.expenseToGroupResponse(
                         expenseService.editGroupExpense(

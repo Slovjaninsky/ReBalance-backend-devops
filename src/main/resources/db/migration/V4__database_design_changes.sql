@@ -4,7 +4,7 @@ DROP TABLE expense_group;
 DROP TABLE expense;
 DROP TABLE user_group;
 DROP TABLE notification;
-DROP TABLE image;
+DROP TABLE images;
 SET foreign_key_checks = 1;
 
 CREATE TABLE users

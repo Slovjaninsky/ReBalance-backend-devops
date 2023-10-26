@@ -11,6 +11,7 @@ import org.mapstruct.Mapping;
 
 @Mapper
 public interface UserMapper {
+    @Mapping(target = "personalGroupId", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getId())")
     UserResponse userToResponse(User user);
 
     GroupUserResponse userToGroupResponse(User user);

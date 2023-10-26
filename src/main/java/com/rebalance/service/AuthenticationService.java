@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
@@ -26,7 +27,9 @@ public class AuthenticationService {
         personalGroup.setCurrency(currency);
         personalGroup.setCreator(user);
         personalGroup.setPersonal(true);
-        groupService.createGroupAndAddUser(personalGroup);
+        Group group = groupService.createGroupAndAddUser(personalGroup);
+
+        user.setCreatedGroups(Set.of(group));
 
         return user;
     }

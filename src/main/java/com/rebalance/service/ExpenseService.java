@@ -8,14 +8,16 @@ import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
 import com.rebalance.repository.ExpenseRepository;
 import com.rebalance.repository.ExpenseUsersRepository;
+import com.rebalance.security.SignedInUsernameGetter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -25,21 +27,27 @@ public class ExpenseService {
     private final UserService userService;
     private final NotificationService notificationService;
     private final ExpenseUsersRepository expenseUsersRepository;
+    private final SignedInUsernameGetter signedInUsernameGetter;
 
     public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers) {
+        // validate input data
         validateUsersAmount(expense.getAmount(), expenseUsers);
         groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
 
         // validate users and initiator in group
         validateUsersInGroup(expenseUsers, expense.getInitiator(), expense.getGroup().getId());
 
+        // set auto generated fields
+        expense.setAddedBy(signedInUsernameGetter.getUser());
         expense.setDate(LocalDate.now());
         expenseRepository.save(expense);
 
+        // save participants of expense
         expenseUsers.forEach(u -> u.setExpense(expense));
         expenseUsersRepository.saveAll(expenseUsers);
-        expense.setExpenseUsers(new HashSet<>(expenseUsers));
 
+        // set expense participants for response
+        expense.setExpenseUsers(new HashSet<>(expenseUsers));
         return expense;
     }
 
@@ -71,7 +79,7 @@ public class ExpenseService {
     }
 
     public Expense savePersonalExpense(Expense expense) {
-        User initiator = userService.getUserById(expense.getUser().getId());
+        User initiator = userService.getUserById(expense.getInitiator().getId());
         Long groupId = expense.getGroup().getId();
         groupService.validateGroupIsPersonal(groupId, initiator.getId());
 
@@ -86,7 +94,7 @@ public class ExpenseService {
         Expense expense = getExpenseById(expenseRequest.getId());
 
         // validate expense is user's personal
-        if (!expense.getGroup().isPersonalOf(expense.getUser())) {
+        if (!expense.getGroup().isPersonalOf(expense.getInitiator())) {
             throw new RebalanceException(RebalanceErrorType.RB_204);
         }
 

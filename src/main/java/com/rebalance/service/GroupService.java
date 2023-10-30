@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -73,7 +74,7 @@ public class GroupService {
         }
     }
 
-    public void validateUsersInGroup(List<Long> users, Long groupId) {
+    public void validateUsersInGroup(Set<Long> users, Long groupId) {
         if (userGroupRepository.countByGroupIdAndUserIdIn(groupId, users) != users.size()) {
             throw new RebalanceException(RebalanceErrorType.RB_202);
         }

@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final GroupService groupService;
-    private final UserService userService;
     private final NotificationService notificationService;
     private final ExpenseUsersRepository expenseUsersRepository;
     private final SignedInUsernameGetter signedInUsernameGetter;

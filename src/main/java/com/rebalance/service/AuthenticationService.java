@@ -2,10 +2,15 @@ package com.rebalance.service;
 
 import com.rebalance.entity.Group;
 import com.rebalance.entity.User;
+import com.rebalance.entity.UserRole;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
 import com.rebalance.repository.UserRepository;
+import com.rebalance.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,9 +22,15 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final GroupService groupService;
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationProvider authenticationProvider;
+    private final JwtService jwtService;
 
     public User createUser(User userRequest, String currency) {
         validateUserNotExists(userRequest.getEmail());
+
+        userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        userRequest.setRole(UserRole.USER);
         User user = userRepository.save(userRequest);
 
         Group personalGroup = new Group();

@@ -3,9 +3,6 @@ package com.rebalance.service;
 import com.rebalance.entity.Group;
 import com.rebalance.entity.User;
 import com.rebalance.entity.UserRole;
-import com.rebalance.exception.RebalanceErrorType;
-import com.rebalance.exception.RebalanceException;
-import com.rebalance.repository.UserRepository;
 import com.rebalance.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -18,7 +15,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Service
 public class AuthenticationService {
-    private final UserRepository userRepository;
     private final GroupService groupService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -26,11 +22,11 @@ public class AuthenticationService {
     private final JwtService jwtService;
 
     public User createUser(User userRequest, String currency) {
-        validateUserNotExists(userRequest.getEmail());
+        userService.validateUserNotExists(userRequest.getEmail());
 
         userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         userRequest.setRole(UserRole.USER);
-        User user = userRepository.save(userRequest);
+        User user = userService.save(userRequest);
 
         Group personalGroup = new Group();
         personalGroup.setName("personal_" + user.getEmail());
@@ -55,11 +51,5 @@ public class AuthenticationService {
         jwtService.saveToken(user.getId(), token);
 
         return token;
-    }
-
-    private void validateUserNotExists(String email) {
-        if (userRepository.existsByEmail(email)) {
-            throw new RebalanceException(RebalanceErrorType.RB_001);
-        }
     }
 }

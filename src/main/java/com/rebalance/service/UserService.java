@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -33,9 +32,12 @@ public class UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
     }
 
-    private void validateUserNotExists(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent()) {
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    public void validateUserNotExists(String email) {
+        if (userRepository.existsByEmail(email)) {
             throw new RebalanceException(RebalanceErrorType.RB_001);
         }
     }

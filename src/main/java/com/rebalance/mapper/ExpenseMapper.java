@@ -33,15 +33,12 @@ public interface ExpenseMapper {
     @Mapping(target = "group.id", source = "groupId")
     Expense groupExpenseAddRequestToExpense(GroupExpenseAddRequest request);
 
-    @Mapping(target = "initiator.id", source = "initiatorUserId")
-    @Mapping(target = "group.id", source = "groupId")
-    Expense perosnalExpenseAddRequestToExpense(PersonalExpenseAddRequest request);
+    Expense personalExpenseAddRequestToExpense(PersonalExpenseAddRequest request);
 
     @Mapping(target = "id", source = "expenseId")
     @Mapping(target = "initiator.id", source = "initiatorUserId")
     Expense groupExpenseEditRequestToExpense(GroupExpenseEditRequest request);
 
     @Mapping(target = "id", source = "expenseId")
-    @Mapping(target = "initiator.id", source = "userId")
     Expense personalExpenseEditRequestToExpense(PersonalExpenseEditRequest request);
 }

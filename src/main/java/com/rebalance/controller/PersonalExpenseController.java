@@ -35,7 +35,7 @@ public class PersonalExpenseController {
         return new ResponseEntity<>(
                 expenseMapper.expenseToPersonalResponse(
                         expenseService.savePersonalExpense(
-                                expenseMapper.perosnalExpenseAddRequestToExpense(request))),
+                                expenseMapper.personalExpenseAddRequestToExpense(request))),
                 HttpStatus.OK);
     }
 

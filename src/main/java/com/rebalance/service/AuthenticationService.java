@@ -45,12 +45,17 @@ public class AuthenticationService {
         return user;
     }
 
-    public Optional<User> authorizeUser(String email, String password) {
+    public String authorizeUser(String email, String password) {
         User user = userService.getUserByEmail(email);
-        if (user.getPassword().equals(password)) {
-            return Optional.of(user);
-        }
-        return Optional.empty();
+
+        authenticationProvider.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password)
+        );
+
+        String token = jwtService.generateToken(user);
+        jwtService.saveToken(user.getId(), token);
+
+        return token;
     }
 
     private void validateUserNotExists(String email) {

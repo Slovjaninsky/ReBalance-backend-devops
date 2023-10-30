@@ -2,6 +2,7 @@ package com.rebalance.mapper;
 
 import com.rebalance.dto.request.UserCreateRequest;
 import com.rebalance.dto.response.GroupUserResponse;
+import com.rebalance.dto.response.LoginResponse;
 import com.rebalance.dto.response.UserGroupResponse;
 import com.rebalance.dto.response.UserResponse;
 import com.rebalance.entity.User;
@@ -21,4 +22,6 @@ public interface UserMapper {
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "groupId", source = "group.id")
     UserGroupResponse userGroupToResponse(UserGroup userGroup);
+
+    LoginResponse tokenToResponse(String token);
 }

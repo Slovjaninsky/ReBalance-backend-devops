@@ -59,8 +59,7 @@ public class AuthenticationService {
     }
 
     private void validateUserNotExists(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent()) {
+        if (userRepository.existsByEmail(email)) {
             throw new RebalanceException(RebalanceErrorType.RB_001);
         }
     }

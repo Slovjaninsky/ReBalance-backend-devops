@@ -32,7 +32,8 @@ public class ExpenseService {
         User initiator = userService.getUserById(expense.getUser().getId());
         groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
 
-        validateUsersInGroup(expenseUsers, expense.getGroup().getId());
+        // validate users and initiator in group
+        validateUsersInGroup(expenseUsers, expense.getInitiator(), expense.getGroup().getId());
 
         expense.setDate(LocalDate.now());
         expenseRepository.save(expense);
@@ -53,12 +54,8 @@ public class ExpenseService {
         validateUsersAmount(expenseRequest.getAmount(), expenseUsers);
         groupService.validateGroupIsNotPersonal(expense.getGroup());
 
-        // add initiator to list to validate he is also in group
-        List<ExpenseUsers> usersToValidate = new ArrayList<>(expenseUsers);
-        ExpenseUsers userToValidate = new ExpenseUsers();
-        userToValidate.setUser(expense.getUser());
-        usersToValidate.add(userToValidate);
-        validateUsersInGroup(usersToValidate, expense.getGroup().getId());
+        // validate users and initiator in group
+        validateUsersInGroup(expenseUsers, expense.getInitiator(), expense.getGroup().getId());
 
         // update fields
         expense.setAmount(expenseRequest.getAmount());
@@ -144,8 +141,10 @@ public class ExpenseService {
         }
     }
 
-    private void validateUsersInGroup(List<ExpenseUsers> users, Long groupId) {
-        groupService.validateUsersInGroup(users.stream().map(expenseUser ->
-                expenseUser.getUser().getId()).distinct().toList(), groupId);
+    private void validateUsersInGroup(List<ExpenseUsers> users, User initiator, Long groupId) {
+        Set<Long> userIds = users.stream().map(expenseUser ->
+                expenseUser.getUser().getId()).collect(Collectors.toSet());
+        userIds.add(initiator.getId());
+        groupService.validateUsersInGroup(userIds, groupId);
     }
 }

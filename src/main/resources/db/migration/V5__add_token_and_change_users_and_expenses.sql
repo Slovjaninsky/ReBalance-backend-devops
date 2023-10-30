@@ -15,3 +15,10 @@ ALTER TABLE users
 
 ALTER TABLE users
     RENAME COLUMN username TO nickname;
+
+ALTER TABLE expenses
+    RENAME COLUMN user_id TO initiator_id;
+
+ALTER TABLE expenses
+    ADD COLUMN added_by_id BIGINT NOT NULL;
+

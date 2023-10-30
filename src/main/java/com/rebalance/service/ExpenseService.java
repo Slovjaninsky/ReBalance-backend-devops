@@ -28,8 +28,6 @@ public class ExpenseService {
 
     public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers) {
         validateUsersAmount(expense.getAmount(), expenseUsers);
-
-        User initiator = userService.getUserById(expense.getUser().getId());
         groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
 
         // validate users and initiator in group

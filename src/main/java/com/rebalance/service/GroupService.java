@@ -7,6 +7,7 @@ import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
 import com.rebalance.repository.GroupRepository;
 import com.rebalance.repository.UserGroupRepository;
+import com.rebalance.security.SignedInUsernameGetter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class GroupService {
     private final UserService userService;
     private final GroupRepository groupRepository;
     private final UserGroupRepository userGroupRepository;
+    private final SignedInUsernameGetter signedInUsernameGetter;
 
     public Group getNotPersonalGroupById(Long id) {
         Group group = groupRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_201));
@@ -35,9 +37,8 @@ public class GroupService {
         return getNotPersonalGroupById(groupId).getUsers().stream().map(UserGroup::getUser).collect(Collectors.toList());
     }
 
-    public Group createGroupAndAddUser(Group groupRequest) {
-        User user = userService.getUserById(groupRequest.getCreator().getId());
-
+    public Group createGroupAndAddUser(Group groupRequest, User user) {
+        groupRequest.setCreator(user);
         Group group = groupRepository.save(groupRequest);
 
         UserGroup userGroup = new UserGroup();
@@ -46,6 +47,12 @@ public class GroupService {
         userGroupRepository.save(userGroup);
 
         return group;
+    }
+
+    public Group createGroupAndAddUser(Group groupRequest) {
+        User user = signedInUsernameGetter.getUser();
+
+        return createGroupAndAddUser(groupRequest, user);
     }
 
     public UserGroup addUserToGroup(Long groupId, String email) {

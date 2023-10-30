@@ -13,7 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -38,7 +37,7 @@ public class AuthenticationService {
         personalGroup.setCurrency(currency);
         personalGroup.setCreator(user);
         personalGroup.setPersonal(true);
-        Group group = groupService.createGroupAndAddUser(personalGroup);
+        Group group = groupService.createGroupAndAddUser(personalGroup, user);
 
         user.setCreatedGroups(Set.of(group));
 

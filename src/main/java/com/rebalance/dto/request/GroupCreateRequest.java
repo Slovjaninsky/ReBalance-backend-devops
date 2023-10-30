@@ -20,6 +20,4 @@ public class GroupCreateRequest {
     @NotNull(message = "Currency is required")
     @Pattern(message = "Currency should be an ISO 4217 compliant code", regexp = ValidationConst.currencyRegex)
     private String currency;
-    @NotNull(message = "Creator id is required")
-    private Long creatorId;
 }

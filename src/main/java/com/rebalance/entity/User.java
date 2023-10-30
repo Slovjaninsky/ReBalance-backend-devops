@@ -40,10 +40,6 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private Set<UserGroup> groups = new HashSet<>();
 
-    @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "user")
-    private Set<Expense> expenses;
-
     @Column(nullable = false, length = 6)
     @Enumerated(EnumType.STRING)
     private UserRole role;

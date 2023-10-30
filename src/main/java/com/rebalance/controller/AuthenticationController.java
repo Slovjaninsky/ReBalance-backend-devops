@@ -24,7 +24,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final UserMapper userMapper;
 
-    @PostMapping()
+    @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody @Validated UserCreateRequest user) {
         return new ResponseEntity<>(
                 userMapper.userToResponse(

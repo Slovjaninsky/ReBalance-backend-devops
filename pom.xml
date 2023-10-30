@@ -9,16 +9,16 @@
         <relativePath/>
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>DatabaseService</artifactId>
+    <artifactId>ReBalance</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>DatabaseService</name>
-    <description>Database service</description>
-	<properties>
-		<java.version>17</java.version>
-		<azure.identity.version>1.8.0</azure.identity.version>
-		<azure.storage.blob.version>12.19.0</azure.storage.blob.version>
-		<azure.storage.common.version>12.19.0</azure.storage.common.version>
-	</properties>
+    <name>ReBalance</name>
+    <description>ReBalance backend</description>
+    <properties>
+        <java.version>17</java.version>
+        <azure.identity.version>1.8.0</azure.identity.version>
+        <azure.storage.blob.version>12.19.0</azure.storage.blob.version>
+        <azure.storage.common.version>12.19.0</azure.storage.common.version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

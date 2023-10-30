@@ -12,3 +12,6 @@ ALTER TABLE token
 
 ALTER TABLE users
     ADD `role` VARCHAR(6) NOT NULL;
+
+ALTER TABLE users
+    RENAME COLUMN username TO nickname;

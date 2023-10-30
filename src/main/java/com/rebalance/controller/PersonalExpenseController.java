@@ -15,22 +15,22 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/personal")
+@RequestMapping("/personal/expenses")
 @RequiredArgsConstructor
 public class PersonalExpenseController {
     private final ExpenseService expenseService;
     private final ImageService imageService;
     private final ExpenseMapper expenseMapper;
 
-    @GetMapping("/{userId}/expenses")
-    public ResponseEntity<List<PersonalExpenseResponse>> getPersonalExpenses(@PathVariable(value = "userId") Long userId) {
+    @GetMapping()
+    public ResponseEntity<List<PersonalExpenseResponse>> getPersonalExpenses() {
         return new ResponseEntity<>(
-                expenseService.getExpensesOfUser(userId).stream()
+                expenseService.getExpensesOfUser().stream()
                         .map(expenseMapper::expenseToPersonalResponse).toList(),
                 HttpStatus.OK);
     }
 
-    @PostMapping("/expenses")
+    @PostMapping()
     public ResponseEntity<PersonalExpenseResponse> addExpense(@RequestBody @Validated PersonalExpenseAddRequest request) {
         return new ResponseEntity<>(
                 expenseMapper.expenseToPersonalResponse(
@@ -39,7 +39,7 @@ public class PersonalExpenseController {
                 HttpStatus.OK);
     }
 
-    @PutMapping("/expenses")
+    @PutMapping()
     public ResponseEntity<PersonalExpenseResponse> editExpense(@RequestBody @Validated PersonalExpenseEditRequest request) {
         return new ResponseEntity<>(
                 expenseMapper.expenseToPersonalResponse(

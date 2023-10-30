@@ -50,10 +50,10 @@ public class HttpConfiguration {
                         .requestMatchers(HttpMethod.GET, "/user/*/notifications").authenticated()
 
                         // PersonalExpenseController
-                        .requestMatchers(HttpMethod.GET, "/personal/*/expenses").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/personal/expenses").authenticated()
                         .requestMatchers(HttpMethod.POST, "/personal/expenses").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/personal/expenses").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/personal/*/expenses/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/personal/expenses/*").authenticated()
 
                         //UserController
                         .requestMatchers(HttpMethod.GET, "/user/email/*").authenticated()

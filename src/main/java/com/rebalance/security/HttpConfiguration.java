@@ -57,7 +57,7 @@ public class HttpConfiguration {
 
                         //UserController
                         .requestMatchers(HttpMethod.GET, "/user/email/*").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/user/*/groups").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/user/groups").authenticated()
 
 //                .requestMatchers(HttpMethod.GET, "/statistics").hasAuthority(UserRole.ADMIN.name())
         );

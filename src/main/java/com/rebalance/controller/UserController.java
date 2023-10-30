@@ -29,10 +29,10 @@ public class UserController {
                         userService.getUserByEmail(email)));
     }
 
-    @GetMapping("/{id}/groups")
-    public ResponseEntity<List<GroupResponse>> getAllGroupsByUserId(@PathVariable(value = "id") Long userId) {
+    @GetMapping("/groups")
+    public ResponseEntity<List<GroupResponse>> getMyGroups() {
         return ResponseEntity.ok(
-                userService.getAllGroupsOfUser(userId).stream()
+                userService.getMyGroups().stream()
                         .map(groupMapper::groupToResponse).toList());
     }
 }

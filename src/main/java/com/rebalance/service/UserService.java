@@ -2,30 +2,26 @@ package com.rebalance.service;
 
 import com.rebalance.entity.Group;
 import com.rebalance.entity.User;
-import com.rebalance.entity.UserGroup;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
+import com.rebalance.repository.GroupRepository;
 import com.rebalance.repository.UserRepository;
+import com.rebalance.security.SignedInUsernameGetter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final GroupRepository groupRepository;
+    private final SignedInUsernameGetter signedInUsernameGetter;
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
-    }
-
-    public List<Group> getAllGroupsOfUser(Long userId) {
-        return getUserById(userId).getGroups().stream()
-                .map(UserGroup::getGroup)
-                .filter(group -> !group.getPersonal()) // do not include personal group
-                .collect(Collectors.toList());
+    public List<Group> getMyGroups() {
+        User signedInUser = signedInUsernameGetter.getUser();
+        return groupRepository.findAllByUsersUserIdAndPersonal(signedInUser.getId(), false);
     }
 
     public User getUserByEmail(String email) {

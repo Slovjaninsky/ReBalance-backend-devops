@@ -79,22 +79,24 @@ public class ExpenseService {
     }
 
     public Expense savePersonalExpense(Expense expense) {
-        User initiator = userService.getUserById(expense.getInitiator().getId());
-        Long groupId = expense.getGroup().getId();
-        groupService.validateGroupIsPersonal(groupId, initiator.getId());
+        User signedInUser = signedInUsernameGetter.getUser();
+        Group group = groupService.getPersonalGroupByUserId(signedInUser.getId());
 
+        expense.setInitiator(signedInUser);
+        expense.setAddedBy(signedInUser);
+        expense.setGroup(group);
         expense.setDate(LocalDate.now());
-        expenseRepository.save(expense);
-
-        return expense;
+        return expenseRepository.save(expense);
     }
 
     public Expense editPersonalExpense(Expense expenseRequest) {
         // get existing expense
         Expense expense = getExpenseById(expenseRequest.getId());
 
+        User signedInUser = signedInUsernameGetter.getUser();
+
         // validate expense is user's personal
-        if (!expense.getGroup().isPersonalOf(expense.getInitiator())) {
+        if (!expense.getGroup().isPersonalOf(signedInUser)) {
             throw new RebalanceException(RebalanceErrorType.RB_204);
         }
 
@@ -102,9 +104,7 @@ public class ExpenseService {
         expense.setAmount(expenseRequest.getAmount());
         expense.setDescription(expenseRequest.getDescription());
         expense.setCategory(expenseRequest.getCategory());
-        expenseRepository.save(expense);
-
-        return expense;
+        return expenseRepository.save(expense);
     }
 
     public Expense getExpenseById(Long id) {
@@ -118,9 +118,10 @@ public class ExpenseService {
         expenseRepository.deleteById(expenseId);
     }
 
-    public void deletePersonalExpenseById(Long userId, Long expenseId) {
+    public void deletePersonalExpenseById(Long expenseId) {
         Expense expense = getExpenseById(expenseId);
-        groupService.validateGroupIsPersonal(expense.getGroup().getId(), userId);
+        User signedInUser = signedInUsernameGetter.getUser();
+        groupService.validateGroupIsPersonal(expense.getGroup().getId(), signedInUser.getId());
 
         expenseRepository.deleteById(expenseId);
     }
@@ -136,8 +137,9 @@ public class ExpenseService {
         return expenseRepository.findAllByGroupId(groupId);
     }
 
-    public List<Expense> getExpensesOfUser(Long userId) {
-        Group personalGroup = groupService.getPersonalGroupByUserId(userId);
+    public List<Expense> getExpensesOfUser() {
+        User signedInuser = signedInUsernameGetter.getUser();
+        Group personalGroup = groupService.getPersonalGroupByUserId(signedInuser.getId());
         return expenseRepository.findAllByGroupId(personalGroup.getId());
     }
 

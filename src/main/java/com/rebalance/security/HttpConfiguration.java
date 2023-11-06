@@ -1,5 +1,6 @@
 package com.rebalance.security;
 
+import com.rebalance.controller.APIVersion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,42 +24,42 @@ public class HttpConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                         // ConnectivityController
-                        .requestMatchers(HttpMethod.GET, "/connect/test").permitAll()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/connect/test").permitAll()
 
                         // AuthenticationController
-                        .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/user/logout").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/user/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/user/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/user/logout").authenticated()
 
                         // GroupController
-                        .requestMatchers(HttpMethod.GET, "/group/*/users").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/group/*").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/group").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/group/users").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*/users").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/group").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/group/users").authenticated()
 
                         // GroupExpenseController
-                        .requestMatchers(HttpMethod.GET, "/group/*/expenses").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/group/expenses").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/group/expenses").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/group/expenses/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*/expenses").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/group/expenses").authenticated()
+                        .requestMatchers(HttpMethod.PUT, APIVersion.current + "/group/expenses").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, APIVersion.current + "/group/expenses/*").authenticated()
 
                         // ImageController
-                        .requestMatchers(HttpMethod.GET, "/expense/*/image").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/expense/*/preview").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/expense/*/image").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/expense/*/image").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/expense/*/preview").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/expense/*/image").authenticated()
 
                         // NotificationController
-                        .requestMatchers(HttpMethod.GET, "/user/*/notifications").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/*/notifications").authenticated()
 
                         // PersonalExpenseController
-                        .requestMatchers(HttpMethod.GET, "/personal/expenses").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/personal/expenses").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/personal/expenses").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/personal/expenses/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/personal/expenses").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/personal/expenses").authenticated()
+                        .requestMatchers(HttpMethod.PUT, APIVersion.current + "/personal/expenses").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, APIVersion.current + "/personal/expenses/*").authenticated()
 
                         //UserController
-                        .requestMatchers(HttpMethod.GET, "/user/email/*").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/user/groups").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/email/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/groups").authenticated()
 
 //                .requestMatchers(HttpMethod.GET, "/statistics").hasAuthority(UserRole.ADMIN.name())
         );

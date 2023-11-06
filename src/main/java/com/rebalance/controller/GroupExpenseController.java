@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/group")
+@RequestMapping(APIVersion.current + "/group")
 @RequiredArgsConstructor
 public class GroupExpenseController {
     private final ExpenseService expenseService;

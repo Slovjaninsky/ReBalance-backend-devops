@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/expense")
+@RequestMapping(APIVersion.current + "/expense")
 @RequiredArgsConstructor
 public class ImageController {
     private final ImageService imageService;

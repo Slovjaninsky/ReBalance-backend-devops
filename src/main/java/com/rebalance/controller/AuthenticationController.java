@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/user")
+@RequestMapping(APIVersion.current + "/user")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final UserMapper userMapper;

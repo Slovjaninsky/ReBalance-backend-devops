@@ -17,6 +17,8 @@ import java.util.List;
 public class GroupExpenseEditRequest {
     @NotNull(message = "Expense id is required")
     private Long expenseId;
+    @NotNull(message = "Initiator user id is required")
+    private Long initiatorUserId;
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount should be possible")
     private Double amount;

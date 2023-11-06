@@ -14,8 +14,6 @@ import lombok.extern.jackson.Jacksonized;
 public class PersonalExpenseEditRequest {
     @NotNull(message = "Expense id is required")
     private Long expenseId;
-    @NotNull(message = "User id is required")
-    private Long userId;
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount should be possible")
     private Double amount;

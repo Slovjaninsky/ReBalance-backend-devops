@@ -22,9 +22,9 @@ public class UserCreateRequest {
     @Pattern(message = "Password should contain at least one digit, one lowercase, uppercase and special character",
             regexp = ValidationConst.passwordRegex)
     private String password;
-    @NotNull(message = "Username is required")
-    @Size(message = "Username length should be between 1 to 255 characters", min = 1, max = 255)
-    private String username;
+    @NotNull(message = "Nickname is required")
+    @Size(message = "Nickname length should be between 1 to 255 characters", min = 1, max = 255)
+    private String nickname;
     @NotNull(message = "Currency is required")
     @Pattern(message = "Currency should be an ISO 4217 compliant code", regexp = ValidationConst.currencyRegex)
     private String currency;

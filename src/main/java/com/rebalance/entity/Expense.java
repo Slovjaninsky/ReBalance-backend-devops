@@ -34,8 +34,13 @@ public class Expense {
 
     @EqualsAndHashCode.Exclude
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "initiator_id", nullable = false)
+    private User initiator;
+
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "added_by_id", nullable = false)
+    private User addedBy;
 
     @EqualsAndHashCode.Exclude
     @ManyToOne

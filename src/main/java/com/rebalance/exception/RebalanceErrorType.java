@@ -29,7 +29,11 @@ public enum RebalanceErrorType {
 
     // images
     RB_301("Image not found", HttpStatus.NOT_FOUND),
-    RB_302("Icon not found", HttpStatus.NOT_FOUND);
+    RB_302("Icon not found", HttpStatus.NOT_FOUND),
+
+    // token
+    RB_401("Invalid token", HttpStatus.BAD_REQUEST),
+    RB_402("Bad credentials", HttpStatus.BAD_REQUEST);
 
 
     private final String description;

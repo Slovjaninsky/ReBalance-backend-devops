@@ -12,10 +12,6 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Jacksonized
 public class PersonalExpenseAddRequest {
-    @NotNull(message = "Initiator user id is required")
-    private Long initiatorUserId;
-    @NotNull(message = "Group id is required")
-    private Long groupId;
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount should be possible")
     private Double amount;

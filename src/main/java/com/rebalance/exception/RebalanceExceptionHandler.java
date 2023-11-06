@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,14 +18,23 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @ControllerAdvice
 public class RebalanceExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler(RebalanceException.class)
-    ProblemDetail handleRebalanceException(RebalanceException e) {
+    private ProblemDetail getProblemDetailForErrorType(RebalanceErrorType errorType) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                e.getErrorType().getStatus(),
-                e.getErrorType().getDescription());
-        problemDetail.setTitle(e.getErrorType().toString());
+                errorType.getStatus(),
+                errorType.getDescription());
+        problemDetail.setTitle(errorType.toString());
 
         return problemDetail;
+    }
+
+    @ExceptionHandler(RebalanceException.class)
+    ProblemDetail handleRebalanceException(RebalanceException e) {
+        return getProblemDetailForErrorType(e.getErrorType());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    ProblemDetail handleBadCredentialsException(BadCredentialsException e) {
+        return getProblemDetailForErrorType(RebalanceErrorType.RB_402);
     }
 
     @Override
@@ -43,7 +53,7 @@ public class RebalanceExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    ProblemDetail handleRuntimeException(Exception ex) {
-        return handleRebalanceException(new RebalanceException(RebalanceErrorType.RB_999));
+    ProblemDetail handleRuntimeException(Exception e) {
+        return getProblemDetailForErrorType(RebalanceErrorType.RB_999);
     }
 }

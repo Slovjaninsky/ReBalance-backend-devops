@@ -7,6 +7,7 @@ import com.rebalance.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -51,5 +52,10 @@ public class AuthenticationService {
         jwtService.saveToken(user.getId(), token);
 
         return token;
+    }
+
+    public void logout() {
+        String jwt = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        jwtService.deleteToken(jwt);
     }
 }

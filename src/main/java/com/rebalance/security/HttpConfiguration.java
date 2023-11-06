@@ -22,12 +22,13 @@ public class HttpConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
+                        // ConnectivityController
+                        .requestMatchers(HttpMethod.GET, "/connect/test").permitAll()
+
                         // AuthenticationController
                         .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
-
-                        // ConnectivityController
-                        .requestMatchers(HttpMethod.GET, "/connect/test").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/logout").authenticated()
 
                         // GroupController
                         .requestMatchers(HttpMethod.GET, "/group/*/users").authenticated()

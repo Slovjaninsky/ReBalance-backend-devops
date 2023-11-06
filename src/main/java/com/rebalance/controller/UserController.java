@@ -5,6 +5,8 @@ import com.rebalance.dto.response.UserResponse;
 import com.rebalance.mapper.GroupMapper;
 import com.rebalance.mapper.UserMapper;
 import com.rebalance.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "User management")
 @AllArgsConstructor
 @RestController
 @RequestMapping(APIVersion.current + "/user")
@@ -22,6 +25,7 @@ public class UserController {
     private final UserMapper userMapper;
     private final GroupMapper groupMapper;
 
+    @Operation(summary = "Get user by email")
     @GetMapping("/email/{email}")
     public ResponseEntity<UserResponse> getUserByEmail(@PathVariable("email") String email) {
         return ResponseEntity.ok(
@@ -29,6 +33,7 @@ public class UserController {
                         userService.getUserByEmail(email)));
     }
 
+    @Operation(summary = "Get my groups")
     @GetMapping("/groups")
     public ResponseEntity<List<GroupResponse>> getMyGroups() {
         return ResponseEntity.ok(

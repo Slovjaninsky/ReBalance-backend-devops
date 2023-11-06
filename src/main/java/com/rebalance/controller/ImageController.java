@@ -2,6 +2,8 @@ package com.rebalance.controller;
 
 import com.rebalance.service.ExpenseService;
 import com.rebalance.service.ImageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag(name = "Image management")
 @RestController
 @RequestMapping(APIVersion.current + "/expense")
 @RequiredArgsConstructor
@@ -17,6 +20,7 @@ public class ImageController {
     private final ImageService imageService;
     private final ExpenseService expenseService;
 
+    @Operation(summary = "Get image")
     @GetMapping("/{expenseId}/image")
     public ResponseEntity<Map<String, String>> getImage(@PathVariable("expenseId") Long expenseId) {
         String base64Image = imageService.getImageByGlobalId(expenseId);
@@ -27,6 +31,7 @@ public class ImageController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get image preview")
     @GetMapping("/{expenseId}/preview")
     public ResponseEntity<Map<String, String>> getImagePreview(@PathVariable("expenseId") Long expenseId) {
         String base64Image = imageService.getImageIconByGlobalId(expenseId);
@@ -37,6 +42,7 @@ public class ImageController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Add image to existing expense")
     @PostMapping("/{expenseId}/image")
     public ResponseEntity<String> addImageToExpense(@PathVariable("expenseId") Long expenseId, @RequestBody Map<String, String> requestBody) {
         expenseService.throwExceptionIfExpensesWithGlobalIdNotFound(expenseId);

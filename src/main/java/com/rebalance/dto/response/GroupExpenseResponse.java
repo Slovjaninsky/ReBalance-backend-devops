@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -14,7 +14,7 @@ public class GroupExpenseResponse {
     private Long id;
     private Double amount;
     private String description;
-    private LocalDate date;
+    private LocalDateTime date;
     private String category;
     private List<GroupExpenseUserResponse> users;
 }

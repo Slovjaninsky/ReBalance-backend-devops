@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/user")
+@RequestMapping(APIVersion.current + "/user")
 public class NotificationController {
     private final NotificationService notificationService;
     private final NotificationMapper notificationMapper;

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/group")
+@RequestMapping(APIVersion.current + "/group")
 @AllArgsConstructor
 public class GroupController {
     private final GroupService groupService;

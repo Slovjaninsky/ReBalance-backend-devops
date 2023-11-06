@@ -33,7 +33,7 @@ public class UserController {
                         userService.getUserByEmail(email)));
     }
 
-    @Operation(summary = "Get my groups")
+    @Operation(summary = "Get groups of user")
     @GetMapping("/groups")
     public ResponseEntity<List<GroupResponse>> getMyGroups() {
         return ResponseEntity.ok(

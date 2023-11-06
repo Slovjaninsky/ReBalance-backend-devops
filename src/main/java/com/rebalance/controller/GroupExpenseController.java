@@ -9,12 +9,12 @@ import com.rebalance.service.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Group expenses management")
 @RestController
@@ -27,10 +27,11 @@ public class GroupExpenseController {
 
     @Operation(summary = "Get expenses of group")
     @GetMapping("/{groupId}/expenses")
-    public ResponseEntity<List<GroupExpenseResponse>> getExpensesOfGroup(@PathVariable(value = "groupId") Long groupId) {
+    public ResponseEntity<Page<GroupExpenseResponse>> getExpensesOfGroup(@PathVariable(value = "groupId") Long groupId,
+                                                                         Pageable pageable) {
         return new ResponseEntity<>(
-                expenseService.getExpensesOfGroup(groupId).stream()
-                        .map(expenseMapper::expenseToGroupResponse).toList(),
+                expenseService.getExpensesOfGroup(groupId, pageable)
+                        .map(expenseMapper::expenseToGroupResponse),
                 HttpStatus.OK);
     }
 

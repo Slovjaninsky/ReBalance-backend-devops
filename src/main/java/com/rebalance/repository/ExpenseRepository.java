@@ -1,6 +1,8 @@
 package com.rebalance.repository;
 
 import com.rebalance.entity.Expense;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,5 +20,5 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("SELECT e.date FROM Expense e where e.group.id = :groupId")
     List<LocalDate> findAllDateStampsByGroup(@Param("groupId") Long groupId);
 
-    List<Expense> findAllByGroupId(Long id);
+    Page<Expense> findAllByGroupId(Long id, Pageable pageable);
 }

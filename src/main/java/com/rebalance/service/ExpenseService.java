@@ -11,6 +11,8 @@ import com.rebalance.repository.ExpenseUsersRepository;
 import com.rebalance.security.SignedInUsernameGetter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -131,15 +133,15 @@ public class ExpenseService {
         }
     }
 
-    public List<Expense> getExpensesOfGroup(Long groupId) {
+    public Page<Expense> getExpensesOfGroup(Long groupId, Pageable pageable) {
         groupService.validateGroupExistsAndNotPersonal(groupId);
-        return expenseRepository.findAllByGroupId(groupId);
+        return expenseRepository.findAllByGroupId(groupId, pageable);
     }
 
-    public List<Expense> getExpensesOfUser() {
+    public Page<Expense> getExpensesOfUser(Pageable pageable) {
         User signedInuser = signedInUsernameGetter.getUser();
         Group personalGroup = groupService.getPersonalGroupByUserId(signedInuser.getId());
-        return expenseRepository.findAllByGroupId(personalGroup.getId());
+        return expenseRepository.findAllByGroupId(personalGroup.getId(), pageable);
     }
 
     private void validateUsersAmount(Double amount, List<ExpenseUsers> expenseUsers) {

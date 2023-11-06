@@ -88,7 +88,9 @@ public class ExpenseService {
         expense.setInitiator(signedInUser);
         expense.setAddedBy(signedInUser);
         expense.setGroup(group);
-        expense.setDate(LocalDate.now());
+        if (expense.getDate() == null) {
+            expense.setDate(LocalDateTime.now());
+        }
         return expenseRepository.save(expense);
     }
 

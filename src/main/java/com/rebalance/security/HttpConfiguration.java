@@ -23,6 +23,12 @@ public class HttpConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
+                        // Swagger
+                        .requestMatchers(HttpMethod.GET, "/v3/api-docs.yaml").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
+
                         // ConnectivityController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/connect/test").permitAll()
 
@@ -60,6 +66,8 @@ public class HttpConfiguration {
                         //UserController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/email/*").authenticated()
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/groups").authenticated()
+
+                        .anyRequest().denyAll()
 
 //                .requestMatchers(HttpMethod.GET, "/statistics").hasAuthority(UserRole.ADMIN.name())
         );

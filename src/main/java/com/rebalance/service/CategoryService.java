@@ -8,8 +8,10 @@ import com.rebalance.repository.CategoryRepository;
 import com.rebalance.repository.GroupCategoryRepository;
 import com.rebalance.security.SignedInUsernameGetter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -23,12 +25,12 @@ public class CategoryService {
     public List<Category> getPersonalCategories() {
         User signedInUser = signedInUsernameGetter.getUser();
         Group personalGroup = groupService.getPersonalGroupByUserId(signedInUser.getId());
-        return categoryRepository.findAllByGroupsGroupId(personalGroup.getId());
+        return categoryRepository.findAllByGroupsGroupId(personalGroup.getId(), Sort.by(Sort.Direction.DESC, "groups.lastUsed"));
     }
 
     public List<Category> getGroupCategories(Long groupId) {
         Group group = groupService.getNotPersonalGroupById(groupId);
-        return categoryRepository.findAllByGroupsGroupId(group.getId());
+        return categoryRepository.findAllByGroupsGroupId(group.getId(), Sort.by(Sort.Direction.DESC, "groups.lastUsed"));
     }
 
     private Category getOrCreateCategory(String name) {
@@ -40,8 +42,13 @@ public class CategoryService {
     public GroupCategory getOrCreateGroupCategory(String categoryName, Group group) {
         Category category = getOrCreateCategory(categoryName);
 
-        return groupCategoryRepository.findByCategoryAndGroup(category, group)
+        GroupCategory groupCategory = groupCategoryRepository.findByCategoryAndGroup(category, group)
                 .orElseGet(() -> groupCategoryRepository.save(
                         GroupCategory.builder().category(category).group(group).build()));
+
+        groupCategory.setLastUsed(LocalDateTime.now());
+        groupCategoryRepository.save(groupCategory);
+
+        return groupCategory;
     }
 }

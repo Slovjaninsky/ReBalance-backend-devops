@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -19,7 +20,8 @@ public class GroupCategory {
     @Column
     private Long id;
 
-    //TODO: add last used date and sort by it while getting
+    @Column
+    private LocalDateTime lastUsed;
 
     @EqualsAndHashCode.Exclude
     @ManyToOne

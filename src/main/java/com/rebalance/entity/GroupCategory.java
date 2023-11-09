@@ -11,19 +11,28 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories")
+@Table(name = "group_category")
 @Entity
-public class Category {
+public class GroupCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    //TODO: add last used date and sort by it while getting
+
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "group_id", nullable = false)
+    private Group group;
+
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "category")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<GroupCategory> groups;
+    private Set<Expense> expenses;
 }

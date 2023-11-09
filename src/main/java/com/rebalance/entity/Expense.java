@@ -29,8 +29,10 @@ public class Expense {
     @Column(nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false)
-    private String category;
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private GroupCategory category;
 
     @EqualsAndHashCode.Exclude
     @ManyToOne

@@ -27,10 +27,11 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final GroupService groupService;
     private final NotificationService notificationService;
+    private final CategoryService categoryService;
     private final ExpenseUsersRepository expenseUsersRepository;
     private final SignedInUsernameGetter signedInUsernameGetter;
 
-    public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers) {
+    public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers, String category) {
         // validate input data
         validateUsersAmount(expense.getAmount(), expenseUsers);
         groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
@@ -41,6 +42,7 @@ public class ExpenseService {
         // set auto generated fields
         expense.setAddedBy(signedInUsernameGetter.getUser());
         expense.setDate(LocalDate.now());
+        expense.setCategory(categoryService.getOrCreateGroupCategory(category, expense.getGroup()));
         expenseRepository.save(expense);
 
         // save participants of expense
@@ -53,7 +55,7 @@ public class ExpenseService {
     }
 
     @Transactional
-    public Expense editGroupExpense(Expense expenseRequest, List<ExpenseUsers> expenseUsers) {
+    public Expense editGroupExpense(Expense expenseRequest, List<ExpenseUsers> expenseUsers, String category) {
         // get existing expense
         Expense expense = getExpenseById(expenseRequest.getId());
 
@@ -67,7 +69,7 @@ public class ExpenseService {
         // update fields
         expense.setAmount(expenseRequest.getAmount());
         expense.setDescription(expenseRequest.getDescription());
-        expense.setCategory(expenseRequest.getCategory());
+        expense.setCategory(categoryService.getOrCreateGroupCategory(category, expense.getGroup()));
         expenseRepository.save(expense);
 
         // update users
@@ -79,7 +81,7 @@ public class ExpenseService {
         return expense;
     }
 
-    public Expense savePersonalExpense(Expense expense) {
+    public Expense savePersonalExpense(Expense expense, String category) {
         User signedInUser = signedInUsernameGetter.getUser();
         Group group = groupService.getPersonalGroupByUserId(signedInUser.getId());
 
@@ -87,10 +89,11 @@ public class ExpenseService {
         expense.setAddedBy(signedInUser);
         expense.setGroup(group);
         expense.setDate(LocalDate.now());
+        expense.setCategory(categoryService.getOrCreateGroupCategory(category, group));
         return expenseRepository.save(expense);
     }
 
-    public Expense editPersonalExpense(Expense expenseRequest) {
+    public Expense editPersonalExpense(Expense expenseRequest, String category) {
         // get existing expense
         Expense expense = getExpenseById(expenseRequest.getId());
 
@@ -104,7 +107,7 @@ public class ExpenseService {
         // update fields
         expense.setAmount(expenseRequest.getAmount());
         expense.setDescription(expenseRequest.getDescription());
-        expense.setCategory(expenseRequest.getCategory());
+        expense.setCategory(categoryService.getOrCreateGroupCategory(category, expense.getGroup()));
         return expenseRepository.save(expense);
     }
 

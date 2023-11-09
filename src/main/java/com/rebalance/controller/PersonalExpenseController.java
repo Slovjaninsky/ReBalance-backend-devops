@@ -40,7 +40,8 @@ public class PersonalExpenseController {
         return new ResponseEntity<>(
                 expenseMapper.expenseToPersonalResponse(
                         expenseService.savePersonalExpense(
-                                expenseMapper.personalExpenseAddRequestToExpense(request))),
+                                expenseMapper.personalExpenseAddRequestToExpense(request),
+                                request.getCategory())),
                 HttpStatus.OK);
     }
 
@@ -50,7 +51,8 @@ public class PersonalExpenseController {
         return new ResponseEntity<>(
                 expenseMapper.expenseToPersonalResponse(
                         expenseService.editPersonalExpense(
-                                expenseMapper.personalExpenseEditRequestToExpense(request))),
+                                expenseMapper.personalExpenseEditRequestToExpense(request),
+                                request.getCategory())),
                 HttpStatus.OK);
     }
 

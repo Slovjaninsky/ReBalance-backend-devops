@@ -44,7 +44,7 @@ public class CategoryService {
 
         GroupCategory groupCategory = groupCategoryRepository.findByCategoryAndGroup(category, group)
                 .orElseGet(() -> groupCategoryRepository.save(
-                        GroupCategory.builder().category(category).group(group).build()));
+                        GroupCategory.builder().category(category).group(group).lastUsed(LocalDateTime.now()).build()));
 
         groupCategory.setLastUsed(LocalDateTime.now());
         groupCategoryRepository.save(groupCategory);

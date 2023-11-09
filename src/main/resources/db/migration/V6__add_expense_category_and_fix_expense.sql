@@ -15,6 +15,7 @@ CREATE TABLE categories
 CREATE TABLE group_category
 (
     id          BIGINT AUTO_INCREMENT NOT NULL,
+    last_used   datetime              NOT NULL,
     group_id    BIGINT                NOT NULL,
     category_id BIGINT                NOT NULL,
     CONSTRAINT pk_group_category PRIMARY KEY (id)

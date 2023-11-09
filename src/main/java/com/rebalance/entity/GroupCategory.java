@@ -20,7 +20,7 @@ public class GroupCategory {
     @Column
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime lastUsed;
 
     @EqualsAndHashCode.Exclude

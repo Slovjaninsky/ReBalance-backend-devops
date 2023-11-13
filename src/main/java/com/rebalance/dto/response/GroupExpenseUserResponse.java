@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class GroupExpenseUserResponse {
     private Long id;
     private Double amount;
+    private Integer multiplier;
     private Long userId;
 }

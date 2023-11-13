@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -27,9 +26,10 @@ public class PersonalExpenseController {
 
     @Operation(summary = "Get personal expenses")
     @GetMapping()
-    public ResponseEntity<Page<PersonalExpenseResponse>> getPersonalExpenses(Pageable pageable) {
+    public ResponseEntity<Page<PersonalExpenseResponse>> getPersonalExpenses(@RequestParam(defaultValue = "0") Integer page,
+                                                                             @RequestParam(defaultValue = "20") Integer size) {
         return new ResponseEntity<>(
-                expenseService.getExpensesOfUser(pageable)
+                expenseService.getExpensesOfUser(page, size)
                         .map(expenseMapper::expenseToPersonalResponse),
                 HttpStatus.OK);
     }

@@ -12,7 +12,9 @@ import com.rebalance.security.SignedInUsernameGetter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -140,14 +142,16 @@ public class ExpenseService {
         }
     }
 
-    public Page<Expense> getExpensesOfGroup(Long groupId, Pageable pageable) {
+    public Page<Expense> getExpensesOfGroup(Long groupId, Integer page, Integer size) {
         groupService.validateGroupExistsAndNotPersonal(groupId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
         return expenseRepository.findAllByGroupId(groupId, pageable);
     }
 
-    public Page<Expense> getExpensesOfUser(Pageable pageable) {
+    public Page<Expense> getExpensesOfUser(Integer page, Integer size) {
         User signedInuser = signedInUsernameGetter.getUser();
         Group personalGroup = groupService.getPersonalGroupByUserId(signedInuser.getId());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
         return expenseRepository.findAllByGroupId(personalGroup.getId(), pageable);
     }
 

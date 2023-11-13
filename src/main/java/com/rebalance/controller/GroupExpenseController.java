@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -28,9 +27,10 @@ public class GroupExpenseController {
     @Operation(summary = "Get expenses of group")
     @GetMapping("/{groupId}/expenses")
     public ResponseEntity<Page<GroupExpenseResponse>> getExpensesOfGroup(@PathVariable(value = "groupId") Long groupId,
-                                                                         Pageable pageable) {
+                                                                         @RequestParam(defaultValue = "0") Integer page,
+                                                                         @RequestParam(defaultValue = "20") Integer size) {
         return new ResponseEntity<>(
-                expenseService.getExpensesOfGroup(groupId, pageable)
+                expenseService.getExpensesOfGroup(groupId, page, size)
                         .map(expenseMapper::expenseToGroupResponse),
                 HttpStatus.OK);
     }

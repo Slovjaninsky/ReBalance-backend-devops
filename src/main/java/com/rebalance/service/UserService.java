@@ -12,6 +12,7 @@ import com.rebalance.security.SignedInUsernameGetter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,15 @@ public class UserService {
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
+    }
+
+    public User getLoggedInUser() {
+        User user = signedInUsernameGetter.getUser();
+        user.setCreatedGroups(
+                new HashSet<>(List.of(
+                        groupRepository.findByCreatorIdAndPersonal(user.getId(), true).get())
+                ));
+        return user;
     }
 
     public User save(User user) {

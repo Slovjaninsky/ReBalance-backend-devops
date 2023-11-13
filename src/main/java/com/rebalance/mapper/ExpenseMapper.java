@@ -16,6 +16,8 @@ public interface ExpenseMapper {
     @Mapping(target = "userId", source = "user.id")
     GroupExpenseUserResponse expenseUserToGroupExpenseResponse(ExpenseUsers user);
 
+    @Mapping(target = "initiatorUserId", source = "initiator.id")
+    @Mapping(target = "addedByUserId", source = "addedBy.id")
     @Mapping(target = "users", source = "expenseUsers")
     @Mapping(target = "category", source = "category.category.name")
     GroupExpenseResponse expenseToGroupResponse(Expense expense);

@@ -8,6 +8,7 @@ import com.rebalance.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,15 @@ public class UserController {
         return ResponseEntity.ok(
                 userMapper.userToResponse(
                         userService.getUserByEmail(email)));
+    }
+
+    @Operation(summary = "Get logged in user info")
+    @GetMapping("/info")
+    public ResponseEntity<UserResponse> getMyInfo() {
+        return new ResponseEntity<>(
+                userMapper.userToResponse(
+                        userService.getLoggedInUser()),
+                HttpStatus.OK);
     }
 
     @Operation(summary = "Get groups of user")

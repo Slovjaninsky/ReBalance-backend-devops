@@ -70,6 +70,7 @@ public class HttpConfiguration {
 
                         //UserController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/email/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/info").authenticated()
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/groups").authenticated()
 
                         .anyRequest().denyAll()

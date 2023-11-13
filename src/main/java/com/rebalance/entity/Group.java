@@ -45,12 +45,12 @@ public class Group {
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "group")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    Set<Expense> expenses;
+    private Set<Expense> expenses;
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "group")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    Set<Category> categories;
+    private Set<GroupCategory> categories = new HashSet<>();
 
     public Boolean isPersonalOf(User user) {
         return personal && creator.getId().equals(user.getId());

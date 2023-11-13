@@ -37,6 +37,10 @@ public class HttpConfiguration {
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/user/login").permitAll()
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/user/logout").authenticated()
 
+                        // CategoryController
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/personal/categories").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*/categories").authenticated()
+
                         // GroupController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*/users").authenticated()
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*").authenticated()

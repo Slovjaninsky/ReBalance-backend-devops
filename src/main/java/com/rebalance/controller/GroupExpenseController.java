@@ -42,7 +42,8 @@ public class GroupExpenseController {
                 expenseMapper.expenseToGroupResponse(
                         expenseService.saveGroupExpense(
                                 expenseMapper.groupExpenseAddRequestToExpense(request),
-                                expenseMapper.groupExpenseUserRequestListToExpenseUserList(request.getUsers()))),
+                                expenseMapper.groupExpenseUserRequestListToExpenseUserList(request.getUsers()),
+                                request.getCategory())),
                 HttpStatus.OK);
     }
 
@@ -53,7 +54,8 @@ public class GroupExpenseController {
                 expenseMapper.expenseToGroupResponse(
                         expenseService.editGroupExpense(
                                 expenseMapper.groupExpenseEditRequestToExpense(request),
-                                expenseMapper.groupExpenseUserRequestListToExpenseUserList(request.getUsers()))),
+                                expenseMapper.groupExpenseUserRequestListToExpenseUserList(request.getUsers()),
+                                request.getCategory())),
                 HttpStatus.OK);
     }
 

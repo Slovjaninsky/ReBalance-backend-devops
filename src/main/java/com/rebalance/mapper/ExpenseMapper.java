@@ -19,9 +19,11 @@ public interface ExpenseMapper {
     @Mapping(target = "initiatorUserId", source = "initiator.id")
     @Mapping(target = "addedByUserId", source = "addedBy.id")
     @Mapping(target = "users", source = "expenseUsers")
+    @Mapping(target = "category", source = "category.category.name")
     GroupExpenseResponse expenseToGroupResponse(Expense expense);
 
 
+    @Mapping(target = "category", source = "category.category.name")
     PersonalExpenseResponse expenseToPersonalResponse(Expense expense);
 
 
@@ -33,14 +35,18 @@ public interface ExpenseMapper {
 
     @Mapping(target = "initiator.id", source = "initiatorUserId")
     @Mapping(target = "group.id", source = "groupId")
+    @Mapping(target = "category", ignore = true)
     Expense groupExpenseAddRequestToExpense(GroupExpenseAddRequest request);
 
+    @Mapping(target = "category", ignore = true)
     Expense personalExpenseAddRequestToExpense(PersonalExpenseAddRequest request);
 
     @Mapping(target = "id", source = "expenseId")
     @Mapping(target = "initiator.id", source = "initiatorUserId")
+    @Mapping(target = "category", ignore = true)
     Expense groupExpenseEditRequestToExpense(GroupExpenseEditRequest request);
 
     @Mapping(target = "id", source = "expenseId")
+    @Mapping(target = "category", ignore = true)
     Expense personalExpenseEditRequestToExpense(PersonalExpenseEditRequest request);
 }

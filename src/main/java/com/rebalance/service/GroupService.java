@@ -26,7 +26,9 @@ public class GroupService {
     public Group getGroupInfoById(Long groupId) {
         Group group = getNotPersonalGroupById(groupId);
         User signedInUser = signedInUsernameGetter.getUser();
+        // leave only current user to properly map favorite field
         group.getUsers().removeIf(userGroup -> !userGroup.getUser().equals(signedInUser));
+
         return group;
     }
 
@@ -61,6 +63,7 @@ public class GroupService {
         User signedInUser = signedInUsernameGetter.getUser();
 
         Group group = createGroupAndAddUser(groupRequest, signedInUser);
+        // leave only current user to properly map favorite field
         group.getUsers().removeIf(userGroup -> !userGroup.getUser().equals(signedInUser));
 
         return group;

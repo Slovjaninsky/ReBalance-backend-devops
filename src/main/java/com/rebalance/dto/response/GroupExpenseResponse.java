@@ -12,6 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 public class GroupExpenseResponse {
     private Long id;
+    private Long initiatorUserId;
+    private Long addedByUserId;
     private Double amount;
     private String description;
     private LocalDate date;

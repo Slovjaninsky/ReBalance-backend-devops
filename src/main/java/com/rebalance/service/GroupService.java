@@ -68,6 +68,20 @@ public class GroupService {
         return userGroupRepository.save(userGroup);
     }
 
+    public void setFavorite(Long groupId, Boolean favorite) {
+        validateGroupExistsAndNotPersonal(groupId);
+        User user = signedInUsernameGetter.getUser();
+        UserGroup userGroup = getUserGroup(user.getId(), groupId);
+
+        userGroup.setFavorite(favorite);
+        userGroupRepository.save(userGroup);
+    }
+
+    private UserGroup getUserGroup(Long userId, Long groupId) {
+        return userGroupRepository.findByUserIdAndGroupId(userId, groupId)
+                .orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_202));
+    }
+
     public void validateGroupExistsAndNotPersonal(Long groupId) {
         if (!groupRepository.existsByIdAndPersonal(groupId, false)) {
             throw new RebalanceException(RebalanceErrorType.RB_201);

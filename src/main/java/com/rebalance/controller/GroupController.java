@@ -2,6 +2,7 @@ package com.rebalance.controller;
 
 import com.rebalance.dto.request.GroupAddUserRequest;
 import com.rebalance.dto.request.GroupCreateRequest;
+import com.rebalance.dto.request.GroupFavoriteRequest;
 import com.rebalance.dto.response.GroupResponse;
 import com.rebalance.dto.response.GroupUserResponse;
 import com.rebalance.dto.response.UserGroupResponse;
@@ -62,5 +63,12 @@ public class GroupController {
                         groupService.addUserToGroup(request.getGroupId(), request.getEmail())),
                 HttpStatus.OK
         );
+    }
+
+    @Operation(summary = "Make group favorite ot not")
+    @PostMapping("/set-favorite")
+    public ResponseEntity<String> setFavorite(@RequestBody @Validated GroupFavoriteRequest request) {
+        groupService.setFavorite(request.getGroupId(), request.getFavorite());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

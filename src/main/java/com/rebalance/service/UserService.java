@@ -2,26 +2,39 @@ package com.rebalance.service;
 
 import com.rebalance.entity.Group;
 import com.rebalance.entity.User;
+import com.rebalance.entity.UserGroup;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
 import com.rebalance.repository.GroupRepository;
+import com.rebalance.repository.UserGroupRepository;
 import com.rebalance.repository.UserRepository;
 import com.rebalance.security.SignedInUsernameGetter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
+    private final UserGroupRepository userGroupRepository;
     private final SignedInUsernameGetter signedInUsernameGetter;
 
     public List<Group> getMyGroups() {
         User signedInUser = signedInUsernameGetter.getUser();
-        return groupRepository.findAllByUsersUserIdAndPersonal(signedInUser.getId(), false);
+        // get groups of user
+        List<Group> groups = groupRepository.findAllByUsersUserIdAndPersonal(signedInUser.getId(), false);
+        // get UserGroup for found groups and with current user id
+        List<UserGroup> users = userGroupRepository.findByUserIdAndGroupIdIn(signedInUser.getId(), groups.stream()
+                .map(Group::getId).toList());
+        // set users (only current user) for each group
+        groups.forEach(group -> group.setUsers(users.stream()
+                .filter(userGroup -> userGroup.getGroup().equals(group))
+                .collect(Collectors.toSet())));
+        return groups;
     }
 
     public User getUserByEmail(String email) {

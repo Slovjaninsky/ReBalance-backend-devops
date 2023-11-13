@@ -32,7 +32,7 @@ public class GroupService {
         return group;
     }
 
-    private Group getNotPersonalGroupById(Long id) {
+    public Group getNotPersonalGroupById(Long id) {
         Group group = groupRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_201));
         validateGroupIsNotPersonal(group);
         return group;

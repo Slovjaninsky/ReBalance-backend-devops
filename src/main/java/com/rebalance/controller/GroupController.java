@@ -42,7 +42,7 @@ public class GroupController {
     public ResponseEntity<GroupResponse> getGroupById(@PathVariable(value = "id") Long id) {
         return ResponseEntity.ok(
                 groupMapper.groupToResponse(
-                        groupService.getNotPersonalGroupById(id)));
+                        groupService.getGroupInfoById(id)));
     }
 
     @Operation(summary = "Create new group")

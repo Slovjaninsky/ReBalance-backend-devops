@@ -1,6 +1,6 @@
 package com.rebalance.controller;
 
-import com.rebalance.dto.response.GroupWithFavoriteResponse;
+import com.rebalance.dto.response.GroupResponse;
 import com.rebalance.dto.response.UserResponse;
 import com.rebalance.mapper.GroupMapper;
 import com.rebalance.mapper.UserMapper;
@@ -35,9 +35,9 @@ public class UserController {
 
     @Operation(summary = "Get groups of user")
     @GetMapping("/groups")
-    public ResponseEntity<List<GroupWithFavoriteResponse>> getMyGroups() {
+    public ResponseEntity<List<GroupResponse>> getMyGroups() {
         return ResponseEntity.ok(
                 userService.getMyGroups().stream()
-                        .map(groupMapper::groupToResponseWithFavorite).toList());
+                        .map(groupMapper::groupToResponse).toList());
     }
 }

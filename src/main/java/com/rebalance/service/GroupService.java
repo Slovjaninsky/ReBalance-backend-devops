@@ -23,7 +23,14 @@ public class GroupService {
     private final UserGroupRepository userGroupRepository;
     private final SignedInUsernameGetter signedInUsernameGetter;
 
-    public Group getNotPersonalGroupById(Long id) {
+    public Group getGroupInfoById(Long groupId) {
+        Group group = getNotPersonalGroupById(groupId);
+        User signedInUser = signedInUsernameGetter.getUser();
+        group.getUsers().removeIf(userGroup -> !userGroup.getUser().equals(signedInUser));
+        return group;
+    }
+
+    private Group getNotPersonalGroupById(Long id) {
         Group group = groupRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_201));
         validateGroupIsNotPersonal(group);
         return group;
@@ -51,9 +58,12 @@ public class GroupService {
     }
 
     public Group createGroupAndAddUser(Group groupRequest) {
-        User user = signedInUsernameGetter.getUser();
+        User signedInUser = signedInUsernameGetter.getUser();
 
-        return createGroupAndAddUser(groupRequest, user);
+        Group group = createGroupAndAddUser(groupRequest, signedInUser);
+        group.getUsers().removeIf(userGroup -> !userGroup.getUser().equals(signedInUser));
+
+        return group;
     }
 
     public UserGroup addUserToGroup(Long groupId, String email) {

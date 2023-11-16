@@ -51,6 +51,9 @@ public class ExpenseService {
 
         // save participants of expense
         expenseUsers.forEach(u -> u.setExpense(expense));
+        expenseUsers.forEach(u -> {
+            if (u.getMultiplier() == null) u.setMultiplier(1);
+        });
         expenseUsersRepository.saveAll(expenseUsers);
 
         // set expense participants for response

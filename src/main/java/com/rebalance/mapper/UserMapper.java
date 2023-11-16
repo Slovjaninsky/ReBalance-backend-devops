@@ -1,10 +1,7 @@
 package com.rebalance.mapper;
 
 import com.rebalance.dto.request.UserCreateRequest;
-import com.rebalance.dto.response.GroupUserResponse;
-import com.rebalance.dto.response.LoginResponse;
-import com.rebalance.dto.response.UserGroupResponse;
-import com.rebalance.dto.response.UserResponse;
+import com.rebalance.dto.response.*;
 import com.rebalance.entity.User;
 import com.rebalance.entity.UserGroup;
 import org.mapstruct.Mapper;
@@ -14,6 +11,9 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
     @Mapping(target = "personalGroupId", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getId())")
     UserResponse userToResponse(User user);
+
+    @Mapping(target = "personalGroupId", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getId())")
+    UserWithTokenResponse userToResponseWithToken(User user, String token);
 
     GroupUserResponse userToGroupResponse(User user);
 

@@ -3,7 +3,8 @@ package com.rebalance.controller;
 import com.rebalance.dto.request.LoginRequest;
 import com.rebalance.dto.request.UserCreateRequest;
 import com.rebalance.dto.response.LoginResponse;
-import com.rebalance.dto.response.UserResponse;
+import com.rebalance.dto.response.UserWithTokenResponse;
+import com.rebalance.entity.User;
 import com.rebalance.mapper.UserMapper;
 import com.rebalance.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,11 +28,12 @@ public class AuthenticationController {
 
     @Operation(summary = "Register new user")
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody @Validated UserCreateRequest user) {
+    public ResponseEntity<UserWithTokenResponse> register(@RequestBody @Validated UserCreateRequest request) {
+        User user = authenticationService.createUser(
+                userMapper.createRequestToUser(request), request.getCurrency());
+        String token = authenticationService.authorizeUser(request.getEmail(), request.getPassword());
         return new ResponseEntity<>(
-                userMapper.userToResponse(
-                        authenticationService.createUser(
-                                userMapper.createRequestToUser(user), user.getCurrency())),
+                userMapper.userToResponseWithToken(user, token),
                 HttpStatus.CREATED);
     }
 

@@ -42,6 +42,10 @@ public class UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_002));
     }
 
+    public User getUserByEmailOnLogin(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_402));
+    }
+
     public User getLoggedInUser() {
         User user = signedInUsernameGetter.getUser();
         user.setCreatedGroups(

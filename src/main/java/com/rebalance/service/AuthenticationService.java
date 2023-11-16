@@ -42,7 +42,7 @@ public class AuthenticationService {
     }
 
     public String authorizeUser(String email, String password) {
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserByEmailOnLogin(email);
 
         authenticationProvider.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)

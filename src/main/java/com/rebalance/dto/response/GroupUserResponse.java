@@ -11,4 +11,5 @@ public class GroupUserResponse {
     private Long id;
     private String nickname;
     private String email;
+    private Double balance;
 }

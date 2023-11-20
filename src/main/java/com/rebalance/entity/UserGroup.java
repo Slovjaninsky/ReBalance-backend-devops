@@ -20,6 +20,10 @@ public class UserGroup {
     @ColumnDefault("0")
     private Boolean favorite = false;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Double balance = 0d;
+
     @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

@@ -1,0 +1,2 @@
+ALTER TABLE user_group
+    ADD balance DOUBLE NOT NULL DEFAULT 0;

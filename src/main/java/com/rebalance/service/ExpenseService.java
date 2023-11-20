@@ -79,9 +79,13 @@ public class ExpenseService {
         Double oldAmount = expense.getAmount();
 
         // update fields
+        expense.setInitiator(expenseRequest.getInitiator());
         expense.setAmount(expenseRequest.getAmount());
         expense.setDescription(expenseRequest.getDescription());
         expense.setCategory(categoryService.getOrCreateGroupCategory(category, expense.getGroup()));
+        if (expenseRequest.getDate() != null) {
+            expense.setDate(expenseRequest.getDate());
+        }
         expenseRepository.save(expense);
 
         // update users balances in group

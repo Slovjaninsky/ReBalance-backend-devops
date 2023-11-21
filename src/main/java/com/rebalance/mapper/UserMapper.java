@@ -15,6 +15,7 @@ public interface UserMapper {
     @Mapping(target = "personalGroupId", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getId())")
     UserWithTokenResponse userToResponseWithToken(User user, String token);
 
+    @Mapping(target = "balance", expression = "java(user.getGroups().stream().findFirst().get().getBalance())")
     GroupUserResponse userToGroupResponse(User user);
 
     User createRequestToUser(UserCreateRequest request);

@@ -44,7 +44,11 @@ public class GroupService {
     }
 
     public List<User> getAllUsersOfGroup(Long groupId) {
-        return getNotPersonalGroupById(groupId).getUsers().stream().map(UserGroup::getUser).collect(Collectors.toList());
+        return getNotPersonalGroupById(groupId).getUsers().stream().map(ug -> {
+            User user = ug.getUser();
+            user.setGroups(Set.of(ug));
+            return user;
+        }).collect(Collectors.toList());
     }
 
     public Group createGroupAndAddUser(Group groupRequest, User user) {

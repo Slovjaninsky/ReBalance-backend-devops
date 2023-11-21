@@ -1,6 +1,5 @@
 package com.rebalance.dto.request;
 
-import jakarta.validation.constraints.Negative;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -13,11 +12,11 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Jacksonized
 public class GroupExpenseUserRequest {
-    @NotNull(message = "Usr id is required")
+    @NotNull(message = "User id is required")
     private Long userId;
     @NotNull(message = "Amount is required")
-    @Negative(message = "Amount should be negative")
+    @Positive(message = "Amount should be positive")
     private Double amount;
     @Positive(message = "Multiplier should be positive")
-    private Integer multiplier;
+    private Integer multiplier = 1;
 }

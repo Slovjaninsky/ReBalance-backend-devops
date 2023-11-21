@@ -1,13 +1,11 @@
 package com.rebalance.service;
 
-import com.rebalance.entity.Expense;
-import com.rebalance.entity.ExpenseUsers;
-import com.rebalance.entity.Group;
-import com.rebalance.entity.User;
+import com.rebalance.entity.*;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
 import com.rebalance.repository.ExpenseRepository;
 import com.rebalance.repository.ExpenseUsersRepository;
+import com.rebalance.repository.UserGroupRepository;
 import com.rebalance.security.SignedInUsernameGetter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -31,8 +27,10 @@ public class ExpenseService {
     private final NotificationService notificationService;
     private final CategoryService categoryService;
     private final ExpenseUsersRepository expenseUsersRepository;
+    private final UserGroupRepository userGroupRepository;
     private final SignedInUsernameGetter signedInUsernameGetter;
 
+    @Transactional
     public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers, String category) {
         // validate input data
         validateUsersAmount(expense.getAmount(), expenseUsers);
@@ -56,6 +54,10 @@ public class ExpenseService {
         });
         expenseUsersRepository.saveAll(expenseUsers);
 
+        // update users balances in group
+        HashMap<Long, Double> userChanges = getBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
+        updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
+
         // set expense participants for response
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
         return expense;
@@ -71,13 +73,36 @@ public class ExpenseService {
         groupService.validateGroupIsNotPersonal(expense.getGroup());
 
         // validate users and initiator in group
-        validateUsersInGroup(expenseUsers, expense.getInitiator(), expense.getGroup().getId());
+        validateUsersInGroup(expenseUsers, expenseRequest.getInitiator(), expense.getGroup().getId());
+
+        Long oldInitiatorId = expense.getInitiator().getId();
+        Double oldAmount = expense.getAmount();
 
         // update fields
+        expense.setInitiator(expenseRequest.getInitiator());
         expense.setAmount(expenseRequest.getAmount());
         expense.setDescription(expenseRequest.getDescription());
         expense.setCategory(categoryService.getOrCreateGroupCategory(category, expense.getGroup()));
+        if (expenseRequest.getDate() != null) {
+            expense.setDate(expenseRequest.getDate());
+        }
         expenseRepository.save(expense);
+
+        // update users balances in group
+        List<ExpenseUsers> oldExpenseUsers = expenseUsersRepository.findAllByExpenseId(expense.getId());
+
+        // add old expenses difference and old initiator difference
+        HashMap<Long, Double> userChanges = getInverseBalanceDiff(oldExpenseUsers, oldInitiatorId, oldAmount);
+        // add new expenses difference and new initiator difference
+        HashMap<Long, Double> newUserChanges = getBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
+        for (Long key : newUserChanges.keySet()) {
+            if (userChanges.containsKey(key)) {
+                userChanges.put(key, userChanges.get(key) + newUserChanges.get(key));
+            } else {
+                userChanges.put(key, newUserChanges.get(key));
+            }
+        }
+        updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
 
         // update users
         expenseUsersRepository.deleteAllByExpenseId(expense.getId());
@@ -128,6 +153,12 @@ public class ExpenseService {
         Expense expense = getExpenseById(expenseId);
         groupService.validateGroupIsNotPersonal(expense.getGroup());
 
+        // update users balances in group
+        List<ExpenseUsers> expenseUsers = expenseUsersRepository.findAllByExpenseId(expense.getId());
+
+        HashMap<Long, Double> userChanges = getInverseBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
+        updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
+
         expenseRepository.deleteById(expenseId);
     }
 
@@ -156,6 +187,38 @@ public class ExpenseService {
         Group personalGroup = groupService.getPersonalGroupByUserId(signedInuser.getId());
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
         return expenseRepository.findAllByGroupId(personalGroup.getId(), pageable);
+    }
+
+    private HashMap<Long, Double> getBalanceDiff(List<ExpenseUsers> expenseUsers, Long initiatorId,
+                                                 Double expenseAmount) {
+        HashMap<Long, Double> userChanges = new HashMap<>(expenseUsers.size() + 1);
+        expenseUsers.forEach(u -> userChanges.put(u.getUser().getId(), -u.getAmount()));
+        if (userChanges.containsKey(initiatorId)) {
+            userChanges.put(initiatorId, expenseAmount + userChanges.get(initiatorId));
+        } else {
+            userChanges.put(initiatorId, expenseAmount);
+        }
+        return userChanges;
+    }
+
+    private HashMap<Long, Double> getInverseBalanceDiff(List<ExpenseUsers> expenseUsers, Long initiatorId,
+                                                        Double expenseAmount) {
+        HashMap<Long, Double> userChanges = new HashMap<>(expenseUsers.size() + 1);
+        expenseUsers.forEach(u -> userChanges.put(u.getUser().getId(), u.getAmount()));
+        if (userChanges.containsKey(initiatorId)) {
+            userChanges.put(initiatorId, -expenseAmount + userChanges.get(initiatorId));
+        } else {
+            userChanges.put(initiatorId, -expenseAmount);
+        }
+        return userChanges;
+    }
+
+    private void updateUsersBalanceInGroup(Map<Long, Double> userChanges, Long groupId) {
+        List<UserGroup> userGroups = userGroupRepository.findAllByGroupIdAndUserIdIn(groupId, userChanges.keySet());
+        userGroups.forEach(ug -> {
+            ug.setBalance(ug.getBalance() + userChanges.get(ug.getUser().getId()));
+        });
+        userGroupRepository.saveAll(userGroups);
     }
 
     private void validateUsersAmount(Double amount, List<ExpenseUsers> expenseUsers) {

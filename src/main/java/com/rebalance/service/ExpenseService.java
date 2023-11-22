@@ -34,6 +34,7 @@ public class ExpenseService {
     public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers, String category) {
         // validate input data
         validateUsersAmount(expense.getAmount(), expenseUsers);
+        validateUserUniqueness(expenseUsers);
         groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
 
         // validate users and initiator in group
@@ -70,6 +71,7 @@ public class ExpenseService {
 
         // validate input data
         validateUsersAmount(expenseRequest.getAmount(), expenseUsers);
+        validateUserUniqueness(expenseUsers);
         groupService.validateGroupIsNotPersonal(expense.getGroup());
 
         // validate users and initiator in group
@@ -232,5 +234,15 @@ public class ExpenseService {
                 expenseUser.getUser().getId()).collect(Collectors.toSet());
         userIds.add(initiator.getId());
         groupService.validateUsersInGroup(userIds, groupId);
+    }
+
+    private void validateUserUniqueness(List<ExpenseUsers> users) {
+        HashSet<Long> userIds = new HashSet<>(users.size());
+        users.forEach(u -> {
+            // if element already present in set, it will return false and fail
+            if (!userIds.add(u.getUser().getId())) {
+                throw new RebalanceException(RebalanceErrorType.RB_105);
+            }
+        });
     }
 }

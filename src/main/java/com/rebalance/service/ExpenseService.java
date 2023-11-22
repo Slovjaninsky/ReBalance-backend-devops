@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -224,7 +225,12 @@ public class ExpenseService {
     }
 
     private void validateUsersAmount(Double amount, List<ExpenseUsers> expenseUsers) {
-        if (expenseUsers.stream().mapToDouble(ExpenseUsers::getAmount).sum() != amount) {
+        BigDecimal amountValue = BigDecimal.valueOf(amount);
+        BigDecimal expensesValue = BigDecimal.ZERO;
+        for (ExpenseUsers eu : expenseUsers) {
+            expensesValue = expensesValue.add(BigDecimal.valueOf(eu.getAmount()));
+        }
+        if (amountValue.compareTo(expensesValue) != 0) {
             throw new RebalanceException(RebalanceErrorType.RB_104);
         }
     }

@@ -1,0 +1,6 @@
+ALTER TABLE user_group
+    MODIFY balance DOUBLE(14, 2) NOT NULL DEFAULT 0;
+ALTER TABLE expenses
+    MODIFY amount DOUBLE(14, 2) NOT NULL;
+ALTER TABLE expense_user
+    MODIFY amount DOUBLE(14, 2) NOT NULL;

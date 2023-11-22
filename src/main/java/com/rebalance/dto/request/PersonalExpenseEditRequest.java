@@ -1,5 +1,6 @@
 package com.rebalance.dto.request;
 
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
@@ -19,6 +20,7 @@ public class PersonalExpenseEditRequest {
     private Long expenseId;
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount should be possible")
+    @Digits(integer = 12, fraction = 2, message = "Amount should have two digits after the decimal point")
     private Double amount;
     @NotNull(message = "Description is required")
     private String description;

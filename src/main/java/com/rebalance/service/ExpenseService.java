@@ -145,6 +145,9 @@ public class ExpenseService {
         expense.setAmount(expenseRequest.getAmount());
         expense.setDescription(expenseRequest.getDescription());
         expense.setCategory(categoryService.getOrCreateGroupCategory(category, expense.getGroup()));
+        if (expenseRequest.getDate() != null) {
+            expense.setDate(expenseRequest.getDate());
+        }
         return expenseRepository.save(expense);
     }
 

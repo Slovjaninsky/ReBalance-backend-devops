@@ -34,7 +34,9 @@ public class GroupController {
     public ResponseEntity<List<GroupUserResponse>> getAllUsersByGroupId(@PathVariable(value = "id") Long groupId) {
         return ResponseEntity.ok(
                 groupService.getAllUsersOfGroup(groupId).stream()
-                        .map(userMapper::userToGroupResponse).collect(Collectors.toList()));
+                        .map(u ->
+                                userMapper.userToGroupResponse(u, u.getGroups().stream().findFirst().get().getBalance())
+                        ).collect(Collectors.toList()));
     }
 
     @Operation(summary = "Get group information")

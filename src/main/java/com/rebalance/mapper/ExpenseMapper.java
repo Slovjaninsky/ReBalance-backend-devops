@@ -6,24 +6,28 @@ import com.rebalance.dto.response.GroupExpenseUserResponse;
 import com.rebalance.dto.response.PersonalExpenseResponse;
 import com.rebalance.entity.Expense;
 import com.rebalance.entity.ExpenseUsers;
+import com.rebalance.mapper.converter.DecimalConverter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper
+@Mapper(uses = DecimalConverter.class)
 public interface ExpenseMapper {
     @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "amount", source = "amount", qualifiedByName = "bigDecimalToDouble")
     GroupExpenseUserResponse expenseUserToGroupExpenseResponse(ExpenseUsers user);
 
     @Mapping(target = "initiatorUserId", source = "initiator.id")
     @Mapping(target = "addedByUserId", source = "addedBy.id")
     @Mapping(target = "users", source = "expenseUsers")
     @Mapping(target = "category", source = "category.category.name")
+    @Mapping(target = "amount", source = "amount", qualifiedByName = "bigDecimalToDouble")
     GroupExpenseResponse expenseToGroupResponse(Expense expense);
 
 
     @Mapping(target = "category", source = "category.category.name")
+    @Mapping(target = "amount", source = "amount", qualifiedByName = "bigDecimalToDouble")
     PersonalExpenseResponse expenseToPersonalResponse(Expense expense);
 
 

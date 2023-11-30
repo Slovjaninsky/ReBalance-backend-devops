@@ -1,6 +1,7 @@
 package com.rebalance.controller;
 
 import com.rebalance.dto.response.CategoryResponse;
+import com.rebalance.dto.response.SumByCategoryResponse;
 import com.rebalance.mapper.CategoryMapper;
 import com.rebalance.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +40,15 @@ public class CategoryController {
         return new ResponseEntity<>(
                 categoryService.getGroupCategories(groupId).stream()
                         .map(categoryMapper::categoryToResponse).collect(Collectors.toList()),
+                HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get amounts by categories of group")
+    @GetMapping("/{groupId}/sum-by-category")
+    public ResponseEntity<List<SumByCategoryResponse>> getSumByCategory(@PathVariable("groupId") Long groupId) {
+        return new ResponseEntity<>(
+                categoryService.getSumByCategory(groupId).entrySet().stream()
+                        .map(categoryMapper::sumByCategoryToResponse).collect(Collectors.toList()),
                 HttpStatus.OK);
     }
 }

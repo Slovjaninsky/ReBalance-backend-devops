@@ -40,6 +40,7 @@ public class HttpConfiguration {
                         // CategoryController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/personal/categories").authenticated()
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*/categories").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/*/sum-by-category").authenticated()
 
                         // GroupController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*/users").authenticated()

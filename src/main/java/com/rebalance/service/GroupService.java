@@ -99,6 +99,12 @@ public class GroupService {
                 .orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_202));
     }
 
+    public void validateGroupExists(Long groupId) {
+        if (!groupRepository.existsById(groupId)) {
+            throw new RebalanceException(RebalanceErrorType.RB_201);
+        }
+    }
+
     public void validateGroupExistsAndNotPersonal(Long groupId) {
         if (!groupRepository.existsByIdAndPersonal(groupId, false)) {
             throw new RebalanceException(RebalanceErrorType.RB_201);

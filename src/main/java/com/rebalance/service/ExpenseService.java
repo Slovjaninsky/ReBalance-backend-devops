@@ -232,9 +232,12 @@ public class ExpenseService {
         // add user amounts
         BigDecimal expensesValue = BigDecimal.ZERO;
         for (ExpenseUsers eu : expenseUsers) {
-            expensesValue = expensesValue.add(BigDecimal.valueOf(eu.getAmount()));
+            expensesValue = expensesValue.add(eu.getAmount());
         }
-        if (amountValue.compareTo(expensesValue) != 0) {
+        // scale expense amount and sum of user amounts to 5 decimal places and subtract one from other
+        BigDecimal diff = amount.setScale(5, RoundingMode.DOWN).subtract(expensesValue.setScale(5, RoundingMode.DOWN));
+        // if not equal to 0, then first 5 decimal places not equal
+        if (diff.compareTo(BigDecimal.ZERO) != 0) {
             throw new RebalanceException(RebalanceErrorType.RB_104);
         }
     }

@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @Table(name = "expense_user")
@@ -17,7 +19,7 @@ public class ExpenseUsers {
     private Long id;
 
     @Column(nullable = false)
-    private Double amount;
+    private BigDecimal amount;
 
     @Column(nullable = false)
     @ColumnDefault("1")

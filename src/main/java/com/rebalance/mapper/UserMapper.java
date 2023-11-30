@@ -4,10 +4,13 @@ import com.rebalance.dto.request.UserCreateRequest;
 import com.rebalance.dto.response.*;
 import com.rebalance.entity.User;
 import com.rebalance.entity.UserGroup;
+import com.rebalance.mapper.converter.DecimalConverter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper
+import java.math.BigDecimal;
+
+@Mapper(uses = DecimalConverter.class)
 public interface UserMapper {
     @Mapping(target = "personalGroupId", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getId())")
     UserResponse userToResponse(User user);
@@ -15,8 +18,8 @@ public interface UserMapper {
     @Mapping(target = "personalGroupId", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getId())")
     UserWithTokenResponse userToResponseWithToken(User user, String token);
 
-    @Mapping(target = "balance", expression = "java(user.getGroups().stream().findFirst().get().getBalance())")
-    GroupUserResponse userToGroupResponse(User user);
+    @Mapping(target = "balance", source = "balance", qualifiedByName = "bigDecimalToDouble")
+    GroupUserResponse userToGroupResponse(User user, BigDecimal balance);
 
     User createRequestToUser(UserCreateRequest request);
 

@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @Table(name = "user_group")
@@ -22,7 +24,7 @@ public class UserGroup {
 
     @Column(nullable = false)
     @ColumnDefault("0")
-    private Double balance = 0d;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @EqualsAndHashCode.Exclude
     @ManyToOne

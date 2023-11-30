@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public class ExpenseService {
         expenseUsersRepository.saveAll(expenseUsers);
 
         // update users balances in group
-        HashMap<Long, Double> userChanges = getBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
+        HashMap<Long, BigDecimal> userChanges = getBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
         updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
 
         // set expense participants for response
@@ -79,7 +80,7 @@ public class ExpenseService {
         validateUsersInGroup(expenseUsers, expenseRequest.getInitiator(), expense.getGroup().getId());
 
         Long oldInitiatorId = expense.getInitiator().getId();
-        Double oldAmount = expense.getAmount();
+        BigDecimal oldAmount = expense.getAmount();
 
         // update fields
         expense.setInitiator(expenseRequest.getInitiator());
@@ -95,12 +96,12 @@ public class ExpenseService {
         List<ExpenseUsers> oldExpenseUsers = expenseUsersRepository.findAllByExpenseId(expense.getId());
 
         // add old expenses difference and old initiator difference
-        HashMap<Long, Double> userChanges = getInverseBalanceDiff(oldExpenseUsers, oldInitiatorId, oldAmount);
+        HashMap<Long, BigDecimal> userChanges = getInverseBalanceDiff(oldExpenseUsers, oldInitiatorId, oldAmount);
         // add new expenses difference and new initiator difference
-        HashMap<Long, Double> newUserChanges = getBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
+        HashMap<Long, BigDecimal> newUserChanges = getBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
         for (Long key : newUserChanges.keySet()) {
             if (userChanges.containsKey(key)) {
-                userChanges.put(key, userChanges.get(key) + newUserChanges.get(key));
+                userChanges.put(key, userChanges.get(key).add(newUserChanges.get(key)));
             } else {
                 userChanges.put(key, newUserChanges.get(key));
             }
@@ -162,7 +163,7 @@ public class ExpenseService {
         // update users balances in group
         List<ExpenseUsers> expenseUsers = expenseUsersRepository.findAllByExpenseId(expense.getId());
 
-        HashMap<Long, Double> userChanges = getInverseBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
+        HashMap<Long, BigDecimal> userChanges = getInverseBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
         updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
 
         expenseRepository.deleteById(expenseId);
@@ -195,45 +196,48 @@ public class ExpenseService {
         return expenseRepository.findAllByGroupId(personalGroup.getId(), pageable);
     }
 
-    private HashMap<Long, Double> getBalanceDiff(List<ExpenseUsers> expenseUsers, Long initiatorId,
-                                                 Double expenseAmount) {
-        HashMap<Long, Double> userChanges = new HashMap<>(expenseUsers.size() + 1);
-        expenseUsers.forEach(u -> userChanges.put(u.getUser().getId(), -u.getAmount()));
+    private HashMap<Long, BigDecimal> getBalanceDiff(List<ExpenseUsers> expenseUsers, Long initiatorId,
+                                                     BigDecimal expenseAmount) {
+        HashMap<Long, BigDecimal> userChanges = new HashMap<>(expenseUsers.size() + 1);
+        expenseUsers.forEach(u -> userChanges.put(u.getUser().getId(), u.getAmount().negate()));
         if (userChanges.containsKey(initiatorId)) {
-            userChanges.put(initiatorId, expenseAmount + userChanges.get(initiatorId));
+            userChanges.put(initiatorId, expenseAmount.add(userChanges.get(initiatorId)));
         } else {
             userChanges.put(initiatorId, expenseAmount);
         }
         return userChanges;
     }
 
-    private HashMap<Long, Double> getInverseBalanceDiff(List<ExpenseUsers> expenseUsers, Long initiatorId,
-                                                        Double expenseAmount) {
-        HashMap<Long, Double> userChanges = new HashMap<>(expenseUsers.size() + 1);
+    private HashMap<Long, BigDecimal> getInverseBalanceDiff(List<ExpenseUsers> expenseUsers, Long initiatorId,
+                                                            BigDecimal expenseAmount) {
+        HashMap<Long, BigDecimal> userChanges = new HashMap<>(expenseUsers.size() + 1);
         expenseUsers.forEach(u -> userChanges.put(u.getUser().getId(), u.getAmount()));
         if (userChanges.containsKey(initiatorId)) {
-            userChanges.put(initiatorId, -expenseAmount + userChanges.get(initiatorId));
+            userChanges.put(initiatorId, expenseAmount.negate().add(userChanges.get(initiatorId)));
         } else {
-            userChanges.put(initiatorId, -expenseAmount);
+            userChanges.put(initiatorId, expenseAmount.negate());
         }
         return userChanges;
     }
 
-    private void updateUsersBalanceInGroup(Map<Long, Double> userChanges, Long groupId) {
+    private void updateUsersBalanceInGroup(Map<Long, BigDecimal> userChanges, Long groupId) {
         List<UserGroup> userGroups = userGroupRepository.findAllByGroupIdAndUserIdIn(groupId, userChanges.keySet());
         userGroups.forEach(ug -> {
-            ug.setBalance(ug.getBalance() + userChanges.get(ug.getUser().getId()));
+            ug.setBalance(ug.getBalance().add(userChanges.get(ug.getUser().getId())));
         });
         userGroupRepository.saveAll(userGroups);
     }
 
-    private void validateUsersAmount(Double amount, List<ExpenseUsers> expenseUsers) {
-        BigDecimal amountValue = BigDecimal.valueOf(amount);
+    private void validateUsersAmount(BigDecimal amount, List<ExpenseUsers> expenseUsers) {
+        // add user amounts
         BigDecimal expensesValue = BigDecimal.ZERO;
         for (ExpenseUsers eu : expenseUsers) {
-            expensesValue = expensesValue.add(BigDecimal.valueOf(eu.getAmount()));
+            expensesValue = expensesValue.add(eu.getAmount());
         }
-        if (amountValue.compareTo(expensesValue) != 0) {
+        // scale expense amount and sum of user amounts to 5 decimal places and subtract one from other
+        BigDecimal diff = amount.setScale(5, RoundingMode.DOWN).subtract(expensesValue.setScale(5, RoundingMode.DOWN));
+        // if not equal to 0, then first 5 decimal places not equal
+        if (diff.compareTo(BigDecimal.ZERO) != 0) {
             throw new RebalanceException(RebalanceErrorType.RB_104);
         }
     }

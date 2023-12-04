@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @Mapper(uses = DecimalConverter.class)
 public interface UserMapper {
     @Mapping(target = "personalGroupId", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getId())")
+    @Mapping(target = "currency", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getCurrency())")
     UserResponse userToResponse(User user);
 
     @Mapping(target = "personalGroupId", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getId())")

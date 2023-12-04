@@ -48,7 +48,7 @@ public class CategoryController {
     public ResponseEntity<List<SumByCategoryResponse>> getSumByCategory(@PathVariable("groupId") Long groupId) {
         return new ResponseEntity<>(
                 categoryService.getSumByCategory(groupId).entrySet().stream()
-                        .map(categoryMapper::sumByCategoryToResponse).collect(Collectors.toList()),
+                        .map(e -> categoryMapper.sumByCategoryToResponse(e.getKey(), e.getValue())).collect(Collectors.toList()),
                 HttpStatus.OK);
     }
 }

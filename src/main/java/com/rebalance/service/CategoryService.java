@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -57,12 +58,12 @@ public class CategoryService {
         return groupCategory;
     }
 
-    public Map<String, Double> getSumByCategory(Long groupId) {
+    public Map<String, BigDecimal> getSumByCategory(Long groupId) {
         groupService.validateGroupExists(groupId);
 
         List<Tuple> sums = groupRepository.findAllSumsByCategory(groupId);
-        HashMap<String, Double> out = new HashMap<>(sums.size());
-        sums.forEach(s -> out.put(s.get(0, String.class), s.get(1, Double.class)));
+        HashMap<String, BigDecimal> out = new HashMap<>(sums.size());
+        sums.forEach(s -> out.put(s.get(0, String.class), s.get(1, BigDecimal.class)));
 
         return out;
     }

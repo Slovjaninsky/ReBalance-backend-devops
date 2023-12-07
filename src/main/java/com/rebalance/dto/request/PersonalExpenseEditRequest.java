@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,5 +26,5 @@ public class PersonalExpenseEditRequest {
     @NotNull(message = "Category is required")
     private String category;
     @PastOrPresent(message = "Date should not be in future")
-    private LocalDateTime date;
+    private Date date;
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @AllArgsConstructor
@@ -31,7 +31,7 @@ public class GroupExpenseAddRequest {
     @NotNull(message = "Category is required")
     private String category;
     @PastOrPresent(message = "Date should not be in future")
-    private LocalDateTime date;
+    private Date date;
     @NotNull(message = "Users is required")
     @NotEmpty(message = "There should be at least one debtor")
     @Valid

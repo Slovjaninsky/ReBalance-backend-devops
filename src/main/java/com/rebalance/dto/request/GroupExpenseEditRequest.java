@@ -3,7 +3,6 @@ package com.rebalance.dto.request;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,7 +29,6 @@ public class GroupExpenseEditRequest {
     private String description;
     @NotNull(message = "Category is required")
     private String category;
-    @PastOrPresent(message = "Date should not be in future")
     private Date date;
     @NotNull(message = "Users is required")
     @NotEmpty(message = "There should be at least one debtor")

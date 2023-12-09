@@ -1,5 +1,6 @@
 package com.rebalance.service;
 
+import com.rebalance.dto.response.DeptSettlementResponse;
 import com.rebalance.entity.Group;
 import com.rebalance.entity.User;
 import com.rebalance.entity.UserGroup;
@@ -11,6 +12,8 @@ import com.rebalance.security.SignedInUsernameGetter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -103,6 +106,51 @@ public class GroupService {
         if (!groupRepository.existsById(groupId)) {
             throw new RebalanceException(RebalanceErrorType.RB_201);
         }
+    }
+
+    public List<DeptSettlementResponse> getDeptSettlement(Long groupId) {
+        User signedInUser = signedInUsernameGetter.getUser();
+        validateUsersInGroup(Set.of(signedInUser.getId()), groupId);
+
+        List<UserGroup> userGroups = userGroupRepository.findAllByGroupId(groupId);
+
+        // calculate sum of balances
+        BigDecimal totalBalance = BigDecimal.ZERO;
+        for (UserGroup ug : userGroups) {
+            totalBalance = totalBalance.add(ug.getBalance().abs());
+        }
+
+        // greedy get settlements
+        List<DeptSettlementResponse> settlements = new ArrayList<>();
+        while (true) {
+            UserGroup maxPositive = null;
+            UserGroup maxNegative = null;
+
+            for (UserGroup ug : userGroups) {
+                if (ug.getBalance().compareTo(BigDecimal.ZERO) > 0 &&
+                        (maxPositive == null || ug.getBalance().compareTo(maxPositive.getBalance()) > 0)) {
+                    maxPositive = ug;
+                }
+                if (ug.getBalance().compareTo(BigDecimal.ZERO) < 0 &&
+                        (maxNegative == null || ug.getBalance().compareTo(maxNegative.getBalance()) < 0)) {
+                    maxNegative = ug;
+                }
+            }
+
+            if (maxPositive == null || maxNegative == null) {
+                break;
+            }
+
+            BigDecimal amount = maxPositive.getBalance().min(maxNegative.getBalance().negate());
+            maxPositive.setBalance(maxPositive.getBalance().subtract(amount));
+            maxNegative.setBalance(maxNegative.getBalance().add(amount));
+            settlements.add(new DeptSettlementResponse(
+                    maxNegative.getUser().getId(), maxNegative.getUser().getNickname(),
+                    maxPositive.getUser().getId(), maxPositive.getUser().getNickname(),
+                    amount.doubleValue()));
+        }
+
+        return settlements;
     }
 
     public void validateGroupExistsAndNotPersonal(Long groupId) {

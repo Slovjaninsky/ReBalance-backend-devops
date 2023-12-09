@@ -48,6 +48,7 @@ public class HttpConfiguration {
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/group").authenticated()
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/group/users").authenticated()
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/group/set-favorite").authenticated()
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*/dept-settlement").authenticated()
 
                         // GroupExpenseController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*/expenses").authenticated()

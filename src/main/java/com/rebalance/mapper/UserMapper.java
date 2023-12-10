@@ -17,6 +17,7 @@ public interface UserMapper {
     UserResponse userToResponse(User user);
 
     @Mapping(target = "personalGroupId", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getId())")
+    @Mapping(target = "currency", expression = "java(user.getCreatedGroups().stream().filter(Group::getPersonal).findFirst().get().getCurrency())")
     UserWithTokenResponse userToResponseWithToken(User user, String token);
 
     @Mapping(target = "balance", source = "balance", qualifiedByName = "bigDecimalToDouble")

@@ -1,6 +1,6 @@
 package com.rebalance.service;
 
-import com.rebalance.dto.response.DeptSettlementResponse;
+import com.rebalance.dto.response.DebtSettlementResponse;
 import com.rebalance.entity.Group;
 import com.rebalance.entity.User;
 import com.rebalance.entity.UserGroup;
@@ -108,7 +108,7 @@ public class GroupService {
         }
     }
 
-    public List<DeptSettlementResponse> getDeptSettlement(Long groupId) {
+    public List<DebtSettlementResponse> getDebtSettlement(Long groupId) {
         User signedInUser = signedInUsernameGetter.getUser();
         validateUsersInGroup(Set.of(signedInUser.getId()), groupId);
 
@@ -121,7 +121,7 @@ public class GroupService {
         }
 
         // greedy get settlements
-        List<DeptSettlementResponse> settlements = new ArrayList<>();
+        List<DebtSettlementResponse> settlements = new ArrayList<>();
         while (true) {
             UserGroup maxPositive = null;
             UserGroup maxNegative = null;
@@ -144,7 +144,7 @@ public class GroupService {
             BigDecimal amount = maxPositive.getBalance().min(maxNegative.getBalance().negate());
             maxPositive.setBalance(maxPositive.getBalance().subtract(amount));
             maxNegative.setBalance(maxNegative.getBalance().add(amount));
-            settlements.add(new DeptSettlementResponse(
+            settlements.add(new DebtSettlementResponse(
                     maxNegative.getUser().getId(), maxNegative.getUser().getNickname(),
                     maxPositive.getUser().getId(), maxPositive.getUser().getNickname(),
                     amount.doubleValue()));

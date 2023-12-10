@@ -3,7 +3,7 @@ package com.rebalance.controller;
 import com.rebalance.dto.request.GroupAddUserRequest;
 import com.rebalance.dto.request.GroupCreateRequest;
 import com.rebalance.dto.request.GroupFavoriteRequest;
-import com.rebalance.dto.response.DeptSettlementResponse;
+import com.rebalance.dto.response.DebtSettlementResponse;
 import com.rebalance.dto.response.GroupResponse;
 import com.rebalance.dto.response.GroupUserResponse;
 import com.rebalance.dto.response.UserGroupResponse;
@@ -75,9 +75,9 @@ public class GroupController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Operation(summary = "Get dept settlement for a group")
-    @GetMapping("/{groupId}/dept-settlement")
-    public ResponseEntity<List<DeptSettlementResponse>> getDeptSettlement(@PathVariable(value = "groupId") Long groupId) {
-        return new ResponseEntity<>(groupService.getDeptSettlement(groupId), HttpStatus.OK);
+    @Operation(summary = "Get debt settlement for a group")
+    @GetMapping("/{groupId}/debt-settlement")
+    public ResponseEntity<List<DebtSettlementResponse>> getDebtSettlement(@PathVariable(value = "groupId") Long groupId) {
+        return new ResponseEntity<>(groupService.getDebtSettlement(groupId), HttpStatus.OK);
     }
 }

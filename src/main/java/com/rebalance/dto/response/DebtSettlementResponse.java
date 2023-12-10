@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeptSettlementResponse {
-    private Long deptorId;
-    private String deptorNickname;
+public class DebtSettlementResponse {
+    private Long debtorId;
+    private String debtorNickname;
     private Long creditorId;
     private String creditorNickname;
-    private Double dept;
+    private Double debt;
 }

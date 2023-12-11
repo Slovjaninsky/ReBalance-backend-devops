@@ -2,7 +2,13 @@ package com.rebalance.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -11,32 +17,43 @@ import lombok.NoArgsConstructor;
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "notification_id")
+    @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    private NotificationType type;
 
-    @Column(name = "user_from_id")
-    private Long userFromId;
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "initiator_id", nullable = false)
+    private User initiator;
 
     @Column(name = "expense_id")
     private Long expenseId;
 
-    @Column(name = "group_id")
-    private Long groupId;
+    @Column(name = "expense_description")
+    private String expenseDescription;
 
-    @Column(name = "amount")
-    private Double amount;
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
 
-    public Notification(Long userId, Long userFromId, Long expenseOrGroupId, Double amount, Boolean isExpense) {
-        this.userId = userId;
-        this.userFromId = userFromId;
-        this.amount = amount;
-        if (isExpense) {
-            this.expenseId = expenseOrGroupId;
-        } else {
-            this.groupId = expenseOrGroupId;
-        }
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "notification")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<NotificationUser> notificationUsers;
+
+    public List<String> getMessage() {
+        return switch (type) {
+            case UserAddedToGroup -> List.of(initiator.getNickname(), " added you to ", group.getName());
+            case GroupExpenseAdded ->
+                    List.of(initiator.getNickname(), " added ", expenseDescription, " to ", group.getName());
+            case GroupExpenseEdited ->
+                    List.of(initiator.getNickname(), " edited ", expenseDescription, " to ", group.getName());
+            case GroupExpenseDeleted ->
+                    List.of(initiator.getNickname(), " deleted ", expenseDescription, " to ", group.getName());
+        };
     }
 }

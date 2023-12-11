@@ -61,19 +61,20 @@ public class HttpConfiguration {
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/expense/*/preview").authenticated()
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/expense/*/image").authenticated()
 
-                        // NotificationController
-                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/*/notifications").authenticated()
-
                         // PersonalExpenseController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/personal/expenses").authenticated()
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/personal/expenses").authenticated()
                         .requestMatchers(HttpMethod.PUT, APIVersion.current + "/personal/expenses").authenticated()
                         .requestMatchers(HttpMethod.DELETE, APIVersion.current + "/personal/expenses/*").authenticated()
 
-                        //UserController
+                        // UserController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/email/*").authenticated()
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/info").authenticated()
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/user/groups").authenticated()
+
+                        // WebSocket
+                        .requestMatchers("/notifications/**").permitAll()
+                        .requestMatchers("/user/notifications/**").permitAll()
 
                         .anyRequest().denyAll()
 

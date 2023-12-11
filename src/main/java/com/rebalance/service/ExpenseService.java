@@ -185,7 +185,7 @@ public class ExpenseService {
         Group groupFromDb = groupService.getGroupByIdNoCheck(expense.getGroup().getId());
         expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
 
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseAdded);
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseDeleted);
 
         expenseRepository.deleteById(expenseId);
     }

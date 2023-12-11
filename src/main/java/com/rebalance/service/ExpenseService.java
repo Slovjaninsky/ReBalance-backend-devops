@@ -235,6 +235,12 @@ public class ExpenseService {
         return expenseRepository.findAllByGroupId(personalGroup.getId(), pageable);
     }
 
+    public List<Expense> getExpensesOfUserByIds(List<Long> expenseIds) {
+        User signedInuser = signedInUsernameGetter.getUser();
+        Group personalGroup = groupService.getPersonalGroupByUserId(signedInuser.getId());
+        return expenseRepository.findAllByGroupIdAndIdIn(personalGroup.getId(), expenseIds, Sort.by(Sort.Direction.DESC, "date"));
+    }
+
     private HashMap<Long, BigDecimal> getBalanceDiff(List<ExpenseUsers> expenseUsers, Long initiatorId,
                                                      BigDecimal expenseAmount) {
         HashMap<Long, BigDecimal> userChanges = new HashMap<>(expenseUsers.size() + 1);

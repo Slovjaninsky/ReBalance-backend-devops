@@ -6,6 +6,7 @@ import com.rebalance.exception.RebalanceException;
 import com.rebalance.repository.ExpenseRepository;
 import com.rebalance.repository.ExpenseUsersRepository;
 import com.rebalance.repository.UserGroupRepository;
+import com.rebalance.repository.UserRepository;
 import com.rebalance.security.SignedInUsernameGetter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class ExpenseService {
     private final ExpenseUsersRepository expenseUsersRepository;
     private final UserGroupRepository userGroupRepository;
     private final SignedInUsernameGetter signedInUsernameGetter;
+    private final UserRepository userRepository;
 
     @Transactional
     public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers, String category) {
@@ -39,11 +41,12 @@ public class ExpenseService {
         validateUserUniqueness(expenseUsers);
         groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
 
-        // validate users and initiator in group
-        validateUsersInGroup(expenseUsers, expense.getInitiator(), expense.getGroup().getId());
+        User signedInUser = signedInUsernameGetter.getUser();
+        // validate users, initiator and signed user in group
+        validateUsersInGroup(expenseUsers, expense.getInitiator(), signedInUser, expense.getGroup().getId());
 
         // set auto generated fields
-        expense.setAddedBy(signedInUsernameGetter.getUser());
+        expense.setAddedBy(signedInUser);
         if (expense.getDate() == null) {
             expense.setDate(LocalDateTime.now());
         }
@@ -63,6 +66,12 @@ public class ExpenseService {
 
         // set expense participants for response
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
+
+        Group groupFromDb = groupService.getGroupByIdNoCheck(expense.getGroup().getId());
+        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
+
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseAdded);
+
         return expense;
     }
 
@@ -76,8 +85,9 @@ public class ExpenseService {
         validateUserUniqueness(expenseUsers);
         groupService.validateGroupIsNotPersonal(expense.getGroup());
 
+        User signedInUser = signedInUsernameGetter.getUser();
         // validate users and initiator in group
-        validateUsersInGroup(expenseUsers, expenseRequest.getInitiator(), expense.getGroup().getId());
+        validateUsersInGroup(expenseUsers, expenseRequest.getInitiator(), signedInUser, expense.getGroup().getId());
 
         Long oldInitiatorId = expense.getInitiator().getId();
         BigDecimal oldAmount = expense.getAmount();
@@ -113,6 +123,11 @@ public class ExpenseService {
         expenseUsers.forEach(u -> u.setExpense(expense));
         expenseUsersRepository.saveAll(expenseUsers);
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
+
+        Group groupFromDb = groupService.getGroupByIdNoCheck(expense.getGroup().getId());
+        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
+
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseEdited);
 
         return expense;
     }
@@ -165,6 +180,12 @@ public class ExpenseService {
 
         HashMap<Long, BigDecimal> userChanges = getInverseBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
         updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
+
+        User signedInUser = signedInUsernameGetter.getUser();
+        Group groupFromDb = groupService.getGroupByIdNoCheck(expense.getGroup().getId());
+        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
+
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseAdded);
 
         expenseRepository.deleteById(expenseId);
     }
@@ -242,10 +263,11 @@ public class ExpenseService {
         }
     }
 
-    private void validateUsersInGroup(List<ExpenseUsers> users, User initiator, Long groupId) {
+    private void validateUsersInGroup(List<ExpenseUsers> users, User initiator, User signedInUser, Long groupId) {
         Set<Long> userIds = users.stream().map(expenseUser ->
                 expenseUser.getUser().getId()).collect(Collectors.toSet());
         userIds.add(initiator.getId());
+        userIds.add(signedInUser.getId());
         groupService.validateUsersInGroup(userIds, groupId);
     }
 

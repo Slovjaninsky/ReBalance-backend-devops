@@ -22,9 +22,14 @@ import java.util.stream.Collectors;
 @Service
 public class GroupService {
     private final UserService userService;
+    private final NotificationService notificationService;
     private final GroupRepository groupRepository;
     private final UserGroupRepository userGroupRepository;
     private final SignedInUsernameGetter signedInUsernameGetter;
+
+    public Group getGroupByIdNoCheck(Long groupId) {
+        return groupRepository.findById(groupId).get();
+    }
 
     public Group getGroupInfoById(Long groupId) {
         Group group = getNotPersonalGroupById(groupId);
@@ -85,7 +90,13 @@ public class GroupService {
         UserGroup userGroup = new UserGroup();
         userGroup.setGroup(group);
         userGroup.setUser(user);
-        return userGroupRepository.save(userGroup);
+        userGroupRepository.save(userGroup);
+
+        User signedInUser = signedInUsernameGetter.getUser();
+
+        notificationService.saveNotificationUserAddedToGroup(signedInUser, user, group);
+
+        return userGroup;
     }
 
     public void setFavorite(Long groupId, Boolean favorite) {

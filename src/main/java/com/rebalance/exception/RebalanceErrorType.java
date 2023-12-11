@@ -34,7 +34,10 @@ public enum RebalanceErrorType {
 
     // token
     RB_401("Invalid token", HttpStatus.BAD_REQUEST),
-    RB_402("Bad credentials", HttpStatus.BAD_REQUEST);
+    RB_402("Bad credentials", HttpStatus.BAD_REQUEST),
+
+    // notifications
+    RB_501("Not found notification", HttpStatus.NOT_FOUND);
 
 
     private final String description;

@@ -7,8 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
-import java.math.BigDecimal;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -16,9 +14,7 @@ import java.math.BigDecimal;
 public class GroupExpenseUserRequest {
     @NotNull(message = "User id is required")
     private Long userId;
-    @NotNull(message = "Amount is required")
-    @Positive(message = "Amount should be positive")
-    private BigDecimal amount;
+    @NotNull(message = "Multiplier is required")
     @Positive(message = "Multiplier should be positive")
     private Integer multiplier = 1;
 }

@@ -178,7 +178,7 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
-    public Expense getExpenseById(Long id) {
+    private Expense getExpenseById(Long id) {
         return expenseRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_101));
     }
 
@@ -217,6 +217,8 @@ public class ExpenseService {
 
     public Page<Expense> getExpensesOfGroup(Long groupId, Integer page, Integer size) {
         groupService.validateGroupExistsAndNotPersonal(groupId);
+        User signedInUser = signedInUsernameGetter.getUser();
+        groupService.validateUsersInGroup(Set.of(signedInUser.getId()), groupId);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
         return expenseRepository.findAllByGroupId(groupId, pageable);
     }

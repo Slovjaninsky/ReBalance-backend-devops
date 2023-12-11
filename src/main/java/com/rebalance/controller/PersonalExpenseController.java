@@ -1,5 +1,6 @@
 package com.rebalance.controller;
 
+import com.rebalance.dto.request.PersonalExpensesGetRequest;
 import com.rebalance.dto.request.PersonalExpenseAddRequest;
 import com.rebalance.dto.request.PersonalExpenseEditRequest;
 import com.rebalance.dto.response.PersonalExpenseResponse;
@@ -14,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Personal expenses management")
 @RestController
@@ -31,6 +34,15 @@ public class PersonalExpenseController {
         return new ResponseEntity<>(
                 expenseService.getExpensesOfUser(page, size)
                         .map(expenseMapper::expenseToPersonalResponse),
+                HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get personal expenses by ids")
+    @PostMapping("/get-by-ids")
+    public ResponseEntity<List<PersonalExpenseResponse>> getExpensesById(@RequestBody @Validated PersonalExpensesGetRequest request) {
+        return new ResponseEntity<>(
+                expenseService.getExpensesOfUserByIds(request.getExpenseIds())
+                        .stream().map(expenseMapper::expenseToPersonalResponse).toList(),
                 HttpStatus.OK);
     }
 

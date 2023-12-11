@@ -178,7 +178,7 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
-    public Expense getExpenseById(Long id) {
+    private Expense getExpenseById(Long id) {
         return expenseRepository.findById(id).orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_101));
     }
 
@@ -217,8 +217,17 @@ public class ExpenseService {
 
     public Page<Expense> getExpensesOfGroup(Long groupId, Integer page, Integer size) {
         groupService.validateGroupExistsAndNotPersonal(groupId);
+        User signedInUser = signedInUsernameGetter.getUser();
+        groupService.validateUsersInGroup(Set.of(signedInUser.getId()), groupId);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
         return expenseRepository.findAllByGroupId(groupId, pageable);
+    }
+
+    public List<Expense> getExpensesOfGroupByIds(Long groupId, List<Long> expenseIds) {
+        groupService.validateGroupExistsAndNotPersonal(groupId);
+        User signedInUser = signedInUsernameGetter.getUser();
+        groupService.validateUsersInGroup(Set.of(signedInUser.getId()), groupId);
+        return expenseRepository.findAllByGroupIdAndIdIn(groupId, expenseIds, Sort.by(Sort.Direction.DESC, "date"));
     }
 
     public Page<Expense> getExpensesOfUser(Integer page, Integer size) {
@@ -226,6 +235,12 @@ public class ExpenseService {
         Group personalGroup = groupService.getPersonalGroupByUserId(signedInuser.getId());
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
         return expenseRepository.findAllByGroupId(personalGroup.getId(), pageable);
+    }
+
+    public List<Expense> getExpensesOfUserByIds(List<Long> expenseIds) {
+        User signedInuser = signedInUsernameGetter.getUser();
+        Group personalGroup = groupService.getPersonalGroupByUserId(signedInuser.getId());
+        return expenseRepository.findAllByGroupIdAndIdIn(personalGroup.getId(), expenseIds, Sort.by(Sort.Direction.DESC, "date"));
     }
 
     private HashMap<Long, BigDecimal> getBalanceDiff(List<ExpenseUsers> expenseUsers, Long initiatorId,

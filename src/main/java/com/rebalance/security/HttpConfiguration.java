@@ -52,6 +52,7 @@ public class HttpConfiguration {
 
                         // GroupExpenseController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/group/*/expenses").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/group/expenses/get-by-ids").authenticated()
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/group/expenses").authenticated()
                         .requestMatchers(HttpMethod.PUT, APIVersion.current + "/group/expenses").authenticated()
                         .requestMatchers(HttpMethod.DELETE, APIVersion.current + "/group/expenses/*").authenticated()

@@ -2,6 +2,7 @@ package com.rebalance.controller;
 
 import com.rebalance.dto.request.GroupExpenseAddRequest;
 import com.rebalance.dto.request.GroupExpenseEditRequest;
+import com.rebalance.dto.request.GroupExpensesGetRequest;
 import com.rebalance.dto.response.GroupExpenseResponse;
 import com.rebalance.mapper.ExpenseMapper;
 import com.rebalance.service.ExpenseService;
@@ -14,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Group expenses management")
 @RestController
@@ -32,6 +35,15 @@ public class GroupExpenseController {
         return new ResponseEntity<>(
                 expenseService.getExpensesOfGroup(groupId, page, size)
                         .map(expenseMapper::expenseToGroupResponse),
+                HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get expenses of group by ids")
+    @PostMapping("/expenses/get-by-ids")
+    public ResponseEntity<List<GroupExpenseResponse>> getExpensesById(@RequestBody @Validated GroupExpensesGetRequest request) {
+        return new ResponseEntity<>(
+                expenseService.getExpensesOfGroupByIds(request.getGroupId(), request.getExpenseIds())
+                        .stream().map(expenseMapper::expenseToGroupResponse).toList(),
                 HttpStatus.OK);
     }
 

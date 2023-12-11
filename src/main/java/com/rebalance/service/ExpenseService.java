@@ -221,6 +221,13 @@ public class ExpenseService {
         return expenseRepository.findAllByGroupId(groupId, pageable);
     }
 
+    public List<Expense> getExpensesOfGroupByIds(Long groupId, List<Long> expenseIds) {
+        groupService.validateGroupExistsAndNotPersonal(groupId);
+        User signedInUser = signedInUsernameGetter.getUser();
+        groupService.validateUsersInGroup(Set.of(signedInUser.getId()), groupId);
+        return expenseRepository.findAllByGroupIdAndIdIn(groupId, expenseIds, Sort.by(Sort.Direction.DESC, "date"));
+    }
+
     public Page<Expense> getExpensesOfUser(Integer page, Integer size) {
         User signedInuser = signedInUsernameGetter.getUser();
         Group personalGroup = groupService.getPersonalGroupByUserId(signedInuser.getId());

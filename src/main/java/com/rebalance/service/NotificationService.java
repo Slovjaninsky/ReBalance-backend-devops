@@ -4,7 +4,6 @@ import com.rebalance.dto.response.NotificationResponse;
 import com.rebalance.entity.*;
 import com.rebalance.exception.RebalanceErrorType;
 import com.rebalance.exception.RebalanceException;
-import com.rebalance.mapper.converter.DecimalConverter;
 import com.rebalance.repository.NotificationRepository;
 import com.rebalance.repository.NotificationUserRepository;
 import com.rebalance.websocket.WSService;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -54,6 +54,9 @@ public class NotificationService {
 
         List<NotificationUser> notificationUsers = new ArrayList<>(participants.size());
         for (ExpenseUsers participant : participants) {
+            if (participant.getUser().getId() == initiator.getId()) {
+                continue;
+            }
             NotificationUser notificationUser = new NotificationUser();
             notificationUser.setSeen(false);
             notificationUser.setUser(participant.getUser());

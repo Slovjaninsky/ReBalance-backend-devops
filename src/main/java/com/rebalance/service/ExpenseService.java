@@ -37,9 +37,8 @@ public class ExpenseService {
     @Transactional
     public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers, String category) {
         // validate input data
-        validateUsersAmount(expense.getAmount(), expenseUsers);
         validateUserUniqueness(expenseUsers);
-        groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
+        Group group = groupService.getNotPersonalGroupById(expense.getGroup().getId());
 
         User signedInUser = signedInUsernameGetter.getUser();
         // validate users, initiator and signed user in group
@@ -54,10 +53,16 @@ public class ExpenseService {
         expenseRepository.save(expense);
 
         // save participants of expense
-        expenseUsers.forEach(u -> u.setExpense(expense));
-        expenseUsers.forEach(u -> {
-            if (u.getMultiplier() == null) u.setMultiplier(1);
-        });
+        // calculate total multipliers
+        BigDecimal totalMultipliers = BigDecimal.ZERO;
+        for (ExpenseUsers eu : expenseUsers) {
+            totalMultipliers = totalMultipliers.add(BigDecimal.valueOf(eu.getMultiplier()));
+        }
+        // set amount and expense for each ExpenseUsers
+        for (ExpenseUsers eu : expenseUsers) {
+            eu.setAmount(expense.getAmount().multiply(BigDecimal.valueOf(eu.getMultiplier()).divide(totalMultipliers, 100, RoundingMode.HALF_EVEN)));
+            eu.setExpense(expense);
+        }
         expenseUsersRepository.saveAll(expenseUsers);
 
         // update users balances in group
@@ -67,10 +72,9 @@ public class ExpenseService {
         // set expense participants for response
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
 
-        Group groupFromDb = groupService.getGroupByIdNoCheck(expense.getGroup().getId());
         expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
 
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseAdded);
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseAdded);
 
         return expense;
     }
@@ -81,9 +85,8 @@ public class ExpenseService {
         Expense expense = getExpenseById(expenseRequest.getId());
 
         // validate input data
-        validateUsersAmount(expenseRequest.getAmount(), expenseUsers);
         validateUserUniqueness(expenseUsers);
-        groupService.validateGroupIsNotPersonal(expense.getGroup());
+        Group group = groupService.getNotPersonalGroupById(expense.getGroup().getId());
 
         User signedInUser = signedInUsernameGetter.getUser();
         // validate users and initiator in group
@@ -120,14 +123,22 @@ public class ExpenseService {
 
         // update users
         expenseUsersRepository.deleteAllByExpenseId(expense.getId());
-        expenseUsers.forEach(u -> u.setExpense(expense));
+        // calculate total multipliers
+        BigDecimal totalMultipliers = BigDecimal.ZERO;
+        for (ExpenseUsers eu : expenseUsers) {
+            totalMultipliers = totalMultipliers.add(BigDecimal.valueOf(eu.getMultiplier()));
+        }
+        // set amount and expense for each ExpenseUsers
+        for (ExpenseUsers eu : expenseUsers) {
+            eu.setAmount(expense.getAmount().multiply(BigDecimal.valueOf(eu.getMultiplier()).divide(totalMultipliers, RoundingMode.HALF_EVEN)));
+            eu.setExpense(expense);
+        }
         expenseUsersRepository.saveAll(expenseUsers);
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
 
-        Group groupFromDb = groupService.getGroupByIdNoCheck(expense.getGroup().getId());
         expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
 
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseEdited);
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseEdited);
 
         return expense;
     }
@@ -247,20 +258,6 @@ public class ExpenseService {
             ug.setBalance(ug.getBalance().add(userChanges.get(ug.getUser().getId())));
         });
         userGroupRepository.saveAll(userGroups);
-    }
-
-    private void validateUsersAmount(BigDecimal amount, List<ExpenseUsers> expenseUsers) {
-        // add user amounts
-        BigDecimal expensesValue = BigDecimal.ZERO;
-        for (ExpenseUsers eu : expenseUsers) {
-            expensesValue = expensesValue.add(eu.getAmount());
-        }
-        // scale expense amount and sum of user amounts to 5 decimal places and subtract one from other
-        BigDecimal diff = amount.setScale(5, RoundingMode.DOWN).subtract(expensesValue.setScale(5, RoundingMode.DOWN));
-        // if not equal to 0, then first 5 decimal places not equal
-        if (diff.compareTo(BigDecimal.ZERO) != 0) {
-            throw new RebalanceException(RebalanceErrorType.RB_104);
-        }
     }
 
     private void validateUsersInGroup(List<ExpenseUsers> users, User initiator, User signedInUser, Long groupId) {

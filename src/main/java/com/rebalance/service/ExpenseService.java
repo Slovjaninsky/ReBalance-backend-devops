@@ -38,7 +38,7 @@ public class ExpenseService {
     public Expense saveGroupExpense(Expense expense, List<ExpenseUsers> expenseUsers, String category) {
         // validate input data
         validateUserUniqueness(expenseUsers);
-        groupService.validateGroupExistsAndNotPersonal(expense.getGroup().getId());
+        Group group = groupService.getNotPersonalGroupById(expense.getGroup().getId());
 
         User signedInUser = signedInUsernameGetter.getUser();
         // validate users, initiator and signed user in group
@@ -72,10 +72,9 @@ public class ExpenseService {
         // set expense participants for response
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
 
-        Group groupFromDb = groupService.getGroupByIdNoCheck(expense.getGroup().getId());
         expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
 
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseAdded);
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseAdded);
 
         return expense;
     }
@@ -87,7 +86,7 @@ public class ExpenseService {
 
         // validate input data
         validateUserUniqueness(expenseUsers);
-        groupService.validateGroupIsNotPersonal(expense.getGroup());
+        Group group = groupService.getNotPersonalGroupById(expense.getGroup().getId());
 
         User signedInUser = signedInUsernameGetter.getUser();
         // validate users and initiator in group
@@ -137,10 +136,9 @@ public class ExpenseService {
         expenseUsersRepository.saveAll(expenseUsers);
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
 
-        Group groupFromDb = groupService.getGroupByIdNoCheck(expense.getGroup().getId());
         expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
 
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseEdited);
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseEdited);
 
         return expense;
     }

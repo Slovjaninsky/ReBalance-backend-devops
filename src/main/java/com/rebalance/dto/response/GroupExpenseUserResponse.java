@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupExpenseUserResponse {
-    private Long id;
     private Double amount;
     private Integer multiplier;
     private Long userId;

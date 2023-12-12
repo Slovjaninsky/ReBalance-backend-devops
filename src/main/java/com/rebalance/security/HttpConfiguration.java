@@ -62,6 +62,10 @@ public class HttpConfiguration {
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/expense/*/preview").authenticated()
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/expense/*/image").authenticated()
 
+                        // NotificationController
+                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/notifications/new").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/notifications/after-date").authenticated()
+
                         // PersonalExpenseController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/personal/expenses").authenticated()
                         .requestMatchers(HttpMethod.POST, APIVersion.current + "/personal/expenses/get-by-ids").authenticated()

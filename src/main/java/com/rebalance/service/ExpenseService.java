@@ -69,13 +69,11 @@ public class ExpenseService {
         HashMap<Long, BigDecimal> userChanges = getBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
         updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
 
-        // set expense participants for response
-        expense.setExpenseUsers(new HashSet<>(expenseUsers));
-
         expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
-
         notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseAdded);
 
+        // set expense participants for response
+        expense.setExpenseUsers(new HashSet<>(expenseUsers));
         return expense;
     }
 
@@ -105,9 +103,19 @@ public class ExpenseService {
         }
         expenseRepository.save(expense);
 
+        // calculate total multipliers
+        BigDecimal totalMultipliers = BigDecimal.ZERO;
+        for (ExpenseUsers eu : expenseUsers) {
+            totalMultipliers = totalMultipliers.add(BigDecimal.valueOf(eu.getMultiplier()));
+        }
+        // set amount and expense for each ExpenseUsers
+        for (ExpenseUsers eu : expenseUsers) {
+            eu.setAmount(expense.getAmount().multiply(BigDecimal.valueOf(eu.getMultiplier()).divide(totalMultipliers, RoundingMode.HALF_EVEN)));
+            eu.setExpense(expense);
+        }
+
         // update users balances in group
         List<ExpenseUsers> oldExpenseUsers = expenseUsersRepository.findAllByExpenseId(expense.getId());
-
         // add old expenses difference and old initiator difference
         HashMap<Long, BigDecimal> userChanges = getInverseBalanceDiff(oldExpenseUsers, oldInitiatorId, oldAmount);
         // add new expenses difference and new initiator difference
@@ -123,21 +131,10 @@ public class ExpenseService {
 
         // update users
         expenseUsersRepository.deleteAllByExpenseId(expense.getId());
-        // calculate total multipliers
-        BigDecimal totalMultipliers = BigDecimal.ZERO;
-        for (ExpenseUsers eu : expenseUsers) {
-            totalMultipliers = totalMultipliers.add(BigDecimal.valueOf(eu.getMultiplier()));
-        }
-        // set amount and expense for each ExpenseUsers
-        for (ExpenseUsers eu : expenseUsers) {
-            eu.setAmount(expense.getAmount().multiply(BigDecimal.valueOf(eu.getMultiplier()).divide(totalMultipliers, RoundingMode.HALF_EVEN)));
-            eu.setExpense(expense);
-        }
         expenseUsersRepository.saveAll(expenseUsers);
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
 
         expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
-
         notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseEdited);
 
         return expense;

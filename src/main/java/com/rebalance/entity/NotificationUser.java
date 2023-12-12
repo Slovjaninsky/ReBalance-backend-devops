@@ -1,12 +1,12 @@
 package com.rebalance.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "notification_user")
 @Entity
 public class NotificationUser {

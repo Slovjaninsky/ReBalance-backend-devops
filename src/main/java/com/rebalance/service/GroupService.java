@@ -10,6 +10,7 @@ import com.rebalance.repository.GroupRepository;
 import com.rebalance.repository.UserGroupRepository;
 import com.rebalance.security.SignedInUsernameGetter;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,10 +27,6 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final UserGroupRepository userGroupRepository;
     private final SignedInUsernameGetter signedInUsernameGetter;
-
-    public Group getGroupByIdNoCheck(Long groupId) {
-        return groupRepository.findById(groupId).get();
-    }
 
     public Group getGroupInfoById(Long groupId) {
         Group group = getNotPersonalGroupById(groupId);
@@ -93,7 +90,8 @@ public class GroupService {
         userGroupRepository.save(userGroup);
 
         User signedInUser = signedInUsernameGetter.getUser();
-
+        Hibernate.initialize(group.getUsers());
+        group.getUsers().forEach(u -> Hibernate.initialize(u.getUser()));
         notificationService.saveNotificationUserAddedToGroup(signedInUser, user, group);
 
         return userGroup;

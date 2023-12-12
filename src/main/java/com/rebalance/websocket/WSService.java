@@ -12,7 +12,11 @@ import java.util.List;
 public class WSService {
     private final SimpMessagingTemplate messagingTemplate;
 
-    public void sendNotificationsToUser(String email, List<NotificationResponse> notifications) {
-        messagingTemplate.convertAndSendToUser(email, "/notifications/new", notifications);
+    public void sendNotificationToUser(String email, NotificationResponse notification) {
+        messagingTemplate.convertAndSendToUser(email, "/notifications/new", List.of(notification));
+    }
+
+    public void sendNotificationToUserAll(String email, NotificationResponse notification) {
+        messagingTemplate.convertAndSendToUser(email, "/notifications/new/all", List.of(notification));
     }
 }

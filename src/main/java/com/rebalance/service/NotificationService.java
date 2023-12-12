@@ -1,18 +1,20 @@
 package com.rebalance.service;
 
+import com.rebalance.dto.response.NotificationAllResponse;
 import com.rebalance.dto.response.NotificationResponse;
 import com.rebalance.entity.*;
-import com.rebalance.exception.RebalanceErrorType;
-import com.rebalance.exception.RebalanceException;
 import com.rebalance.repository.NotificationRepository;
 import com.rebalance.repository.NotificationUserRepository;
+import com.rebalance.security.SignedInUsernameGetter;
 import com.rebalance.websocket.WSService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -20,85 +22,124 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationUserRepository notificationUserRepository;
     private final WSService wsService;
+    private final SignedInUsernameGetter signedInUsernameGetter;
 
     public void saveNotificationUserAddedToGroup(User initiator, User added, Group group) {
-        Notification notification = new Notification();
-        notification.setType(NotificationType.UserAddedToGroup);
-        notification.setInitiator(initiator);
-        notification.setGroup(group);
-        notificationRepository.save(notification);
+        Notification notificationForUser = saveNotification(initiator, added, null, group, NotificationType.CurrentUserAddedToGroup);
+        // send notification to user which was added to group in private channel
+        saveAndSendToUser(notificationForUser, initiator, null, null, group, added, NotificationType.CurrentUserAddedToGroup, false);
+        // send notification to user which was added to group in all channel
+        saveAndSendToUser(notificationForUser, initiator, null, null, group, added, NotificationType.CurrentUserAddedToGroup, true);
 
-        NotificationUser notificationUser = new NotificationUser();
-        notificationUser.setSeen(false);
-        notificationUser.setUser(added);
-        notificationUser.setNotification(notification);
-        notificationUserRepository.save(notificationUser);
-
-        NotificationResponse response = new NotificationResponse();
-        response.setId(notification.getId());
-        response.setType(NotificationType.UserAddedToGroup);
-        response.setInitiatorUserId(initiator.getId());
-        response.setGroupId(group.getId());
-        response.setMessage(notification.getMessage());
-        wsService.sendNotificationsToUser(added.getEmail(), List.of(response));
+        // send notification to all users of group that new user was added to group
+        Notification notificationForOther = saveNotification(initiator, added, null, group, NotificationType.UserAddedToGroup);
+        List<User> usersToSend = group.getUsers().stream().map(UserGroup::getUser)
+                .filter(u -> u.getId() != added.getId()).toList();
+        // send notifications to all users in group in private channel
+        saveAndSendToUsers(notificationForOther, initiator, added, null, group,
+                usersToSend, NotificationType.UserAddedToGroup, false);
+        List<User> usersToSendAll = group.getUsers().stream().map(UserGroup::getUser).toList();
+        // send notifications to all users in group in all channel
+        saveAndSendToUsers(notificationForOther, initiator, added, null, group,
+                usersToSendAll, NotificationType.UserAddedToGroup, true);
     }
 
-    public void saveNotificationGroupExpense(User initiator, Expense expense, Group group, List<ExpenseUsers> participants, NotificationType acttionType) {
-        Notification notification = new Notification();
-        notification.setType(acttionType);
-        notification.setInitiator(initiator);
-        notification.setExpenseId(expense.getId());
-        notification.setExpenseDescription(expense.getDescription());
-        notification.setGroup(group);
-        notificationRepository.save(notification);
+    public void saveNotificationGroupExpense(User initiator, Expense expense, Group group, List<ExpenseUsers> participants, NotificationType actionType) {
+        Notification notification = saveNotification(initiator, null, expense, group, actionType);
+        // send notification to all participants of expense in private channel
+        saveAndSendToUsers(notification, initiator, null, expense, group, participants.stream().map(ExpenseUsers::getUser).toList(), actionType, false);
+        // send notification to all users in group in all channel
+        saveAndSendToUsers(notification, initiator, null, expense, group, group.getUsers().stream().map(UserGroup::getUser).toList(), actionType, true);
+    }
 
-        List<NotificationUser> notificationUsers = new ArrayList<>(participants.size());
-        for (ExpenseUsers participant : participants) {
-            if (participant.getUser().getId() == initiator.getId()) {
+    public void saveNotificationPersonalExpense(User initiator, Expense expense, NotificationType actionType) {
+        Notification notification = saveNotification(initiator, null, expense, null, actionType);
+        // send notification to user about personal expense in private channel
+        saveAndSendToUser(notification, initiator, null, expense, null, initiator, actionType, false);
+        // send notification to user about personal expense in all channel
+        saveAndSendToUser(notification, initiator, null, expense, null, initiator, actionType, true);
+    }
+
+    public List<NotificationResponse> findAllNotSeen() {
+        User signedInUser = signedInUsernameGetter.getUser();
+        List<Notification> notifications = notificationRepository.findAllByNotificationUsersUserIdAndNotificationUsersSeen(signedInUser.getId(), false);
+
+        return notifications.stream().map(notification -> NotificationResponse.builder()
+                .id(notification.getId())
+                .type(notification.getType())
+                .initiatorUserId(notification.getInitiator().getId())
+                .userAddedId(notification.getAdded() == null ? null : notification.getAdded().getId())
+                .expenseId(notification.getExpenseId())
+                .groupId(notification.getGroup() == null ? null : notification.getGroup().getId())
+                .message(notification.getMessage())
+                .build()).toList();
+    }
+
+    public List<NotificationAllResponse> findAllAfterDate(Date date) {
+        User signedInUser = signedInUsernameGetter.getUser();
+        LocalDateTime dateLocal = LocalDateTime.ofInstant(date.toInstant(), ZoneId.of("UTC"));
+        List<Notification> notifications = notificationRepository.findAllByNotificationUsersUserIdAndDateAfter(
+                signedInUser.getId(), dateLocal, Sort.by(Sort.Direction.ASC, "date"));
+
+        return notifications.stream().map(notification -> NotificationAllResponse.builder()
+                .type(notification.getType().ordinal())
+                .initiatorUserId(notification.getInitiator().getId())
+                .userAddedId(notification.getAdded() == null ? null : notification.getAdded().getId())
+                .expenseId(notification.getExpenseId())
+                .groupId(notification.getGroup() == null ? null : notification.getGroup().getId())
+                .date(notification.getDate())
+                .build()).toList();
+    }
+
+    private Notification saveNotification(User initiator, User added, Expense expense, Group group, NotificationType actionType) {
+        return notificationRepository.save(Notification.builder()
+                .type(actionType)
+                .initiator(initiator)
+                .added(added)
+                .expenseId(expense == null ? null : expense.getId())
+                .expenseDescription(expense == null ? null : expense.getDescription())
+                .group(group)
+                .date(LocalDateTime.now())
+                .build());
+    }
+
+    private void saveAndSendToUsers(Notification notification, User initiator, User added, Expense expense, Group group,
+                                    List<User> participants, NotificationType actionType, Boolean sendToAll) {
+        for (User participant : participants) {
+            if (!sendToAll && participant.getId() == initiator.getId()) {
                 continue;
             }
-            NotificationUser notificationUser = new NotificationUser();
-            notificationUser.setSeen(false);
-            notificationUser.setUser(participant.getUser());
-            notificationUser.setNotification(notification);
-            notificationUsers.add(notificationUser);
-
-            NotificationResponse response = new NotificationResponse();
-            response.setId(notification.getId());
-            response.setType(acttionType);
-            response.setInitiatorUserId(initiator.getId());
-            response.setExpenseId(expense.getId());
-            response.setGroupId(group.getId());
-            response.setMessage(notification.getMessage());
-            wsService.sendNotificationsToUser(participant.getUser().getEmail(), List.of(response));
+            saveAndSendToUser(notification, initiator, added, expense, group, participant, actionType, sendToAll);
         }
-        notificationUserRepository.saveAll(notificationUsers);
     }
 
-    public List<NotificationResponse> findAllNotSeenByUserId(Long id) {
-        List<Notification> notifications = notificationRepository.findAllByNotificationUsersUserIdAndNotificationUsersSeen(id, false);
+    private void saveAndSendToUser(Notification notification, User initiator, User added, Expense expense, Group group,
+                                   User receiver, NotificationType actionType, Boolean sendToAll) {
+        notificationUserRepository.save(NotificationUser.builder()
+                .seen(false)
+                .user(receiver)
+                .notification(notification)
+                .build());
 
-        List<NotificationResponse> responses = new ArrayList<>(notifications.size());
-        for (Notification notification : notifications) {
-            NotificationResponse response = new NotificationResponse();
-            response.setId(notification.getId());
-            response.setType(notification.getType());
-            response.setInitiatorUserId(notification.getInitiator().getId());
-            response.setExpenseId(notification.getExpenseId());
-            response.setGroupId(notification.getGroup().getId());
-            response.setMessage(notification.getMessage());
-            responses.add(response);
+        NotificationResponse response = NotificationResponse.builder()
+                .id(notification.getId())
+                .type(actionType)
+                .initiatorUserId(initiator.getId())
+                .userAddedId(added == null ? null : added.getId())
+                .expenseId(expense == null ? null : expense.getId())
+                .groupId(group == null ? null : group.getId())
+                .message(notification.getMessage())
+                .build();
+        if (sendToAll) {
+            wsService.sendNotificationToUserAll(receiver.getEmail(), response);
+        } else {
+            wsService.sendNotificationToUser(receiver.getEmail(), response);
         }
-
-        return responses;
     }
 
     public void setSeenByUser(Long userId, List<Long> notificationIds) {
-        List<NotificationUser> notificationUsers = notificationUserRepository.findAllByUserIdAndNotificationIdIn(userId, notificationIds);
-
-        if (notificationUsers.size() != notificationIds.size()) {
-            throw new RebalanceException(RebalanceErrorType.RB_501);
-        }
+        notificationUserRepository.setUserNotificationsAsSeen(userId, notificationIds);
+    }
 
         notificationUsers.forEach(n -> n.setSeen(true));
         notificationUserRepository.saveAll(notificationUsers);

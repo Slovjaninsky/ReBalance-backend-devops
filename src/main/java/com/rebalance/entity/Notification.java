@@ -1,17 +1,18 @@
 package com.rebalance.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "notifications")
 @Entity
 public class Notification {
@@ -29,6 +30,11 @@ public class Notification {
     @JoinColumn(name = "initiator_id", nullable = false)
     private User initiator;
 
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "added_id")
+    private User added;
+
     @Column(name = "expense_id")
     private Long expenseId;
 
@@ -40,6 +46,9 @@ public class Notification {
     @JoinColumn(name = "group_id")
     private Group group;
 
+    @Column(name = "date")
+    private LocalDateTime date;
+
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "notification")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -47,13 +56,18 @@ public class Notification {
 
     public List<String> getMessage() {
         return switch (type) {
-            case UserAddedToGroup -> List.of(initiator.getNickname(), " added you to ", group.getName());
+            case UserAddedToGroup ->
+                    List.of(initiator.getNickname(), " added ", added.getNickname(), " to ", group.getName());
+            case CurrentUserAddedToGroup -> List.of(initiator.getNickname(), " added you to ", group.getName());
             case GroupExpenseAdded ->
                     List.of(initiator.getNickname(), " added ", expenseDescription, " to ", group.getName());
             case GroupExpenseEdited ->
                     List.of(initiator.getNickname(), " edited ", expenseDescription, " to ", group.getName());
             case GroupExpenseDeleted ->
                     List.of(initiator.getNickname(), " deleted ", expenseDescription, " to ", group.getName());
+            case PersonalExpenseAdded -> List.of("Added personal expense ", expenseDescription);
+            case PersonalExpenseEdited -> List.of("Edited personal expense ", expenseDescription);
+            case PersonalExpenseDeleted -> List.of("Deleted personal expense ", expenseDescription);
         };
     }
 }

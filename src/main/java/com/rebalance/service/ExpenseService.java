@@ -154,7 +154,11 @@ public class ExpenseService {
             expense.setDate(LocalDateTime.now());
         }
         expense.setCategory(categoryService.getOrCreateGroupCategory(category, group));
-        return expenseRepository.save(expense);
+        expenseRepository.save(expense);
+
+        notificationService.saveNotificationPersonalExpense(signedInUser, expense, NotificationType.PersonalExpenseAdded);
+
+        return expense;
     }
 
     public Expense editPersonalExpense(Expense expenseRequest, String category) {
@@ -175,7 +179,10 @@ public class ExpenseService {
         if (expenseRequest.getDate() != null) {
             expense.setDate(expenseRequest.getDate());
         }
-        return expenseRepository.save(expense);
+        expenseRepository.save(expense);
+
+        notificationService.saveNotificationPersonalExpense(signedInUser, expense, NotificationType.PersonalExpenseEdited);
+        return expense;
     }
 
     private Expense getExpenseById(Long id) {
@@ -192,13 +199,11 @@ public class ExpenseService {
         HashMap<Long, BigDecimal> userChanges = getInverseBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
         updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
 
-        User signedInUser = signedInUsernameGetter.getUser();
-        Group groupFromDb = groupService.getGroupByIdNoCheck(expense.getGroup().getId());
-        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
-
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, groupFromDb, expenseUsers, NotificationType.GroupExpenseDeleted);
-
         expenseRepository.deleteById(expenseId);
+
+        User signedInUser = signedInUsernameGetter.getUser();
+        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, expense.getGroup(), expenseUsers, NotificationType.GroupExpenseDeleted);
     }
 
     public void deletePersonalExpenseById(Long expenseId) {
@@ -207,6 +212,7 @@ public class ExpenseService {
         groupService.validateGroupIsPersonal(expense.getGroup().getId(), signedInUser.getId());
 
         expenseRepository.deleteById(expenseId);
+        notificationService.saveNotificationPersonalExpense(signedInUser, expense, NotificationType.PersonalExpenseDeleted);
     }
 
     public void throwExceptionIfExpensesWithGlobalIdNotFound(Long globalId) {

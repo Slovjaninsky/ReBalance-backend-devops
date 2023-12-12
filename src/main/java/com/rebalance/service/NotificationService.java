@@ -140,8 +140,4 @@ public class NotificationService {
     public void setSeenByUser(Long userId, List<Long> notificationIds) {
         notificationUserRepository.setUserNotificationsAsSeen(userId, notificationIds);
     }
-
-        notificationUsers.forEach(n -> n.setSeen(true));
-        notificationUserRepository.saveAll(notificationUsers);
-    }
 }

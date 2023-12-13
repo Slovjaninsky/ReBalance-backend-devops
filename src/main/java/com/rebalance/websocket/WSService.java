@@ -1,5 +1,6 @@
 package com.rebalance.websocket;
 
+import com.rebalance.dto.response.NotificationAllResponse;
 import com.rebalance.dto.response.NotificationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

@@ -38,10 +38,9 @@ public class NotificationService {
         // send notifications to all users in group in private channel
         saveAndSendToUsers(notificationForOther, initiator, added, null, group,
                 usersToSend, NotificationType.UserAddedToGroup, false);
-        List<User> usersToSendAll = group.getUsers().stream().map(UserGroup::getUser).toList();
         // send notifications to all users in group in all channel
         saveAndSendToUsers(notificationForOther, initiator, added, null, group,
-                usersToSendAll, NotificationType.UserAddedToGroup, true);
+                usersToSend, NotificationType.UserAddedToGroup, true);
     }
 
     public void saveNotificationCreatedGroup(User initiator, Group group) {
@@ -81,6 +80,7 @@ public class NotificationService {
                 .build()).toList();
     }
 
+    //TODO: return to Page
     public List<NotificationAllResponse> findAllAfterDate(Date date) {
         User signedInUser = signedInUsernameGetter.getUser();
         LocalDateTime dateLocal = LocalDateTime.ofInstant(date.toInstant(), ZoneId.of("UTC"));
@@ -105,7 +105,7 @@ public class NotificationService {
                 .expenseId(expense == null ? null : expense.getId())
                 .expenseDescription(expense == null ? null : expense.getDescription())
                 .group(group)
-                .date(LocalDateTime.now())
+                .date(LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.of("UTC")))
                 .build());
     }
 
@@ -127,23 +127,40 @@ public class NotificationService {
                 .notification(notification)
                 .build());
 
-        NotificationResponse response = NotificationResponse.builder()
-                .id(notification.getId())
-                .type(actionType)
-                .initiatorUserId(initiator.getId())
-                .userAddedId(added == null ? null : added.getId())
-                .expenseId(expense == null ? null : expense.getId())
-                .groupId(group == null ? null : group.getId())
-                .message(notification.getMessage())
-                .build();
         if (sendToAll) {
-            wsService.sendNotificationToUserAll(receiver.getEmail(), response);
+            wsService.sendNotificationToUserAll(receiver.getEmail(), NotificationAllResponse.builder()
+                    .type(actionType.ordinal())
+                    .initiatorUserId(initiator.getId())
+                    .userAddedId(added == null ? null : added.getId())
+                    .expenseId(expense == null ? null : expense.getId())
+                    .groupId(group == null ? null : group.getId())
+                    .build());
         } else {
-            wsService.sendNotificationToUser(receiver.getEmail(), response);
+            wsService.sendNotificationToUser(receiver.getEmail(), NotificationResponse.builder()
+                    .id(notification.getId())
+                    .type(actionType)
+                    .initiatorUserId(initiator.getId())
+                    .userAddedId(added == null ? null : added.getId())
+                    .expenseId(expense == null ? null : expense.getId())
+                    .groupId(group == null ? null : group.getId())
+                    .message(notification.getMessage())
+                    .build());
         }
     }
 
     public void setSeenByUser(Long userId, List<Long> notificationIds) {
         notificationUserRepository.setUserNotificationsAsSeen(userId, notificationIds);
     }
+
+    /*
+    TODO:
+    + add all users to notifications even if they do not participate in expense
+    + set seen by ids using custom query (for performance reasons)
+    + add date of creation to all notifications
+    + add rest endpoint to get all notifications for user after some date (with pagination, ordered by date asc).
+        It will be used by android app to synchronize DBs when notifications were not working.
+    - call rest endpoint to get notifications on loading screen (show text like synchronising)
+    - on android, when receive new notification, update variable lastUpdatedNotifications
+    - on android, when receive new notifications, send request to set them as seen
+     */
 }

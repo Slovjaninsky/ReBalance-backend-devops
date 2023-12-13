@@ -44,6 +44,12 @@ public class NotificationService {
                 usersToSendAll, NotificationType.UserAddedToGroup, true);
     }
 
+    public void saveNotificationCreatedGroup(User initiator, Group group) {
+        Notification notification = saveNotification(initiator, null, null, group, NotificationType.GroupCreated);
+        // send notification to all users in group in all channel
+        saveAndSendToUsers(notification, initiator, null, null, group, List.of(initiator), NotificationType.GroupCreated, true);
+    }
+
     public void saveNotificationGroupExpense(User initiator, Expense expense, Group group, List<ExpenseUsers> participants, NotificationType actionType) {
         Notification notification = saveNotification(initiator, null, expense, group, actionType);
         // send notification to all participants of expense in private channel

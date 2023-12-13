@@ -75,6 +75,8 @@ public class GroupService {
         // leave only current user to properly map favorite field
         group.getUsers().removeIf(userGroup -> !userGroup.getUser().equals(signedInUser));
 
+        notificationService.saveNotificationCreatedGroup(signedInUser, group);
+
         return group;
     }
 

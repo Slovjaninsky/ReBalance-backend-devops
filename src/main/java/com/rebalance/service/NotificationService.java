@@ -151,16 +151,4 @@ public class NotificationService {
     public void setSeenByUser(Long userId, List<Long> notificationIds) {
         notificationUserRepository.setUserNotificationsAsSeen(userId, notificationIds);
     }
-
-    /*
-    TODO:
-    + add all users to notifications even if they do not participate in expense
-    + set seen by ids using custom query (for performance reasons)
-    + add date of creation to all notifications
-    + add rest endpoint to get all notifications for user after some date (with pagination, ordered by date asc).
-        It will be used by android app to synchronize DBs when notifications were not working.
-    - call rest endpoint to get notifications on loading screen (show text like synchronising)
-    - on android, when receive new notification, update variable lastUpdatedNotifications
-    - on android, when receive new notifications, send request to set them as seen
-     */
 }

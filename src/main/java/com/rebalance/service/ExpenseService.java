@@ -110,7 +110,7 @@ public class ExpenseService {
         }
         // set amount and expense for each ExpenseUsers
         for (ExpenseUsers eu : expenseUsers) {
-            eu.setAmount(expense.getAmount().multiply(BigDecimal.valueOf(eu.getMultiplier()).divide(totalMultipliers, RoundingMode.HALF_EVEN)));
+            eu.setAmount(expense.getAmount().multiply(BigDecimal.valueOf(eu.getMultiplier()).divide(totalMultipliers, 100, RoundingMode.HALF_EVEN)));
             eu.setExpense(expense);
         }
 

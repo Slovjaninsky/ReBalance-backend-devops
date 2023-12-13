@@ -83,15 +83,16 @@ public class GroupService {
     public UserGroup addUserToGroup(Long groupId, String email) {
         Group group = getNotPersonalGroupById(groupId);
         User user = userService.getUserByEmail(email);
+        User signedInUser = signedInUsernameGetter.getUser();
 
         validateUserNotInGroup(user.getId(), group.getId());
+        validateUsersInGroup(Set.of(signedInUser.getId()), group.getId());
 
         UserGroup userGroup = new UserGroup();
         userGroup.setGroup(group);
         userGroup.setUser(user);
         userGroupRepository.save(userGroup);
 
-        User signedInUser = signedInUsernameGetter.getUser();
         Hibernate.initialize(group.getUsers());
         group.getUsers().forEach(u -> Hibernate.initialize(u.getUser()));
         notificationService.saveNotificationUserAddedToGroup(signedInUser, user, group);

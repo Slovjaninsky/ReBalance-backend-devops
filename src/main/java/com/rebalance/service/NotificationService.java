@@ -38,16 +38,21 @@ public class NotificationService {
         // send notifications to all users in group in private channel
         saveAndSendToUsers(notificationForOther, initiator, added, null, group,
                 usersToSend, NotificationType.UserAddedToGroup, false);
-        List<User> usersToSendAll = group.getUsers().stream().map(UserGroup::getUser).toList();
         // send notifications to all users in group in all channel
         saveAndSendToUsers(notificationForOther, initiator, added, null, group,
-                usersToSendAll, NotificationType.UserAddedToGroup, true);
+                usersToSend, NotificationType.UserAddedToGroup, true);
     }
 
-    public void saveNotificationGroupExpense(User initiator, Expense expense, Group group, List<ExpenseUsers> participants, NotificationType actionType) {
+    public void saveNotificationCreatedGroup(User initiator, Group group) {
+        Notification notification = saveNotification(initiator, null, null, group, NotificationType.GroupCreated);
+        // send notification to all users in group in all channel
+        saveAndSendToUsers(notification, initiator, null, null, group, List.of(initiator), NotificationType.GroupCreated, true);
+    }
+
+    public void saveNotificationGroupExpense(User initiator, Expense expense, Group group, List<User> participants, NotificationType actionType) {
         Notification notification = saveNotification(initiator, null, expense, group, actionType);
         // send notification to all participants of expense in private channel
-        saveAndSendToUsers(notification, initiator, null, expense, group, participants.stream().map(ExpenseUsers::getUser).toList(), actionType, false);
+        saveAndSendToUsers(notification, initiator, null, expense, group, participants, actionType, false);
         // send notification to all users in group in all channel
         saveAndSendToUsers(notification, initiator, null, expense, group, group.getUsers().stream().map(UserGroup::getUser).toList(), actionType, true);
     }
@@ -75,6 +80,7 @@ public class NotificationService {
                 .build()).toList();
     }
 
+    //TODO: return to Page
     public List<NotificationAllResponse> findAllAfterDate(Date date) {
         User signedInUser = signedInUsernameGetter.getUser();
         LocalDateTime dateLocal = LocalDateTime.ofInstant(date.toInstant(), ZoneId.of("UTC"));
@@ -99,7 +105,7 @@ public class NotificationService {
                 .expenseId(expense == null ? null : expense.getId())
                 .expenseDescription(expense == null ? null : expense.getDescription())
                 .group(group)
-                .date(LocalDateTime.now())
+                .date(LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.of("UTC")))
                 .build());
     }
 
@@ -121,19 +127,25 @@ public class NotificationService {
                 .notification(notification)
                 .build());
 
-        NotificationResponse response = NotificationResponse.builder()
-                .id(notification.getId())
-                .type(actionType)
-                .initiatorUserId(initiator.getId())
-                .userAddedId(added == null ? null : added.getId())
-                .expenseId(expense == null ? null : expense.getId())
-                .groupId(group == null ? null : group.getId())
-                .message(notification.getMessage())
-                .build();
         if (sendToAll) {
-            wsService.sendNotificationToUserAll(receiver.getEmail(), response);
+            wsService.sendNotificationToUserAll(receiver.getEmail(), NotificationAllResponse.builder()
+                    .type(actionType.ordinal())
+                    .initiatorUserId(initiator.getId())
+                    .userAddedId(added == null ? null : added.getId())
+                    .expenseId(expense == null ? null : expense.getId())
+                    .groupId(group == null ? null : group.getId())
+                    .date(notification.getDate())
+                    .build());
         } else {
-            wsService.sendNotificationToUser(receiver.getEmail(), response);
+            wsService.sendNotificationToUser(receiver.getEmail(), NotificationResponse.builder()
+                    .id(notification.getId())
+                    .type(actionType)
+                    .initiatorUserId(initiator.getId())
+                    .userAddedId(added == null ? null : added.getId())
+                    .expenseId(expense == null ? null : expense.getId())
+                    .groupId(group == null ? null : group.getId())
+                    .message(notification.getMessage())
+                    .build());
         }
     }
 

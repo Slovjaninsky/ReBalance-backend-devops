@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,7 @@ public class ExpenseService {
         // set auto generated fields
         expense.setAddedBy(signedInUser);
         if (expense.getDate() == null) {
-            expense.setDate(LocalDateTime.now());
+            expense.setDate(LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.of("UTC")));
         }
         expense.setCategory(categoryService.getOrCreateGroupCategory(category, expense.getGroup()));
         expenseRepository.save(expense);
@@ -69,8 +70,9 @@ public class ExpenseService {
         HashMap<Long, BigDecimal> userChanges = getBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
         updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
 
-        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseAdded);
+        List<User> usersToBeNotified = userRepository.findAllById(expenseUsers.stream().map(eu -> eu.getUser().getId()).toList());
+        usersToBeNotified.add(userRepository.findById(expense.getInitiator().getId()).get());
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, usersToBeNotified, NotificationType.GroupExpenseAdded);
 
         // set expense participants for response
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
@@ -110,7 +112,7 @@ public class ExpenseService {
         }
         // set amount and expense for each ExpenseUsers
         for (ExpenseUsers eu : expenseUsers) {
-            eu.setAmount(expense.getAmount().multiply(BigDecimal.valueOf(eu.getMultiplier()).divide(totalMultipliers, RoundingMode.HALF_EVEN)));
+            eu.setAmount(expense.getAmount().multiply(BigDecimal.valueOf(eu.getMultiplier()).divide(totalMultipliers, 100, RoundingMode.HALF_EVEN)));
             eu.setExpense(expense);
         }
 
@@ -134,8 +136,9 @@ public class ExpenseService {
         expenseUsersRepository.saveAll(expenseUsers);
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
 
-        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseEdited);
+        List<User> usersToBeNotified = userRepository.findAllById(expenseUsers.stream().map(eu -> eu.getUser().getId()).toList());
+        usersToBeNotified.add(userRepository.findById(expense.getInitiator().getId()).get());
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, usersToBeNotified, NotificationType.GroupExpenseEdited);
 
         return expense;
     }
@@ -148,7 +151,7 @@ public class ExpenseService {
         expense.setAddedBy(signedInUser);
         expense.setGroup(group);
         if (expense.getDate() == null) {
-            expense.setDate(LocalDateTime.now());
+            expense.setDate(LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.of("UTC")));
         }
         expense.setCategory(categoryService.getOrCreateGroupCategory(category, group));
         expenseRepository.save(expense);
@@ -199,8 +202,8 @@ public class ExpenseService {
         expenseRepository.deleteById(expenseId);
 
         User signedInUser = signedInUsernameGetter.getUser();
-        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, expense.getGroup(), expenseUsers, NotificationType.GroupExpenseDeleted);
+        List<User> usersToBeNotified = userRepository.findAllById(expenseUsers.stream().map(eu -> eu.getUser().getId()).toList());
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, expense.getGroup(), usersToBeNotified, NotificationType.GroupExpenseDeleted);
     }
 
     public void deletePersonalExpenseById(Long expenseId) {

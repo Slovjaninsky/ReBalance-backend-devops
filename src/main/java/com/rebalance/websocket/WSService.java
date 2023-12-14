@@ -1,5 +1,6 @@
 package com.rebalance.websocket;
 
+import com.rebalance.dto.response.NotificationAllResponse;
 import com.rebalance.dto.response.NotificationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -16,7 +17,7 @@ public class WSService {
         messagingTemplate.convertAndSendToUser(email, "/notifications/new", List.of(notification));
     }
 
-    public void sendNotificationToUserAll(String email, NotificationResponse notification) {
+    public void sendNotificationToUserAll(String email, NotificationAllResponse notification) {
         messagingTemplate.convertAndSendToUser(email, "/notifications/new/all", List.of(notification));
     }
 }

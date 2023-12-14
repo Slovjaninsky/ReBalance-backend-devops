@@ -63,9 +63,9 @@ public class Notification {
             case GroupExpenseAdded ->
                     List.of(initiator.getNickname(), " added ", expenseDescription, " to ", group.getName());
             case GroupExpenseEdited ->
-                    List.of(initiator.getNickname(), " edited ", expenseDescription, " to ", group.getName());
+                    List.of(initiator.getNickname(), " edited ", expenseDescription, " in ", group.getName());
             case GroupExpenseDeleted ->
-                    List.of(initiator.getNickname(), " deleted ", expenseDescription, " to ", group.getName());
+                    List.of(initiator.getNickname(), " deleted ", expenseDescription, " from ", group.getName());
             case PersonalExpenseAdded -> List.of("Added personal expense ", expenseDescription);
             case PersonalExpenseEdited -> List.of("Edited personal expense ", expenseDescription);
             case PersonalExpenseDeleted -> List.of("Deleted personal expense ", expenseDescription);

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,7 @@ public class ExpenseService {
         // set auto generated fields
         expense.setAddedBy(signedInUser);
         if (expense.getDate() == null) {
-            expense.setDate(LocalDateTime.now());
+            expense.setDate(LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.of("UTC")));
         }
         expense.setCategory(categoryService.getOrCreateGroupCategory(category, expense.getGroup()));
         expenseRepository.save(expense);
@@ -150,7 +151,7 @@ public class ExpenseService {
         expense.setAddedBy(signedInUser);
         expense.setGroup(group);
         if (expense.getDate() == null) {
-            expense.setDate(LocalDateTime.now());
+            expense.setDate(LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.of("UTC")));
         }
         expense.setCategory(categoryService.getOrCreateGroupCategory(category, group));
         expenseRepository.save(expense);

@@ -134,6 +134,7 @@ public class NotificationService {
                     .userAddedId(added == null ? null : added.getId())
                     .expenseId(expense == null ? null : expense.getId())
                     .groupId(group == null ? null : group.getId())
+                    .date(notification.getDate())
                     .build());
         } else {
             wsService.sendNotificationToUser(receiver.getEmail(), NotificationResponse.builder()

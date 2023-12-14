@@ -49,10 +49,10 @@ public class NotificationService {
         saveAndSendToUsers(notification, initiator, null, null, group, List.of(initiator), NotificationType.GroupCreated, true);
     }
 
-    public void saveNotificationGroupExpense(User initiator, Expense expense, Group group, List<ExpenseUsers> participants, NotificationType actionType) {
+    public void saveNotificationGroupExpense(User initiator, Expense expense, Group group, List<User> participants, NotificationType actionType) {
         Notification notification = saveNotification(initiator, null, expense, group, actionType);
         // send notification to all participants of expense in private channel
-        saveAndSendToUsers(notification, initiator, null, expense, group, participants.stream().map(ExpenseUsers::getUser).toList(), actionType, false);
+        saveAndSendToUsers(notification, initiator, null, expense, group, participants, actionType, false);
         // send notification to all users in group in all channel
         saveAndSendToUsers(notification, initiator, null, expense, group, group.getUsers().stream().map(UserGroup::getUser).toList(), actionType, true);
     }

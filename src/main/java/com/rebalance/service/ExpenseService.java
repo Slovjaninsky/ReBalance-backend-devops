@@ -69,8 +69,9 @@ public class ExpenseService {
         HashMap<Long, BigDecimal> userChanges = getBalanceDiff(expenseUsers, expense.getInitiator().getId(), expense.getAmount());
         updateUsersBalanceInGroup(userChanges, expense.getGroup().getId());
 
-        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseAdded);
+        List<User> usersToBeNotified = userRepository.findAllById(expenseUsers.stream().map(eu -> eu.getUser().getId()).toList());
+        usersToBeNotified.add(userRepository.findById(expense.getInitiator().getId()).get());
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, usersToBeNotified, NotificationType.GroupExpenseAdded);
 
         // set expense participants for response
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
@@ -134,8 +135,9 @@ public class ExpenseService {
         expenseUsersRepository.saveAll(expenseUsers);
         expense.setExpenseUsers(new HashSet<>(expenseUsers));
 
-        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, expenseUsers, NotificationType.GroupExpenseEdited);
+        List<User> usersToBeNotified = userRepository.findAllById(expenseUsers.stream().map(eu -> eu.getUser().getId()).toList());
+        usersToBeNotified.add(userRepository.findById(expense.getInitiator().getId()).get());
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, group, usersToBeNotified, NotificationType.GroupExpenseEdited);
 
         return expense;
     }
@@ -199,8 +201,8 @@ public class ExpenseService {
         expenseRepository.deleteById(expenseId);
 
         User signedInUser = signedInUsernameGetter.getUser();
-        expenseUsers.forEach(eu -> eu.setUser(userRepository.findById(eu.getUser().getId()).get()));
-        notificationService.saveNotificationGroupExpense(signedInUser, expense, expense.getGroup(), expenseUsers, NotificationType.GroupExpenseDeleted);
+        List<User> usersToBeNotified = userRepository.findAllById(expenseUsers.stream().map(eu -> eu.getUser().getId()).toList());
+        notificationService.saveNotificationGroupExpense(signedInUser, expense, expense.getGroup(), usersToBeNotified, NotificationType.GroupExpenseDeleted);
     }
 
     public void deletePersonalExpenseById(Long expenseId) {

@@ -1,55 +1,70 @@
 package com.rebalance.controller;
 
-import com.rebalance.service.ExpenseService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebalance.service.ImageService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.net.URI;
 
 @Tag(name = "Image management")
 @RestController
-@RequestMapping(APIVersion.current + "/expense")
+@RequestMapping(APIVersion.current)
 @RequiredArgsConstructor
 public class ImageController {
+
     private final ImageService imageService;
-    private final ExpenseService expenseService;
 
-    @Operation(summary = "Get image")
-    @GetMapping("/{expenseId}/image")
-    public ResponseEntity<Map<String, String>> getImage(@PathVariable("expenseId") Long expenseId) {
-        String base64Image = imageService.getImageByGlobalId(expenseId);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("image", base64Image);
-
-        return ResponseEntity.ok(response);
+    @GetMapping(
+            value = "/images",
+            produces = MediaType.IMAGE_JPEG_VALUE
+    )
+    public byte[][] getImagesByIds(@RequestBody String imageIdsJson) throws IOException {
+        return getMediaByIds(imageIdsJson, true);
     }
 
-    @Operation(summary = "Get image preview")
-    @GetMapping("/{expenseId}/preview")
-    public ResponseEntity<Map<String, String>> getImagePreview(@PathVariable("expenseId") Long expenseId) {
-        String base64Image = imageService.getImageIconByGlobalId(expenseId);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("image", base64Image);
-
-        return ResponseEntity.ok(response);
+    @GetMapping(
+            value = "/icons",
+            produces = MediaType.IMAGE_JPEG_VALUE
+    )
+    public byte[][] getIconsByIds(@RequestBody String imageIdsJson) throws IOException {
+        return getMediaByIds(imageIdsJson, false);
     }
 
-    @Operation(summary = "Add image to existing expense")
-    @PostMapping("/{expenseId}/image")
-    public ResponseEntity<String> addImageToExpense(@PathVariable("expenseId") Long expenseId, @RequestBody Map<String, String> requestBody) {
-        expenseService.throwExceptionIfExpensesWithGlobalIdNotFound(expenseId);
+    private byte[][] getMediaByIds(String data, boolean images) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Long[] imageIds = mapper.readValue(data, Long[].class);
+        return images ? imageService.getImagesByGlobalIds(imageIds) : imageService.getImageIconsByGlobalIds(imageIds);
+    }
 
-        String base64Image = requestBody.get("image");
-        imageService.saveImage(base64Image, expenseId);
+    @PostMapping(
+            value = "/images/{globalId}",
+            consumes = MediaType.IMAGE_JPEG_VALUE
+    )
+    public ResponseEntity<Void> saveImage(@PathVariable Long globalId, @RequestBody byte[] imageData) {
+        imageService.saveImage(globalId, imageData);
+        return ResponseEntity.ok().build();
+    }
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    @PutMapping(
+            value = "/images/{globalId}",
+            consumes = MediaType.IMAGE_JPEG_VALUE
+    )
+    public ResponseEntity<Void> updateImage(@PathVariable Long globalId, @RequestBody byte[] imageData) {
+        imageService.updateImage(globalId, imageData);
+        return ResponseEntity.created(URI.create("/images/" + globalId)).build();
+    }
+
+    @DeleteMapping(
+            value = "/images/{globalId}"
+    )
+    public ResponseEntity<Void> deleteImage(@PathVariable Long globalId) {
+        imageService.deleteImageByGlobalId(globalId);
+        return ResponseEntity.noContent().build();
     }
 }

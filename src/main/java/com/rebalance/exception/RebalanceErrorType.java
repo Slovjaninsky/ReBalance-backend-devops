@@ -28,8 +28,9 @@ public enum RebalanceErrorType {
     RB_205("Group is personal", HttpStatus.CONFLICT),
 
     // images
-    RB_301("Image not found", HttpStatus.NOT_FOUND),
-    RB_302("Icon not found", HttpStatus.NOT_FOUND),
+    RB_301("Media not found", HttpStatus.NOT_FOUND),
+    RB_302("Error saving image", HttpStatus.NOT_FOUND),
+    RB_303("Invalid image data", HttpStatus.NOT_FOUND),
 
     // token
     RB_401("Invalid token", HttpStatus.BAD_REQUEST),
@@ -37,7 +38,6 @@ public enum RebalanceErrorType {
 
     // notifications
     RB_501("Not found notification", HttpStatus.NOT_FOUND);
-
 
     private final String description;
     private final HttpStatus status;

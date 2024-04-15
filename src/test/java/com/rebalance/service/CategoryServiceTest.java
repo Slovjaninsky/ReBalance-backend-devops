@@ -42,7 +42,7 @@ class CategoryServiceTest {
 
 
     @Test
-    public void should_return_categories_with_personal_groups_when_valid_data_provided() {
+    void should_return_categories_with_personal_groups_when_valid_data_provided() {
         Long userId = 1L;
         Long groupId = 2L;
         User user = new User();
@@ -62,7 +62,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    public void should_throw_exception_when_null_provided_by_repo() {
+    void should_throw_exception_when_null_provided_by_repo() {
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
@@ -73,7 +73,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    public void should_return_categories_with_public_groups_when_valid_data_provided() {
+    void should_return_categories_with_public_groups_when_valid_data_provided() {
         Long groupId = 1L;
         Group group = new Group();
         group.setId(groupId);
@@ -90,7 +90,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    public void should_propagate_exception_when_thrown_during_db_operation() {
+    void should_propagate_exception_when_thrown_during_db_operation() {
         Long groupId = 1L;
         when(groupService.getNotPersonalGroupById(groupId)).thenThrow(new RuntimeException("Group not found"));
 

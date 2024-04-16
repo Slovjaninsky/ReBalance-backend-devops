@@ -57,7 +57,7 @@ public class ImageService {
         imageRepository.save(toRepository);
     }
 
-    public byte[][] getImagesByGlobalIds(Long[] ids) {
+    public byte[][] getImagesByGlobalIds(Long... ids) {
         byte[][] res = new byte[ids.length][];
         for (int i = 0; i < ids.length; i++) {
             throwExceptionIfMediaNotExists(ids[i]);
@@ -66,7 +66,7 @@ public class ImageService {
         return res;
     }
 
-    public byte[][] getImageIconsByGlobalIds(Long[] ids) {
+    public byte[][] getImageIconsByGlobalIds(Long... ids) {
         byte[][] res = new byte[ids.length][];
         for (int i = 0; i < ids.length; i++) {
             throwExceptionIfMediaNotExists(ids[i]);

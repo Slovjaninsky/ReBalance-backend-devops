@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### configs ###
+src/test/resources/app_test.cfg

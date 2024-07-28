@@ -58,9 +58,11 @@ public class HttpConfiguration {
                         .requestMatchers(HttpMethod.DELETE, APIVersion.current + "/group/expenses/*").authenticated()
 
                         // ImageController
-                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/expense/*/image").authenticated()
-                        .requestMatchers(HttpMethod.GET, APIVersion.current + "/expense/*/preview").authenticated()
-                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/expense/*/image").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/images").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/icons").authenticated()
+                        .requestMatchers(HttpMethod.POST, APIVersion.current + "/images/*").authenticated()
+                        .requestMatchers(HttpMethod.PUT, APIVersion.current + "/images/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, APIVersion.current + "/images/*").authenticated()
 
                         // NotificationController
                         .requestMatchers(HttpMethod.GET, APIVersion.current + "/notifications/new").authenticated()

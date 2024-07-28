@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class Image {
     @Id
     @Column(name = "global_id")
-    private Long id;
+    private Long globalId;
 
     @Column(name = "image_path")
     private String imagePath;

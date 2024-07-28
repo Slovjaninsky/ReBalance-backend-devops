@@ -18,7 +18,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Base64;
 
+import static java.util.Objects.nonNull;
 import static org.springframework.util.Assert.notNull;
 
 @Slf4j
@@ -57,56 +59,46 @@ public class ImageService {
         imageRepository.save(toRepository);
     }
 
-    public byte[][] getImagesByGlobalIds(Long... ids) {
-        byte[][] res = new byte[ids.length][];
-        for (int i = 0; i < ids.length; i++) {
-            throwExceptionIfMediaNotExists(ids[i]);
-            res[i] = loadImageBytes(ids[i], false);
-        }
-        return res;
-    }
-
-    public byte[][] getImageIconsByGlobalIds(Long... ids) {
-        byte[][] res = new byte[ids.length][];
-        for (int i = 0; i < ids.length; i++) {
-            throwExceptionIfMediaNotExists(ids[i]);
-            res[i] = loadImageBytes(ids[i], true);
-        }
-        return res;
-    }
-
     public void deleteImageByGlobalId(Long id) {
-        throwExceptionIfMediaNotExists(id);
-
+        if (!imageExistsByGlobalId(id)) {
+            return;
+        }
         connection.getBlobContainerClient(storageContainerImages).getBlobClient(id + imageNamePrefix + PNG).delete();
         connection.getBlobContainerClient(storageContainerThumbnails).getBlobClient(id + imageNamePrefix + ICON_JPG).delete();
 
         imageRepository.deleteById(id);
     }
 
-    public void throwExceptionIfMediaNotExists(Long id) {
-        if (imageRepository.findById(id).isEmpty()) {
+    public void throwExceptionIfMediaNotExists(Long globalId) {
+        if (imageRepository.findById(globalId).isEmpty()) {
             throw new RebalanceException(RebalanceErrorType.RB_301);
         }
     }
 
-    public void updateImage(Long id, byte[] imageBytes) {
-        connection.getBlobContainerClient(storageContainerImages).getBlobClient(id + imageNamePrefix + PNG).delete();
-        connection.getBlobContainerClient(storageContainerThumbnails).getBlobClient(id + imageNamePrefix + ICON_JPG).delete();
+    public boolean imageExistsByGlobalId(Long globalId) {
+        return imageRepository.findById(globalId).isPresent();
+    }
 
-        String uri = saveImageAndIconToCloud(imageBytes, id);
-        if (imageRepository.findById(id).isEmpty()) {
-            Image toRepository = new Image(id, uri);
-            imageRepository.save(toRepository);
+    public void updateImage(Long globalId, byte[] image) {
+        deleteImageByGlobalId(globalId);
+        saveImage(globalId, image);
+    }
+
+    public String loadImageBase64(Long globalId, boolean getIcon) {
+        if (imageRepository.findById(globalId).isEmpty()) {
+            return null;
         }
-
+        try {
+            String container = getIcon ? storageContainerThumbnails : storageContainerImages;
+            String blobName = getIcon ? globalId + imageNamePrefix + ICON_JPG : globalId + imageNamePrefix + PNG;
+            byte[] imageBytes = connection.getBlobContainerClient(container).getBlobClient(blobName).downloadContent().toBytes();
+            return nonNull(imageBytes) ? Base64.getEncoder().encodeToString(imageBytes) : null;
+        } catch (Exception e) {
+            log.error(e.toString());
+            return null;
+        }
     }
 
-    private byte[] loadImageBytes(Long globalId, boolean getIcon) {
-        String container = getIcon ? storageContainerThumbnails : storageContainerImages;
-        String blobName = getIcon ? globalId + imageNamePrefix + ICON_JPG : globalId + imageNamePrefix + PNG;
-        return connection.getBlobContainerClient(container).getBlobClient(blobName).downloadContent().toBytes();
-    }
 
     private BlobServiceClient connectToCloudStorage() {
         return new BlobServiceClientBuilder()

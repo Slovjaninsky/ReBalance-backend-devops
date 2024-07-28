@@ -19,6 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,10 +57,10 @@ class ImageServiceTest {
     }
 
     @Test
-    void should_throw_exception_when_image_does_not_exist() {
+    void should_return_null_when_image_does_not_exist() {
         when(imageRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(RebalanceException.class, () -> imageService.getImagesByGlobalIds(new Long[]{1L}));
+        assertNull(imageService.loadImageBase64(1L, false));
     }
 
     @Test
@@ -73,10 +74,9 @@ class ImageServiceTest {
         when(blobClient.downloadContent()).thenReturn(binaryData);
         when(binaryData.toBytes()).thenReturn(expected);
 
-        byte[][] images = imageService.getImagesByGlobalIds(new Long[]{1L});
+        String image = imageService.loadImageBase64(1L, false);
 
-        assertEquals(1, images.length);
-        assertEquals(expected, images[0]);
+        assertEquals(Base64.getEncoder().encodeToString(expected), image);
     }
 
     @Test
@@ -146,7 +146,7 @@ class ImageServiceTest {
 
         verify(blobClient, times(2)).delete();
         verify(blobClient, times(2)).upload(any());
-        verify(imageRepository, never()).save(any());
+        verify(imageRepository).save(any());
     }
 
     @Test
@@ -167,16 +167,16 @@ class ImageServiceTest {
 
         imageService.updateImage(id, imageBytes);
 
-        verify(blobClient, times(2)).delete();
+        verify(blobClient, never()).delete();
         verify(blobClient, times(2)).upload(any());
         verify(imageRepository).save(new Image(id, String.format("https://%s.blob.core.windows.net/images/%s%s%s", STORAGE_ACC, id, IMAGE_NAME_PREFIX, ImageService.PNG)));
     }
 
     @Test
-    void should_throw_exception_when_image_absent_for_delete() {
+    void should_not_throw_exception_when_image_absent_for_delete() {
         when(imageRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(RebalanceException.class, () -> imageService.deleteImageByGlobalId(1L));
+        assertDoesNotThrow(() -> imageService.deleteImageByGlobalId(1L));
     }
 
     @Test

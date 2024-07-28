@@ -72,11 +72,7 @@ public class PersonalExpenseController {
     @DeleteMapping("/{expenseId}")
     public ResponseEntity<HttpStatus> deleteExpenseById(@PathVariable("expenseId") Long expenseId) {
         expenseService.deletePersonalExpenseById(expenseId);
-
-        try {
-            imageService.deleteImageByGlobalId(expenseId);
-        } catch (RuntimeException ignored) {
-        }
+        imageService.deleteImageByGlobalId(expenseId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

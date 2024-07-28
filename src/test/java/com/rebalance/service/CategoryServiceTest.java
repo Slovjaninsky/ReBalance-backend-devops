@@ -96,8 +96,4 @@ class CategoryServiceTest {
 
         assertThrows(RuntimeException.class, () -> categoryService.getGroupCategories(groupId));
     }
-
-
 }
-
-

@@ -102,7 +102,7 @@ public class ImageService {
 
     private BlobServiceClient connectToCloudStorage() {
         return new BlobServiceClientBuilder()
-                .endpoint(String.format("https://%s.blob.core.windows.net/", storageAccountName))
+                .endpoint("https://" + storageAccountName + ".blob.core.windows.net/")
                 .connectionString(storageConnectionString)
                 .buildClient();
     }
@@ -124,7 +124,7 @@ public class ImageService {
             ImageIO.write(bufferedImage, "jpg", b);
 
             connection.getBlobContainerClient(storageContainerThumbnails).getBlobClient(iconBlobName).upload(BinaryData.fromBytes(b.toByteArray()));
-            return String.format("https://%s.blob.core.windows.net/%s/%s", storageAccountName, storageContainerImages, blobName);
+            return "https://" + storageAccountName + ".blob.core.windows.net/" + storageContainerImages + "/" + blobName;
         } catch (IOException e) {
             log.error("Error saving image [globalId={}]", globalId);
             throw new RebalanceException(RebalanceErrorType.RB_302);

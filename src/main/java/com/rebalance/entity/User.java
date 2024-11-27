@@ -25,6 +25,9 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(nullable = false)
+    private String cognitoID;
+
+    @Column(nullable = false)
     private String nickname;
 
     @Column(nullable = false, unique = true)

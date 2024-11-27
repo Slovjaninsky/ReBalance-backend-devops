@@ -35,3 +35,5 @@ build/
 
 ### configs ###
 src/test/resources/app_test.cfg
+
+.env

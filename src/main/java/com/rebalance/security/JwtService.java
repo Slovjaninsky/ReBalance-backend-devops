@@ -53,10 +53,10 @@ public class JwtService {
     }
 
     public void saveToken(Long userId, String jwtToken) {
-        Token token = new Token();
-        token.setUserId(userId);
-        token.setToken(jwtToken);
-        tokenRepository.save(token);
+        // Token token = new Token();
+        // token.setUserId(userId);
+        // // token.setToken(jwtToken);
+        // tokenRepository.save(token);
     }
 
     public void deleteToken(String token) {

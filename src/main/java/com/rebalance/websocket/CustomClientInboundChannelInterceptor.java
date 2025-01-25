@@ -39,7 +39,7 @@ public class CustomClientInboundChannelInterceptor implements ChannelInterceptor
                 // if user is not authenticated, get it from database
                 User user = (User) userDetailsService.loadUserByUsername(userEmail);
                 // then check if token is valid
-                if (jwtService.isTokenValid(jwt)) {
+                if (jwtService.isTokenValid(jwt, user)) {
                     // update MessageAccessor with authentication
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             user, jwt, user.getAuthorities()

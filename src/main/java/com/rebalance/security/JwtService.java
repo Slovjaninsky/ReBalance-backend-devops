@@ -60,8 +60,8 @@ public class JwtService {
     }
 
     public void deleteToken(String token) {
-        // Token savedToken = tokenRepository.findByToken(token)
-        //         .orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_401));
-        // tokenRepository.delete(savedToken);
+        Token savedToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RebalanceException(RebalanceErrorType.RB_401));
+        tokenRepository.delete(savedToken);
     }
 }

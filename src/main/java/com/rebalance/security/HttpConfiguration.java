@@ -90,7 +90,6 @@ public class HttpConfiguration {
                         .requestMatchers("/notifications/**").permitAll()
                         .requestMatchers("/user/notifications/**").permitAll()
 
-                        .anyRequest().denyAll()
 
 //                .requestMatchers(HttpMethod.GET, "/statistics").hasAuthority(UserRole.ADMIN.name())
         );

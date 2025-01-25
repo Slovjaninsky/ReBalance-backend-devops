@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Tag(name = "User management")
 @AllArgsConstructor
@@ -49,5 +51,5 @@ public class UserController {
         return ResponseEntity.ok(
                 userService.getMyGroups().stream()
                         .map(groupMapper::groupToResponse).toList());
-    }
+    }    
 }
